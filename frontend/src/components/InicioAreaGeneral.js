@@ -7,7 +7,7 @@ const InicioAreaGeneral = () => {
   const navigate = useNavigate();
   const user = {
     name: 'Josefina Tomei',
-    area: 'Criminologia',
+    area: 'General (Aca van todas las areas como Salud, Trabajo, Psicologia, etc..)',
     unit: '6'
   };
 

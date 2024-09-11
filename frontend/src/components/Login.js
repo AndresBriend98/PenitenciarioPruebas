@@ -3,20 +3,58 @@ import { Link, useNavigate } from 'react-router-dom';
 import logoPenitenciaria from '../assets/images/logoPenitenciaria.png';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setShowLoadingModal(true);
 
-    setTimeout(() => {
-      console.log('Usuario:', email, 'Contraseña:', password);
-      navigate('/general');
+    // Simulación de llamada a la API
+    setTimeout(async () => {
+      console.log('Usuario:', username, 'Contraseña:', password);
+      
+      // Simulación de respuesta de la API
+      const userType = await fakeAuth(username, password);
+
+      if (userType) {
+        navigate(userType); // Redirige a la ruta según el rol del usuario
+      } else {
+        setShowErrorModal(true); // Muestra el modal de error si el usuario no está autenticado
+      }
+
+      setShowLoadingModal(false); // Oculta el modal de carga
     }, 1000);
+  };
+
+  // Simulación de autenticación
+  const fakeAuth = async (username, password) => {
+    // Mapa de usuarios a rutas
+    const userRoles = {
+      'admin': '/administrador',
+      'jefe': '/jefatura',
+      'general': '/general',
+      'judicial': '/judicial',
+      'tecnica': '/tecnica',
+      'superadmin': '/superadministrador',
+    };
+
+    // Aquí puedes realizar una validación real
+    // Por ejemplo, consulta a tu backend para verificar credenciales
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Lógica para determinar el tipo de usuario
+        if (username in userRoles && password === username) {
+          resolve(userRoles[username]);
+        } else {
+          resolve(null); // Usuario no válido
+        }
+      }, 500);
+    });
   };
 
   return (
@@ -28,12 +66,12 @@ const Login = () => {
         <h2 className="text-xl font-bold mb-4 text-center">Iniciar sesión</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="email" className="block text-gray-700 text-sm">Usuario:</label>
+            <label htmlFor="username" className="block text-gray-700 text-sm">Usuario:</label>
             <input 
-              type="email" 
-              id="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              type="text" 
+              id="username" 
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)} 
               required 
               className="mt-1 block w-full border border-gray-300 p-1.5 text-sm rounded-md"
             />
@@ -61,11 +99,27 @@ const Login = () => {
         </div>
       </div>
 
+      {/* Modal de carga */}
       {showLoadingModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-4 rounded-lg shadow-lg text-center">
             <h3 className="text-lg font-semibold">Iniciando sesión...</h3>
             <p className="mt-2 text-sm">Por favor, espere un momento.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de error */}
+      {showErrorModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-4 rounded-lg shadow-lg text-center">
+            <h3 className="text-lg font-semibold text-red-600">Usuario o contraseña incorrectos</h3>
+            <button 
+              onClick={() => setShowErrorModal(false)} 
+              className="mt-4 bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
+            >
+              Cerrar
+            </button>
           </div>
         </div>
       )}
