@@ -11,7 +11,7 @@ const InicioAreaGeneral = () => {
     unit: '6'
   };
 
-  const data = Array(50).fill({
+  const data = Array.from({ length: 50 }, (_, index) => ({
     name: 'Juan Carlos López',
     crime: 'Robo',
     sentenceDate: '25/06/2025',
@@ -21,8 +21,9 @@ const InicioAreaGeneral = () => {
     transferDate: '25/06/2025',
     conditionalDate: '25/06/2025',
     assistanceDate: '25/06/2025',
-    admissionDate: '25/06/2025'
-  });
+    admissionDate: '25/06/2025',
+    internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado'
+  }));
 
   const handleLogout = () => {
     // Falto logica para el logout
@@ -66,6 +67,7 @@ const InicioAreaGeneral = () => {
                   <th className="p-2 border">#</th>
                   <th className="p-2 border">Nombre/Apellido</th>
                   <th className="p-2 border">Delitos</th>
+                  <th className="p-2 border">Tipo de interno</th>
                   <th className="p-2 border">Cumple</th>
                   <th className="p-2 border">Juzgado</th>
                   <th className="p-2 border">Condena</th>
@@ -83,17 +85,34 @@ const InicioAreaGeneral = () => {
                     <td className="p-2 border">{index + 1}</td>
                     <td className="p-2 border">{item.name}</td>
                     <td className="p-2 border">{item.crime}</td>
-                    <td className="p-2 border">{item.sentenceDate}</td>
-                    <td className="p-2 border">{item.court}</td>
-                    <td className="p-2 border">{item.sentence}</td>
-                    <td className="p-2 border">{item.fileNumber}</td>
-                    <td className="p-2 border">{item.transferDate}</td>
-                    <td className="p-2 border">{item.conditionalDate}</td>
-                    <td className="p-2 border">{item.assistanceDate}</td>
-                    <td className="p-2 border">{item.admissionDate}</td>
+                    <td className="p-2 border">{item.internalType}</td> {/* Nueva columna */}
+                    <td className="p-2 border">
+                      {item.internalType === 'Condenado' ? item.sentenceDate : '-'}
+                    </td>
+                    <td className="p-2 border">
+                      {item.court}  {/* Mostrar siempre el juzgado */}
+                    </td>
+                    <td className="p-2 border">
+                      {item.internalType === 'Condenado' ? item.sentence : '-'}
+                    </td>
+                    <td className="p-2 border">
+                      {item.internalType === 'Condenado' ? item.fileNumber : '-'}
+                    </td>
+                    <td className="p-2 border">
+                      {item.internalType === 'Condenado' ? item.transferDate : '-'}
+                    </td>
+                    <td className="p-2 border">
+                      {item.internalType === 'Condenado' ? item.conditionalDate : '-'}
+                    </td>
+                    <td className="p-2 border">
+                      {item.internalType === 'Condenado' ? item.assistanceDate : '-'}
+                    </td>
+                    <td className="p-2 border">
+                      {item.internalType === 'Condenado' ? item.admissionDate : item.admissionDate}
+                    </td>
                     <td className="p-2 border text-center">
                       <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
-                      onClick={() => navigate('/fichaingreso')}>
+                        onClick={() => navigate('/fichaingreso')}>
                         Ver
                       </button>
                     </td>

@@ -15,17 +15,17 @@ const FichaIngreso = () => {
     };
 
     const [user, setUser] = useState({
-        name: 'Ana María Fernández',
-        alias: 'AMF',
-        unit: 'Unidad Penitenciaria 12',
-        fileNumber: '4587',
-        typedoc: 'DNI',
-        dni: '27483912',
-        crime: 'Hurto',
+        name: 'Maximiliano Ezequiel Dominguez',
+        alias: 'JL',
+        unit: 'Unidad Penitenciaria 9',
+        fileNumber: '3576',
+        typedoc: 'Cédula Ejemplar B',
+        dni: '23123564',
+        crime: 'Robo',
         typeofintern: 'Condenado',
         entryDate: '2026-06-01',
-        sentenceEndDate: '15/08/2025',
-        remainingSentence: '1 año 5 meses 12 días',
+        sentenceEndDate: '10/06/2030',
+        remainingSentence: '3 años 2 meses 5 días',
         numprontuario: '48765',
         reingresante: false,
         processed: true,
@@ -460,7 +460,7 @@ const FichaIngreso = () => {
                     className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm mt-10"
                     onClick={handleVolver}
                 >
-                    Volver
+                    Menu Principal
                 </button>
 
             </div>
