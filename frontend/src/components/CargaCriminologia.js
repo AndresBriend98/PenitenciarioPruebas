@@ -5,9 +5,10 @@ const CargaCriminologia = () => {
     const navigate = useNavigate();
     const scrollContainerRef = useRef(null);
     const [selectedArea, setSelectedArea] = useState('Criminologia');
-    const [showModal, setShowModal] = useState(false);
     const [informeCriminologico, setInformeCriminologico] = useState('');
     const [hasError, setHasError] = useState(false);
+
+    const [historial, setHistorial] = useState([]);
 
     const [user, setUser] = useState({
         name: 'Maximiliano Ezequiel Dominguez',
@@ -62,11 +63,18 @@ const CargaCriminologia = () => {
             return;
         }
         setHasError(false);
-        setShowModal(true);
-        setTimeout(() => {
-            setShowModal(false);
-        }, 3000);
+
+        const nuevaEntrada = {
+            informe: informeCriminologico,
+            fecha: new Date().toLocaleString(), // Fecha actual
+        };
+
+        // Actualiza el historial agregando la nueva entrada
+        setHistorial(prevHistorial => [...prevHistorial, nuevaEntrada]);
+
+        setInformeCriminologico(''); // Limpia el campo después de cargar
     };
+
 
     useEffect(() => {
         if (scrollContainerRef.current) {
@@ -80,25 +88,18 @@ const CargaCriminologia = () => {
             }
             setSelectedArea('Criminología');
         }
-    }, [selectedArea]);    
-    
+    }, [selectedArea]);
+
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col z-10">
-            {showModal && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
-                    <div className="bg-white p-4 rounded-md shadow-lg text-center">
-                        <h2 className="text-sm font-bold mb-2">Se han cargado los datos con éxito</h2>
-                    </div>
-                </div>
-            )}
             {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-400 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
+            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
                 {/* Foto y datos del usuario */}
                 <div className="flex items-start flex-grow">
                     {/* Foto y botón de carga */}
                     <div className="relative mr-4 flex-shrink-0 flex flex-col items-center mt-4">
-                        <div className="w-48 h-48 bg-gray-300 rounded-full flex justify-center items-center overflow-hidden mb-2">
-                            <span className="text-center text-gray-700">Foto</span>
+                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mb-2">
+                            <span className="text-center text-white">Foto</span>
                         </div>
                     </div>
                     {/* Datos del usuario */}
@@ -298,17 +299,37 @@ const CargaCriminologia = () => {
                         <input type="file" className="w-full p-2 border border-gray-300 rounded text-sm" />
                     </div>
                 </div>
+                <div className="bg-white p-4 rounded-md shadow-md mb-4 mt-5">
+                    <h1 className="text-sm font-bold mt-4">Historial de Carga</h1>
+                    <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
+                        {historial.length > 0 ? (
+                            <ul className="space-y-2">
+                                {historial.map((entrada, index) => (
+                                    <li key={index} className="border-b border-gray-300 pb-2">
+                                        <p className="text-sm"><strong>Informe:</strong> {entrada.informe}</p>
+                                        <p className="text-sm text-gray-500"><strong>Fecha de carga:</strong> {entrada.fecha}</p>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-sm text-gray-500 text-center">
+                                No hay informes criminológicos registrados aún.
+                            </p>
+                        )}
+                    </div>
+                </div>
+
                 <div className="flex justify-between mt-10">
                     <button
                         onClick={handleVolver}
-                        className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-sm"
+                        className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-xs"
                     >
                         Menu Principal
                     </button>
                     <div className="flex space-x-3">
                         <button
                             onClick={handleCargar}
-                            className="bg-green-500 text-white p-2 rounded hover:bg-green-600 text-sm"
+                            className="bg-green-500 text-white p-2 rounded hover:bg-green-600 text-xs"
                         >
                             Cargar
                         </button>

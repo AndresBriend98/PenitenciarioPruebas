@@ -84,26 +84,26 @@ const AdministrarUsuarios = () => {
                 </div>
             )}
 
-            <div className="bg-gray-300 flex-1 p-4 rounded-md flex flex-col">
+            <div className="bg-gray-100 flex-1 p-4 rounded-md flex flex-col">
                 <div className="flex items-center mb-4 space-x-4">
                     <div className="flex items-center">
-                        <label htmlFor="search" className="mr-3 text-base font-semibold">Buscar:</label>
+                        <label htmlFor="search" className="mr-3 text-base font-semibold text-sm">Buscar:</label>
                         <input
                             type="text"
                             id="search"
                             placeholder="DNI"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full md:w-64 p-2 border border-gray-300 rounded-md text-sm"
+                            className="w-full p-1 border border-gray-300 rounded text-sm"
                         />
                     </div>
                     <div className="flex items-center">
-                        <label htmlFor="area" className="mr-3 text-base font-semibold">Área:</label>
+                        <label htmlFor="area" className="mr-3 text-base font-semibold text-sm">Área:</label>
                         <select
                             id="area"
                             value={selectedArea}
                             onChange={(e) => setSelectedArea(e.target.value)}
-                            className="w-48 p-2 border border-gray-300 rounded-md text-sm text-gray-400"
+                            className="w-full p-1 border border-gray-300 rounded text-sm text-gray-400"
                         >
                             <option value="">Seleccione un área</option>
                             {Array.from({ length: 12 }, (_, i) => (
@@ -113,7 +113,7 @@ const AdministrarUsuarios = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-x-auto">
+                <div className="flex-1 overflow-x-auto mt-10">
                     <div className="max-h-[calc(100vh-14rem)] overflow-y-auto">
                         <table className="w-full text-left bg-white rounded-md shadow-md text-sm">
                             <thead className="bg-gray-400">
@@ -128,14 +128,14 @@ const AdministrarUsuarios = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.slice(0, 16).map((item, index) => (
+                                {data.slice(0, 30).map((item, index) => (
                                     <tr key={index} className="hover:bg-gray-100">
-                                        <td className="p-2 border">{index + 1}</td>
-                                        <td className="p-2 border">{item.name}</td>
-                                        <td className="p-2 border">{item.dni}</td>
-                                        <td className="p-2 border">{item.area}</td>
-                                        <td className="p-2 border">{item.unidad}</td>
-                                        <td className="p-2 border">{item.usuario}</td>
+                                        <td className="p-2 border text-xs">{index + 1}</td>
+                                        <td className="p-2 border text-xs">{item.name}</td>
+                                        <td className="p-2 border text-xs">{item.dni}</td>
+                                        <td className="p-2 border text-xs">{item.area}</td>
+                                        <td className="p-2 border text-xs">{item.unidad}</td>
+                                        <td className="p-2 border text-xs">{item.usuario}</td>
                                         <td className="p-2 border text-center">
                                             <div className="flex justify-center space-x-1">
                                                 <button
@@ -168,13 +168,13 @@ const AdministrarUsuarios = () => {
                 <div className="flex justify-between items-center mt-4">
                     <button
                         onClick={() => navigate('/')}
-                        className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-sm"
+                        className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-xs"
                     >
                         Volver
                     </button>
                     <button
                         onClick={() => navigate('/validacionusuarios')}
-                        className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 text-sm"
+                        className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 text-xs"
                     >
                         Validación de Usuarios
                     </button>
@@ -214,7 +214,7 @@ const AdministrarUsuarios = () => {
                                 name="name"
                                 value={selectedUser?.name || ''}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded-md"
+                                className="w-full p-1 border border-gray-300 rounded text-sm"
                             />
                         </div>
                         <div className="mb-4">
@@ -225,7 +225,7 @@ const AdministrarUsuarios = () => {
                                 name="dni"
                                 value={selectedUser?.dni || ''}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded-md"
+                                className="w-full p-1 border border-gray-300 rounded text-sm"
                             />
                         </div>
                         <div className="mb-4">
@@ -236,7 +236,7 @@ const AdministrarUsuarios = () => {
                                 name="area"
                                 value={selectedUser?.area || ''}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded-md"
+                                className="w-full p-1 border border-gray-300 rounded text-sm"
                             />
                         </div>
                         <div className="mb-4">
@@ -247,7 +247,7 @@ const AdministrarUsuarios = () => {
                                 name="unidad"
                                 value={selectedUser?.unidad || ''}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded-md"
+                                className="w-full p-1 border border-gray-300 rounded text-sm"
                             />
                         </div>
                         <div className="mb-4">
@@ -258,7 +258,7 @@ const AdministrarUsuarios = () => {
                                 name="usuario"
                                 value={selectedUser?.usuario || ''}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded-md"
+                                className="w-full p-1 border border-gray-300 rounded text-sm"
                             />
                         </div>
                         <div className="mb-4">
@@ -269,21 +269,21 @@ const AdministrarUsuarios = () => {
                                 name="password"
                                 value={selectedUser?.password || ''}
                                 onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded-md"
+                                className="w-full p-1 border border-gray-300 rounded text-sm"
                             />
                         </div>
                         <div className="flex justify-between">
                             <button
                                 type="button"
                                 onClick={handleSave}
-                                className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600"
+                                className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 text-xs"
                             >
                                 Guardar
                             </button>
                             <button
                                 type="button"
                                 onClick={handleCloseModal}
-                                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-xs"
                             >
                                 Cancelar
                             </button>
@@ -322,14 +322,14 @@ const AdministrarUsuarios = () => {
                         <button
                             type="button"
                             onClick={handleConfirmDelete}
-                            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500"
+                            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500 text-xs"
                         >
                             Eliminar
                         </button>
                         <button
                             type="button"
                             onClick={handleCloseConfirmationModal}
-                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-xs"
                         >
                             Cancelar
                         </button>

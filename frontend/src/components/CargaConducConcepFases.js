@@ -80,7 +80,6 @@ const CargaConducConcepFases = () => {
     });
     const [evolucion, setEvolucion] = useState('');
 
-    // Handler para agregar Evolución
     const handleAgregarEvolucion = () => {
         if (evolucion.trim() === '' || fechaEvolucion.trim() === '') {
             setErrors((prevErrors) => ({
@@ -89,11 +88,15 @@ const CargaConducConcepFases = () => {
             }));
             return;
         }
-        setHistorialEvolucion([...historialEvolucion, { descripcion: evolucion, fecha: fechaEvolucion }]);
+
+        const fechaCarga = new Date().toLocaleString(); // Obtener la fecha de carga actual
+
+        setHistorialEvolucion([...historialEvolucion, { descripcion: evolucion, fecha: fechaEvolucion, fechaCarga }]);
         setEvolucion('');
         setFechaEvolucion('');
         setErrors((prevErrors) => ({ ...prevErrors, evolucion: '' }));
     };
+
 
     const handleAgregarCorrectivo = () => {
         if (correctivo.trim() === '' || fechaCorrectivo.trim() === '') {
@@ -103,11 +106,15 @@ const CargaConducConcepFases = () => {
             }));
             return;
         }
-        setHistorialCorrectivo([...historialCorrectivo, { descripcion: correctivo, fecha: fechaCorrectivo }]);
+
+        const fechaCarga = new Date().toLocaleString(); // Obtener la fecha de carga actual
+
+        setHistorialCorrectivo([...historialCorrectivo, { descripcion: correctivo, fecha: fechaCorrectivo, fechaCarga }]);
         setCorrectivo('');
         setFechaCorrectivo('');
         setErrors((prevErrors) => ({ ...prevErrors, correctivo: '' }));
     };
+
 
     const handleAddItem = () => {
         let hasErrors = false;
@@ -151,7 +158,9 @@ const CargaConducConcepFases = () => {
                 ...newErrors
             }));
         } else {
-            setItems([...items, { trimestre, ano, conducta, puntajeCond, concepto, puntajeConc }]);
+            const fechaCarga = new Date().toLocaleString(); // Obtener la fecha de carga actual
+
+            setItems([...items, { trimestre, ano, conducta, puntajeCond, concepto, puntajeConc, fechaCarga }]);
             setTrimestre('');
             setAno('');
             setConducta('');
@@ -195,7 +204,7 @@ const CargaConducConcepFases = () => {
             }
             setSelectedArea('Conducta-Concepto-Fases');
         }
-    }, [selectedArea]); 
+    }, [selectedArea]);
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
@@ -208,13 +217,13 @@ const CargaConducConcepFases = () => {
             )}
 
             {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-400 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
+            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
                 {/* Foto y datos del usuario */}
                 <div className="flex items-start flex-grow">
                     {/* Foto y botón de carga */}
                     <div className="relative mr-4 flex-shrink-0 flex flex-col items-center mt-4">
-                        <div className="w-48 h-48 bg-gray-300 rounded-full flex justify-center items-center overflow-hidden mb-2">
-                            <span className="text-center text-gray-700">Foto</span>
+                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mb-2">
+                            <span className="text-center text-white">Foto</span>
                         </div>
                     </div>
                     {/* Datos del usuario */}
@@ -495,32 +504,32 @@ const CargaConducConcepFases = () => {
                         <div className="flex justify-center mb-4">
                             <button
                                 onClick={handleAddItem}
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm"
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                             >
                                 Agregar
                             </button>
                         </div>
 
-                        <table className="mt-4 border border-gray-300 w-full text-sm">
+                        <table className="min-w-full table-auto border-collapse border border-gray-300 overflow-x-auto overflow-y-auto block md:table md:overflow-visible">
                             <thead>
                                 <tr>
-                                    <th className="border border-gray-300 p-2">Trimestre</th>
-                                    <th className="border border-gray-300 p-2">Año</th>
-                                    <th className="border border-gray-300 p-2">Conducta</th>
-                                    <th className="border border-gray-300 p-2">Puntaje Conducta</th>
-                                    <th className="border border-gray-300 p-2">Concepto</th>
-                                    <th className="border border-gray-300 p-2">Puntaje Concepto</th>
+                                    <th className="px-4 py-2 border border-gray-300 text-left text-sm">Trimestre</th>
+                                    <th className="px-4 py-2 border border-gray-300 text-left text-sm">Año</th>
+                                    <th className="px-4 py-2 border border-gray-300 text-left text-sm">Conducta</th>
+                                    <th className="px-4 py-2 border border-gray-300 text-left text-sm">Puntaje Conducta</th>
+                                    <th className="px-4 py-2 border border-gray-300 text-left text-sm">Concepto</th>
+                                    <th className="px-4 py-2 border border-gray-300 text-left text-sm">Puntaje Concepto</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {items.map((item, index) => (
                                     <tr key={index}>
-                                        <td className="border border-gray-300 p-2">{item.trimestre}</td>
-                                        <td className="border border-gray-300 p-2">{item.ano}</td>
-                                        <td className="border border-gray-300 p-2">{item.conducta}</td>
-                                        <td className="border border-gray-300 p-2">{item.puntajeCond}</td>
-                                        <td className="border border-gray-300 p-2">{item.concepto}</td>
-                                        <td className="border border-gray-300 p-2">{item.puntajeConc}</td>
+                                        <td className="px-4 py-2 border border-gray-300 text-left text-sm">{item.trimestre}</td>
+                                        <td className="px-4 py-2 border border-gray-300 text-left text-sm">{item.ano}</td>
+                                        <td className="px-4 py-2 border border-gray-300 text-left text-sm">{item.conducta}</td>
+                                        <td className="px-4 py-2 border border-gray-300 text-left text-sm">{item.puntajeCond}</td>
+                                        <td className="px-4 py-2 border border-gray-300 text-left text-sm">{item.concepto}</td>
+                                        <td className="px-4 py-2 border border-gray-300 text-left text-sm">{item.puntajeConc}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -529,23 +538,23 @@ const CargaConducConcepFases = () => {
 
                     {/* Sección de Fase actual */}
                     <div className="bg-white p-4 rounded-md shadow-md">
-                        <h2 className="text-lg font-bold mb-4 flex items-center">
+                        <h2 className="text-md font-bold mb-4 flex items-center">
                             <span className="font-bold mr-2">Fase Actual:</span>
-                            <span className="font-normal border border-gray-300 bg-gray-100 p-2 rounded">{faseActual}</span>
+                            <span className="text-sm border border-gray-300 bg-gray-100 p-2 rounded">{faseActual}</span>
                         </h2>
-                        <table className="border border-gray-300 w-full mb-4 text-sm">
+                        <table className="min-w-full table-auto border-collapse border border-gray-300 overflow-x-auto overflow-y-auto block md:table md:overflow-visible">
                             <thead>
                                 <tr>
-                                    <th className="border border-gray-300 p-2">Fase</th>
-                                    <th className="border border-gray-300 p-2">Fecha inicio</th>
-                                    <th className="border border-gray-300 p-2">Fecha fin</th>
+                                    <th className="px-4 py-2 border border-gray-300 text-left text-sm">Fase</th>
+                                    <th className="px-4 py-2 border border-gray-300 text-left text-sm">Fecha inicio</th>
+                                    <th className="px-4 py-2 border border-gray-300 text-left text-sm">Fecha fin</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {['Socializacion', 'Consolidacion', 'Confianza'].map((fase) => (
                                     <tr key={fase}>
-                                        <td className="border border-gray-300 p-2">{fase}</td>
-                                        <td className="border border-gray-300 p-2">
+                                        <td className="px-4 py-2 border border-gray-300 text-left text-sm">{fase}</td>
+                                        <td className="px-4 py-2 border border-gray-300 text-left text-sm">
                                             <input
                                                 type="date"
                                                 value={fechas[fase]?.inicio || ''}
@@ -553,7 +562,7 @@ const CargaConducConcepFases = () => {
                                                 className="border border-gray-300 rounded p-1 w-full text-sm"
                                             />
                                         </td>
-                                        <td className="border border-gray-300 p-2">
+                                        <td className="px-4 py-2 border border-gray-300 text-left text-sm">
                                             <input
                                                 type="date"
                                                 value={fechas[fase]?.fin || ''}
@@ -566,7 +575,7 @@ const CargaConducConcepFases = () => {
                             </tbody>
                         </table>
                         {/* Sección de Evolución */}
-                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mt-5">
                             <h2 className="text-lg font-bold">Evolución</h2>
                             <label className="block text-sm font-semibold mt-2">Descripción</label>
                             <textarea
@@ -586,18 +595,22 @@ const CargaConducConcepFases = () => {
                             <div className="flex justify-center">
                                 <button
                                     onClick={handleAgregarEvolucion}
-                                    className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm"
+                                    className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
                                 >
                                     Agregar
                                 </button>
                             </div>
-                            <h3 className="text-md font-bold mt-3">Registro de Evolución</h3>
+                            <h3 className="text-sm font-bold mt-4">Historial de Carga</h3>
                             <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
                                 {historialEvolucion.length > 0 ? (
                                     <ul className="mt-2">
                                         {historialEvolucion.map((item, index) => (
-                                            <li key={index} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
-                                                {item.descripcion} - {item.fecha}
+                                            <li key={index} className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm">
+                                                <p className='text-sm'><strong>Descripción:</strong> {item.descripcion}</p>
+                                                <p className='text-sm'><strong>Fecha:</strong> {item.fecha}</p>
+                                                <div>
+                                                    <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
+                                                </div>
                                             </li>
                                         ))}
                                     </ul>
@@ -607,6 +620,7 @@ const CargaConducConcepFases = () => {
                                     </p>
                                 )}
                             </div>
+
                         </div>
 
                         {/* Sección de Correctivo Disciplinario */}
@@ -630,18 +644,20 @@ const CargaConducConcepFases = () => {
                             <div className="flex justify-center">
                                 <button
                                     onClick={handleAgregarCorrectivo}
-                                    className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm"
+                                    className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
                                 >
                                     Agregar
                                 </button>
                             </div>
-                            <h3 className="text-md font-bold mt-3">Registro de Correctivo Disciplinario</h3>
+                            <h3 className="text-sm font-bold mt-4">Historial de Carga</h3>
                             <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
                                 {historialCorrectivo.length > 0 ? (
                                     <ul className="mt-2">
                                         {historialCorrectivo.map((item, index) => (
-                                            <li key={index} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
-                                                {item.descripcion} - {item.fecha}
+                                            <li key={index} className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm">
+                                                <p className='text-sm'><strong>Descripción:</strong> {item.descripcion}</p>
+                                                <p className='text-sm'><strong>Fecha:</strong> {item.fecha}</p>
+                                                <div><p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p></div>
                                             </li>
                                         ))}
                                     </ul>
@@ -656,7 +672,7 @@ const CargaConducConcepFases = () => {
                     <div className="flex justify-between mt-10">
                         <button
                             onClick={() => navigate('/general')}
-                            className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-sm"
+                            className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-xs"
                         >
                             Menu Principal
                         </button>

@@ -9,7 +9,7 @@ const InicioAreaAdministrador = () => {
   const user = {
     name: 'Uriel Umeres',
     area: 'Administrador',
-    unidad: '2',
+    unit: '2',
   };
 
   const data = Array(50).fill({
@@ -27,12 +27,12 @@ const InicioAreaAdministrador = () => {
 
   return (
     <div className="bg-general bg-cover bg-center min-h-screen flex flex-col p-4">
-      <div className="bg-gray-300 flex-1 p-4 rounded-md flex flex-col">
+      <div className="bg-gray-100 flex-1 p-4 rounded-md flex flex-col">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
           <div className="flex-1 flex flex-col text-left md:text-left">
-            <p><strong>Bienvenido, {user.name}</strong></p>
-            <p><strong>Área:</strong> {user.area}</p>
-            <p><strong>Unidad:</strong> {user.unidad}</p>
+          <p className='text-lg'><strong>Bienvenido/a, {user.name}</strong></p>
+            <p className='text-sm'><strong>Área:</strong> {user.area}</p>
+            <p className='text-sm'><strong>Unidad:</strong> {user.unit}</p>
           </div>
 
           <div className="my-4 md:my-0 flex flex-col items-center">
@@ -42,7 +42,7 @@ const InicioAreaAdministrador = () => {
           <div className="flex-1 flex justify-end">
             <button
               onClick={() => navigate('/administrarusuarios')}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 text-sm"
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 text-xs"
             >
               Administrar Usuarios
             </button>
@@ -50,14 +50,14 @@ const InicioAreaAdministrador = () => {
         </div>
 
         <div className="flex items-center mb-4">
-          <label htmlFor="search" className="mr-3 text-base font-semibold">Buscar:</label>
+          <label htmlFor="search" className="mr-3 text-base font-semibold text-sm">Buscar:</label>
           <input
             type="text"
             id="search"
             placeholder="DNI / Legajo judicial"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full md:w-64 p-2 border border-gray-300 rounded-md text-sm"
+            className="w-full md:w-64 p-1 border border-gray-300 rounded text-sm"
           />
         </div>
 
@@ -83,20 +83,20 @@ const InicioAreaAdministrador = () => {
               <tbody>
                 {data.slice(0, 16).map((item, index) => (
                   <tr key={index} className="hover:bg-gray-100">
-                    <td className="p-2 border">{index + 1}</td>
-                    <td className="p-2 border">{item.name}</td>
-                    <td className="p-2 border">{item.crime}</td>
-                    <td className="p-2 border">{item.sentenceDate}</td>
-                    <td className="p-2 border">{item.court}</td>
-                    <td className="p-2 border">{item.sentence}</td>
-                    <td className="p-2 border">{item.fileNumber}</td>
-                    <td className="p-2 border">{item.transferDate}</td>
-                    <td className="p-2 border">{item.conditionalDate}</td>
-                    <td className="p-2 border">{item.assistanceDate}</td>
-                    <td className="p-2 border">{item.admissionDate}</td>
+                    <td className="p-2 border text-xs">{index + 1}</td>
+                    <td className="p-2 border text-xs">{item.name}</td>
+                    <td className="p-2 border text-xs">{item.crime}</td>
+                    <td className="p-2 border text-xs">{item.sentenceDate}</td>
+                    <td className="p-2 border text-xs">{item.court}</td>
+                    <td className="p-2 border text-xs">{item.sentence}</td>
+                    <td className="p-2 border text-xs">{item.fileNumber}</td>
+                    <td className="p-2 border text-xs">{item.transferDate}</td>
+                    <td className="p-2 border text-xs">{item.conditionalDate}</td>
+                    <td className="p-2 border text-xs">{item.assistanceDate}</td>
+                    <td className="p-2 border text-xs">{item.admissionDate}</td>
                     <td className="p-2 border text-center">
                       <button 
-                      className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
+                      className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
                       onClick={() => navigate('/fichaingreso')}
                       >
                         Ver
@@ -112,11 +112,11 @@ const InicioAreaAdministrador = () => {
         <div className="flex justify-between mt-4">
           <button
             onClick={() => navigate('/login')}
-            className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-sm"
+            className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-xs"
           >
             Cerrar sesión
           </button>
-          <button className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 text-sm">
+          <button className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 text-xs">
             Generar Informe Completo
           </button>
         </div>

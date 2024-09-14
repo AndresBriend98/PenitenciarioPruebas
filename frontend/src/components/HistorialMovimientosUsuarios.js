@@ -31,10 +31,10 @@ const HistorialMovimientosUsuarios = () => {
                             <tbody>
                                 {historial.map((item, index) => (
                                     <tr key={index} className="hover:bg-gray-100">
-                                        <td className="p-2 border">{index + 1}</td>
-                                        <td className="p-2 border">{item.date}</td>
-                                        <td className="p-2 border">{item.time}</td>
-                                        <td className="p-2 border">{item.event}</td>
+                                        <td className="p-2 border text-xs">{index + 1}</td>
+                                        <td className="p-2 border text-xs">{item.date}</td>
+                                        <td className="p-2 border text-xs">{item.time}</td>
+                                        <td className="p-2 border text-xs">{item.event}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -45,7 +45,7 @@ const HistorialMovimientosUsuarios = () => {
                 <div className="flex justify-between items-center mt-4">
                     <button
                         onClick={() => navigate('/administrarusuarios')}
-                        className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-sm"
+                        className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-xs"
                     >
                         Volver
                     </button>

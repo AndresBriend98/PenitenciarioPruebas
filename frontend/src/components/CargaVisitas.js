@@ -73,13 +73,13 @@ const CargaVisitas= () => {
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-400 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
+            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
                 {/* Foto y datos del usuario */}
                 <div className="flex items-start flex-grow">
                     {/* Foto y botón de carga */}
                     <div className="relative mr-4 flex-shrink-0 flex flex-col items-center mt-4">
-                        <div className="w-48 h-48 bg-gray-300 rounded-full flex justify-center items-center overflow-hidden mb-2">
-                            <span className="text-center text-gray-700">Foto</span>
+                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mb-2">
+                            <span className="text-center text-white">Foto</span>
                         </div>
                     </div>
                     {/* Datos del usuario */}

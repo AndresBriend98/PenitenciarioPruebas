@@ -96,7 +96,11 @@ const CargaSalud = () => {
                 padecimientos: newErrors
             }));
         } else {
-            setHistorialpadecimiento([...historialpadecimiento, padecimientoData]);
+            const padecimientoConFecha = {
+                ...padecimientoData,
+                fechaCarga: new Date().toLocaleString() // Fecha de carga actual
+            };
+            setHistorialpadecimiento([...historialpadecimiento, padecimientoConFecha]);
             setPadecimientoData({ descripcion: '', fecha: '' });
             setErrors(prevErrors => ({
                 ...prevErrors,
@@ -104,6 +108,7 @@ const CargaSalud = () => {
             }));
         }
     };
+
 
     const handleAgregarTratamiento = () => {
         let hasErrors = false;
@@ -124,7 +129,11 @@ const CargaSalud = () => {
                 tratamientos: newErrors
             }));
         } else {
-            setTratamientos([...tratamientos, tratamientoData]);
+            const tratamientoConFecha = {
+                ...tratamientoData,
+                fechaCarga: new Date().toLocaleDateString() // Fecha de carga actual
+            };
+            setTratamientos([...tratamientos, tratamientoConFecha]);
             setTratamientoData({ descripcion: '', fecha: '' });
             setErrors(prevErrors => ({
                 ...prevErrors,
@@ -132,6 +141,7 @@ const CargaSalud = () => {
             }));
         }
     };
+
 
     const handleAgregarVacuna = () => {
         let hasErrors = false;
@@ -152,7 +162,11 @@ const CargaSalud = () => {
                 vacunas: newErrors
             }));
         } else {
-            setVacunas([...vacunas, vacunaData]);
+            const vacunaConFecha = {
+                ...vacunaData,
+                fechaCarga: new Date().toLocaleDateString() // Fecha de carga actual
+            };
+            setVacunas([...vacunas, vacunaConFecha]);
             setVacunaData({ descripcion: '', fecha: '' });
             setErrors(prevErrors => ({
                 ...prevErrors,
@@ -184,7 +198,11 @@ const CargaSalud = () => {
                 atenciones: newErrors
             }));
         } else {
-            setAtenciones([...atenciones, atencionData]);
+            const atencionConFecha = {
+                ...atencionData,
+                fechaCarga: new Date().toLocaleDateString() // Fecha de carga actual
+            };
+            setAtenciones([...atenciones, atencionConFecha]);
             setAtencionData({ descripcion: '', fecha: '', hora: '' });
             setErrors(prevErrors => ({
                 ...prevErrors,
@@ -193,12 +211,13 @@ const CargaSalud = () => {
         }
     };
 
+
     const handleVolver = () => {
         navigate('/general');
     };
 
     const handleGenerarInforme = () => {
-        // Logica
+
     };
 
 
@@ -219,13 +238,13 @@ const CargaSalud = () => {
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-400 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
+            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
                 {/* Foto y datos del usuario */}
                 <div className="flex items-start flex-grow">
                     {/* Foto y botón de carga */}
                     <div className="relative mr-4 flex-shrink-0 flex flex-col items-center mt-4">
-                        <div className="w-48 h-48 bg-gray-300 rounded-full flex justify-center items-center overflow-hidden mb-2">
-                            <span className="text-center text-gray-700">Foto</span>
+                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mb-2">
+                            <span className="text-center text-white">Foto</span>
                         </div>
                     </div>
                     {/* Datos del usuario */}
@@ -428,25 +447,33 @@ const CargaSalud = () => {
                         <div className="flex justify-center">
                             <button
                                 onClick={handleAgregarPadecimiento}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm"
+                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
-                                Agregar
+                                Cargar
                             </button>
                         </div>
 
-                        <h3 className="text-md font-bold mt-3">Historial de Padecimientos</h3>
+                        <h3 className="text-sm font-bold mt-4">Historial de Padecimientos</h3>
                         <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
                             {historialpadecimiento.length > 0 ? (
-                                <ul className="mt-2">
+                                <ul className="space-y-2 mt-2">
                                     {historialpadecimiento.map((item, index) => (
-                                        <li key={index} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
-                                            {item.descripcion} - {item.fecha}
+                                        <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
+                                            <div className="text-sm">
+                                                <strong>Descripción:</strong> {item.descripcion}
+                                            </div>
+                                            <div className="text-sm">
+                                                <strong>Fecha:</strong> {item.fecha}
+                                            </div>
+                                            <div className="text-sm text-gray-500 mt-2">
+                                                <strong>Fecha de Carga:</strong> {item.fechaCarga}
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
                             ) : (
                                 <p className="text-sm text-gray-500 text-center">
-                                    No hay historial médico registrado aún.
+                                    No hay padecimientos registrados aún.
                                 </p>
                             )}
                         </div>
@@ -477,19 +504,27 @@ const CargaSalud = () => {
                         <div className="flex justify-center">
                             <button
                                 onClick={handleAgregarTratamiento}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm"
+                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
-                                Agregar
+                                Cargar
                             </button>
                         </div>
 
-                        <h3 className="text-md font-bold mt-3">Historial de Tratamientos</h3>
+                        <h3 className="text-sm font-bold mt-4">Historial de Carga</h3>
                         <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
                             {tratamientos.length > 0 ? (
-                                <ul className="mt-2">
+                                <ul className="space-y-2 mt-2">
                                     {tratamientos.map((item, index) => (
-                                        <li key={index} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
-                                            {item.descripcion} - {item.fecha}
+                                        <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
+                                            <div className="text-sm">
+                                                <strong>Descripción:</strong> {item.descripcion}
+                                            </div>
+                                            <div className="text-sm">
+                                                <strong>Fecha:</strong> {item.fecha}
+                                            </div>
+                                            <div className="text-sm text-gray-500 mt-2">
+                                                <strong>Fecha de Carga:</strong> {item.fechaCarga}
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
@@ -499,6 +534,7 @@ const CargaSalud = () => {
                                 </p>
                             )}
                         </div>
+
                     </div>
 
                     {/* Vacunas */}
@@ -526,19 +562,27 @@ const CargaSalud = () => {
                         <div className="flex justify-center">
                             <button
                                 onClick={handleAgregarVacuna}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm"
+                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
-                                Agregar
+                                Cargar
                             </button>
                         </div>
 
-                        <h3 className="text-md font-bold mt-3">Historial de Vacunas</h3>
+                        <h3 className="text-sm font-bold mt-4">Historial de Vacunas</h3>
                         <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
                             {vacunas.length > 0 ? (
-                                <ul className="mt-2">
+                                <ul className="space-y-2 mt-2">
                                     {vacunas.map((item, index) => (
-                                        <li key={index} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
-                                            {item.descripcion} - {item.fecha}
+                                        <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
+                                            <div className="text-sm">
+                                                <strong>Descripción:</strong> {item.descripcion}
+                                            </div>
+                                            <div className="text-sm">
+                                                <strong>Fecha:</strong> {item.fecha}
+                                            </div>
+                                            <div className="text-sm text-gray-500 mt-2">
+                                                <strong>Fecha de Carga:</strong> {item.fechaCarga}
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
@@ -584,19 +628,30 @@ const CargaSalud = () => {
                         <div className="flex justify-center">
                             <button
                                 onClick={handleAgregarAtencion}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm"
+                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
-                                Agregar
+                                Cargar
                             </button>
                         </div>
 
-                        <h3 className="text-md font-bold mt-3">Historial de Atenciones</h3>
+                        <h3 className="text-sm font-bold mt-4">Historial de Atenciones</h3>
                         <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
                             {atenciones.length > 0 ? (
-                                <ul className="mt-2">
+                                <ul className="space-y-2 mt-2">
                                     {atenciones.map((item, index) => (
-                                        <li key={index} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
-                                            {item.descripcion} - {item.fecha} {item.hora && `- ${item.hora}`}
+                                        <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
+                                            <div className="text-sm">
+                                                <strong>Descripción:</strong> {item.descripcion}
+                                            </div>
+                                            <div className="text-sm">
+                                                <strong>Fecha:</strong> {item.fecha}
+                                            </div>
+                                            <div className="text-sm">
+                                                <strong>Hora:</strong> {item.hora}
+                                            </div>
+                                            <div className="text-sm text-gray-500 mt-2">
+                                                <strong>Fecha de Carga:</strong> {item.fechaCarga}
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
@@ -610,22 +665,24 @@ const CargaSalud = () => {
 
                 </div>
                 {/* Archivo Adjunto */}
-                <div className="mt-4 bg-white flex justify-center items-center">
-                    <label className="block text-sm font-semibold mr-5">Archivo Adjunto</label>
-                    <input type="file" className="border border-gray-300 p-1 rounded text-sm" />
+                {/* Archivo Adjunto */}
+                <div className="mt-4 bg-white flex flex-col md:flex-row md:items-start md:justify-start p-4 bg-white p-4 rounded-md shadow-md">
+                    <label className="block text-sm font-semibold mb-2 md:mb-0 md:mr-5">Archivo Adjunto</label>
+                    <input type="file" className="border border-gray-300 p-1 rounded text-sm w-full md:w-auto" />
                 </div>
+
 
                 {/* Botones de acción */}
                 <div className="mt-6 flex justify-between items-center">
                     <button
                         onClick={handleVolver}
-                        className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-sm"
+                        className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-xs"
                     >
                         Menu Principal
                     </button>
                     <button
                         onClick={handleGenerarInforme}
-                        className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600 text-sm"
+                        className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600 text-xs"
                     >
                         Generar Informe
                     </button>

@@ -79,11 +79,11 @@ const ValidacionUsuarios = () => {
                 </div>
             )}
 
-            <div className="bg-gray-300 flex-1 p-4 rounded-md flex flex-col">
+            <div className="bg-gray-100 flex-1 p-4 rounded-md flex flex-col">
                 <div className="text-left text-base mb-4 md:mb-0">
                     <p><strong>Validación de Usuarios</strong></p>
                 </div>
-                <div className="flex-1 overflow-x-auto mt-5">
+                <div className="flex-1 overflow-x-auto mt-10">
                     <div className="max-h-[calc(100vh-14rem)] overflow-y-auto">
                         <table className="w-full text-left bg-white rounded-md shadow-md text-sm">
                             <thead className="bg-gray-400">
@@ -98,25 +98,25 @@ const ValidacionUsuarios = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.slice(0, 16).map((item, index) => (
+                                {data.slice(0, 30).map((item, index) => (
                                     <tr key={index} className="hover:bg-gray-100">
-                                        <td className="p-2 border">{index + 1}</td>
-                                        <td className="p-2 border">{item.name}</td>
-                                        <td className="p-2 border">{item.dni}</td>
-                                        <td className="p-2 border">{item.area}</td>
-                                        <td className="p-2 border">{item.unidad}</td>
-                                        <td className="p-2 border">{item.usuario}</td>
+                                        <td className="p-2 border text-xs">{index + 1}</td>
+                                        <td className="p-2 border text-xs">{item.name}</td>
+                                        <td className="p-2 border text-xs">{item.dni}</td>
+                                        <td className="p-2 border text-xs">{item.area}</td>
+                                        <td className="p-2 border text-xs">{item.unidad}</td>
+                                        <td className="p-2 border text-xs">{item.usuario}</td>
                                         <td className="p-2 border text-center">
                                             <div className="flex justify-center space-x-2">
                                                 <button
                                                     onClick={() => handleOpenConfirmationModal(item, 'validate')}
-                                                    className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
+                                                    className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
                                                 >
                                                     Validar
                                                 </button>
                                                 <button
                                                     onClick={() => handleOpenConfirmationModal(item, 'invalidate')}
-                                                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500 text-sm"
+                                                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500 text-xs"
                                                 >
                                                     No Validar
                                                 </button>
@@ -129,10 +129,10 @@ const ValidacionUsuarios = () => {
                     </div>
                 </div>
 
-                <div className="flex justify-between items-center mt-4">
+                <div className="flex justify-between items-center">
                     <button
                         onClick={() => navigate('/administrarusuarios')}
-                        className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-sm"
+                        className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-xs"
                     >
                         Volver
                     </button>
@@ -171,14 +171,14 @@ const ValidacionUsuarios = () => {
                         <button
                             type="button"
                             onClick={handleConfirm}
-                            className={`text-white px-4 py-2 rounded-md ${confirmationAction === 'validate' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-600 hover:bg-red-700'}`}
+                            className={`text-white px-4 py-2 rounded-md text-xs ${confirmationAction === 'validate' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-600 hover:bg-red-700'}`}
                         >
                             {confirmationAction === 'validate' ? 'Validar' : 'No Validar'}
                         </button>
                         <button
                             type="button"
                             onClick={handleCloseModal}
-                            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 text-xs"
                         >
                             Cancelar
                         </button>

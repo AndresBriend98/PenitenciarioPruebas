@@ -36,11 +36,11 @@ const InicioAreaSuperAdministrador = () => {
 
   return (
     <div className="bg-general bg-cover bg-center min-h-screen flex flex-col p-4">
-      <div className="bg-gray-300 flex-1 p-4 rounded-md flex flex-col">
+      <div className="bg-gray-100 flex-1 p-4 rounded-md flex flex-col">
         <div className="flex flex-col md:flex-row md:justify-between items-center mb-4">
           <div className="text-left text-base mb-4 md:mb-0">
-            <p><strong>Bienvenido, {user.name}</strong></p>
-            <p><strong>Área:</strong> {user.area}</p>
+          <p className='text-lg'><strong>Bienvenido/a, {user.name}</strong></p>
+          <p className='text-sm'><strong>Área:</strong> {user.area}</p>
           </div>
 
           <div className="my-4 md:my-0 flex flex-grow justify-center">
@@ -50,7 +50,7 @@ const InicioAreaSuperAdministrador = () => {
           <div className="flex items-center md:ml-auto">
             <button
               onClick={handleManageUsers}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 text-sm"
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 text-xs"
             >
               Administrar Usuarios
             </button>
@@ -59,23 +59,23 @@ const InicioAreaSuperAdministrador = () => {
 
         <div className="flex items-center mb-4 space-x-4">
           <div className="flex items-center">
-            <label htmlFor="search" className="mr-3 text-base font-semibold">Buscar:</label>
+            <label htmlFor="search" className="mr-3 text-base font-semibold text-sm">Buscar:</label>
             <input
               type="text"
               id="search"
               placeholder="DNI / Legajo judicial"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full md:w-64 p-2 border border-gray-300 rounded-md text-sm"
+              className="w-full md:w-64 p-1 border border-gray-300 rounded text-sm"
             />
           </div>
           <div className="flex items-center">
-            <label htmlFor="unit" className="mr-3 text-base font-semibold">Unidad:</label>
+            <label htmlFor="unit" className="mr-3 text-base font-semibold text-sm">Unidad:</label>
             <select
               id="unit"
               value={selectedUnit}
               onChange={(e) => setSelectedUnit(e.target.value)}
-              className="w-48 p-2 border border-gray-300 rounded-md text-sm text-gray-400"
+              className="w-full md:w-64 p-1 border border-gray-300 rounded text-sm text-gray-400"
             >
               <option value="">Seleccione una unidad</option>
               {Array.from({ length: 12 }, (_, i) => (
@@ -107,19 +107,19 @@ const InicioAreaSuperAdministrador = () => {
               <tbody>
                 {data.slice(0, 16).map((item, index) => (
                   <tr key={index} className="hover:bg-gray-100">
-                    <td className="p-2 border">{index + 1}</td>
-                    <td className="p-2 border">{item.name}</td>
-                    <td className="p-2 border">{item.crime}</td>
-                    <td className="p-2 border">{item.sentenceDate}</td>
-                    <td className="p-2 border">{item.court}</td>
-                    <td className="p-2 border">{item.sentence}</td>
-                    <td className="p-2 border">{item.fileNumber}</td>
-                    <td className="p-2 border">{item.transferDate}</td>
-                    <td className="p-2 border">{item.conditionalDate}</td>
-                    <td className="p-2 border">{item.assistanceDate}</td>
-                    <td className="p-2 border">{item.admissionDate}</td>
+                    <td className="p-2 border text-xs">{index + 1}</td>
+                    <td className="p-2 border text-xs">{item.name}</td>
+                    <td className="p-2 border text-xs">{item.crime}</td>
+                    <td className="p-2 border text-xs">{item.sentenceDate}</td>
+                    <td className="p-2 border text-xs">{item.court}</td>
+                    <td className="p-2 border text-xs">{item.sentence}</td>
+                    <td className="p-2 border text-xs">{item.fileNumber}</td>
+                    <td className="p-2 border text-xs">{item.transferDate}</td>
+                    <td className="p-2 border text-xs">{item.conditionalDate}</td>
+                    <td className="p-2 border text-xs">{item.assistanceDate}</td>
+                    <td className="p-2 border text-xs">{item.admissionDate}</td>
                     <td className="p-2 border text-center">
-                      <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
+                      <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
                       onClick={() => navigate('/fichaingreso')}>
                         Ver
                       </button>
@@ -134,19 +134,19 @@ const InicioAreaSuperAdministrador = () => {
         <div className="flex justify-between items-center mt-4">
           <button
             onClick={handleLogout}
-            className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-sm"
+            className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-xs"
           >
             Cerrar sesión
           </button>
           <div className="flex-1 flex justify-center space-x-4">
-            <button className="bg-blue-800 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+            <button className="bg-blue-800 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-xs">
               Cargar Backup
             </button>
-            <button className="bg-blue-800 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+            <button className="bg-blue-800 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-xs">
               Generar Backup
             </button>
           </div>
-          <button className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 text-sm">
+          <button className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 text-xs">
             Generar Informe Completo
           </button>
         </div>

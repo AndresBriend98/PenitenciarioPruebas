@@ -98,18 +98,18 @@ const FichaIngreso = () => {
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-400 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
+            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
                 {/* Foto y datos del usuario */}
                 <div className="flex items-start flex-grow">
                     {/* Foto y botón de carga */}
                     <div className="relative mr-4 flex-shrink-0 flex flex-col items-center mt-4">
-                        <div className="w-48 h-48 bg-gray-300 rounded-full flex justify-center items-center overflow-hidden mb-2">
-                            <span className="text-center text-gray-700">Foto</span>
+                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mb-2">
+                            <span className="text-center text-white">Foto</span>
                         </div>
                     </div>
                     {/* Datos del usuario */}
                     <div className="space-y-3">
-                        <h2 className="text-lg font-bold">{user.name}</h2>
+                        <h2 className="text-lg font-bold text-center">{user.name}</h2>
                         <p className="mt-1 text-sm"><strong>Tipo de interno:</strong> {user.typeofintern}</p>
                         <p className="mt-1 text-sm"><strong>Alias:</strong> {user.alias}</p>
                         <p className="mt-1 text-sm"><strong>Unidad:</strong> {user.unit}</p>
@@ -457,7 +457,7 @@ const FichaIngreso = () => {
                 </div>
 
                 <button
-                    className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm mt-10"
+                    className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-xs mt-10"
                     onClick={handleVolver}
                 >
                     Menu Principal

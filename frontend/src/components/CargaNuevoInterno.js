@@ -134,15 +134,15 @@ const CargaNuevoInterno = () => {
                 </div>
             )}
             {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-400 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
-                <div className="flex flex-col md:flex-row items-start p-4 bg-gray-400 rounded-md mb-4">
+            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
+                <div className="flex flex-col md:flex-row items-start p-4 bg-gray-300 rounded-md mb-4">
                     {/* Foto y botón de carga */}
                     <div className="relative flex-shrink-0 mb-4 md:mb-0 md:mr-4">
-                        <div className="w-48 h-48 bg-gray-300 rounded-full flex justify-center items-center overflow-hidden">
+                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
                             {image ? (
                                 <img src={image} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
-                                <span>Foto Presentacion</span>
+                                <span className="text-white">Foto Presentacion</span>
                             )}
                         </div>
                         <button
@@ -161,7 +161,7 @@ const CargaNuevoInterno = () => {
                         {/* Botón de Fotos del Interno */}
                         <div className="flex justify-between items-center mt-4 space-x-2 ml-2">
                             <button
-                                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                                className="bg-blue-500 text-white px-5 py-1 rounded hover:bg-blue-600 text-xs"
                                 onClick={() => adjuntoInputRef.current.click()}
                             >
                                 + Otras Fotos del Interno
@@ -451,13 +451,13 @@ const CargaNuevoInterno = () => {
 
                 <div className="flex justify-between items-center mt-10 space-x-2">
                     <button
-                        className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm"
+                        className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-xs"
                         onClick={handleVolver}
                     >
                         Menu Principal
                     </button>
                     <button
-                        className="bg-green-500 text-white py-1 px-3 rounded shadow-md hover:bg-green-600 text-sm"
+                        className="bg-green-500 text-white py-1 px-3 rounded shadow-md hover:bg-green-600 text-xs"
                         onClick={handleAgregarNuevoInterno}
                     >
                         Agregar Nuevo Interno

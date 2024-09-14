@@ -29,7 +29,16 @@ const CargaTraslado = () => {
 
     const handleAgregarTraslado = () => {
         if (validateForm()) {
-            setHistorialTraslados([...historialTraslados, trasladoData]);
+            // Agregar fecha de carga al trasladoData
+            const trasladoConFecha = {
+                ...trasladoData,
+                fechaCarga: new Date().toLocaleString()
+            };
+
+            // Guardar el nuevo traslado con la fecha de carga en el historial
+            setHistorialTraslados([...historialTraslados, trasladoConFecha]);
+
+            // Limpiar el formulario de traslado
             setTrasladoData({
                 numeroActa: '',
                 fechaTraslado: '',
@@ -42,10 +51,6 @@ const CargaTraslado = () => {
                     dni: '',
                 },
             });
-            setShowModal(true);
-            setTimeout(() => {
-                setShowModal(false);
-            }, 3000);
         }
     };
 
@@ -158,7 +163,6 @@ const CargaTraslado = () => {
 
     const [selectedArea, setSelectedArea] = useState('Traslado');
     const [historialTraslados, setHistorialTraslados] = useState([]);
-    const [showModal, setShowModal] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -200,21 +204,14 @@ const CargaTraslado = () => {
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
-            {showModal && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
-                    <div className="bg-white p-4 rounded-md shadow-lg text-center">
-                        <h2 className="text-sm font-bold mb-2">Datos cargados con éxito</h2>
-                    </div>
-                </div>
-            )}
             {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-400 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
+            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
                 {/* Foto y datos del usuario */}
                 <div className="flex items-start flex-grow">
                     {/* Foto y botón de carga */}
                     <div className="relative mr-4 flex-shrink-0 flex flex-col items-center mt-4">
-                        <div className="w-48 h-48 bg-gray-300 rounded-full flex justify-center items-center overflow-hidden mb-2">
-                            <span className="text-center text-gray-700">Foto</span>
+                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mb-2">
+                            <span className="text-center text-white">Foto</span>
                         </div>
                     </div>
                     {/* Datos del usuario */}
@@ -396,7 +393,7 @@ const CargaTraslado = () => {
                         name="nombrecompleto"
                         value={trasladoData.encargado.nombrecompleto}
                         onChange={handleEncargadoChange}
-                        className={`w-full p-2 border ${errors.encargado.nombrecompleto ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                        className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.encargado.nombrecompleto ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                         placeholder="Nombre/s y Apellido/s del encargado"
                     />
 
@@ -408,7 +405,7 @@ const CargaTraslado = () => {
                         name="dni"
                         value={trasladoData.encargado.dni}
                         onChange={handleEncargadoChange}
-                        className={`w-full p-2 border ${errors.encargado.dni ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                        className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.encargado.dni ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                         placeholder="DNI del encargado"
                     />
                     {errors.encargado.dni && <p className="text-red-500 text-sm">{errors.encargado.dni}</p>}
@@ -422,7 +419,7 @@ const CargaTraslado = () => {
                             name="fechaTraslado"
                             value={trasladoData.fechaTraslado}
                             onChange={handleChange}
-                            className={`w-full p-2 border ${errors.fechaTraslado ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.fechaTraslado ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                         />
                         {errors.fechaTraslado && <p className="text-red-500 text-sm">{errors.fechaTraslado}</p>}
                     </div>
@@ -434,7 +431,7 @@ const CargaTraslado = () => {
                             name="horarioTraslado"
                             value={trasladoData.horarioTraslado}
                             onChange={handleChange}
-                            className={`w-full p-2 border ${errors.horarioTraslado ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.horarioTraslado ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                         />
                         {errors.horarioTraslado && <p className="text-red-500 text-sm">{errors.horarioTraslado}</p>}
                     </div>
@@ -445,7 +442,7 @@ const CargaTraslado = () => {
                             name="numeroActa"
                             value={trasladoData.numeroActa}
                             onChange={handleChange}
-                            className={`w-full p-2 border ${errors.numeroActa ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.numeroActa ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                             placeholder="Número de acta"
                         />
                         {errors.numeroActa && <p className="text-red-500 text-sm">{errors.numeroActa}</p>}
@@ -458,71 +455,78 @@ const CargaTraslado = () => {
                             name="patenteMovil"
                             value={trasladoData.patenteMovil}
                             onChange={handleChange}
-                            className={`w-full p-2 border ${errors.patenteMovil ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.patenteMovil ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                             placeholder="Patente del móvil"
                         />
                         {errors.patenteMovil && <p className="text-red-500 text-sm">{errors.patenteMovil}</p>}
                     </div>
 
                     <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
-                        <label className="block text-sm font-semibold mb-2">Lugar al Cual se Traslada</label>
+                        <label className="block text-sm font-semibold">Lugar al Cual se Traslada</label>
                         <input
                             type="text"
                             name="lugarDestino"
                             value={trasladoData.lugarDestino}
                             onChange={handleChange}
-                            className={`w-full p-2 border ${errors.lugarDestino ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                            className={`w-full p-1 border border-gray-300 rounded text-sm mt-3 ${errors.lugarDestino ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                             placeholder="Lugar destino"
                         />
                         {errors.lugarDestino && <p className="text-red-500 text-sm">{errors.lugarDestino}</p>}
                     </div>
-                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <label className="block text-sm font-semibold mb-2">Motivo de Traslado</label>
                         <textarea
                             name="motivoTraslado"
                             value={trasladoData.motivoTraslado}
                             onChange={handleChange}
-                            className={`w-full p-2 border ${errors.motivoTraslado ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.motivoTraslado ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                             rows="2"
                             placeholder="Motivo del traslado"
                         />
                         {errors.motivoTraslado && <p className="text-red-500 text-sm">{errors.motivoTraslado}</p>}
                     </div>
                 </div>
+                <div className="flex justify-center mt-4">
+                        <button
+                            onClick={handleAgregarTraslado}
+                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                        >
+                            Cargar
+                        </button>
+                    </div>
 
                 <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mt-6">
-                    <h2 className="text-lg font-bold mb-4">Historial de Traslados</h2>
-                    {historialTraslados.length > 0 ? (
-                        <ul className="space-y-4">
-                            {historialTraslados.map((traslado, index) => (
-                                <li key={index} className="border-b border-gray-300 pb-2 mb-2">
-                                    <div><strong className="text-sm">Número de Acta:</strong> {traslado.numeroActa}</div>
-                                    <div><strong className="text-sm">Fecha de Traslado:</strong> {traslado.fechaTraslado}</div>
-                                    <div><strong className="text-sm">Patente del Móvil:</strong> {traslado.patenteMovil}</div>
-                                    <div><strong className="text-sm">Horario del Traslado:</strong> {traslado.horarioTraslado}</div>
-                                    <div><strong className="text-sm">Lugar de Destino:</strong> {traslado.lugarDestino}</div>
-                                    <div><strong className="text-sm">Motivo del Traslado:</strong> {traslado.motivoTraslado}</div>
-                                    <div><strong className="text-sm">Encargado:</strong> {traslado.encargado.nombrecompleto} {traslado.encargado.apellidos}, <strong className="text-sm">DNI: </strong>{traslado.encargado.dni}</div>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>No hay traslados registrados.</p>
-                    )}
+                    <h2 className="text-sm font-bold mt-4">Historial de Traslados</h2>
+                    <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
+                        {historialTraslados.length > 0 ? (
+                            <ul className="space-y-4">
+                                {historialTraslados.map((traslado, index) => (
+                                    <li key={index} className="border-b border-gray-300 pb-2 mb-2">
+                                        <div><strong className="text-sm">Número de Acta:</strong> {traslado.numeroActa}</div>
+                                        <div><strong className="text-sm">Fecha de Traslado:</strong> {traslado.fechaTraslado}</div>
+                                        <div><strong className="text-sm">Patente del Móvil:</strong> {traslado.patenteMovil}</div>
+                                        <div><strong className="text-sm">Horario del Traslado:</strong> {traslado.horarioTraslado}</div>
+                                        <div><strong className="text-sm">Lugar de Destino:</strong> {traslado.lugarDestino}</div>
+                                        <div><strong className="text-sm">Motivo del Traslado:</strong> {traslado.motivoTraslado}</div>
+                                        <div><strong className="text-sm">Encargado:</strong> {traslado.encargado.nombrecompleto} {traslado.encargado.apellidos}, <strong className="text-sm">DNI: </strong>{traslado.encargado.dni}</div>
+                                        <div><p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {traslado.fechaCarga}</p></div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-sm text-gray-500 text-center">
+                                No hay traslados registrados aún.
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex justify-between items-center mt-6">
                     <button
                         onClick={() => navigate('/general')}
-                        className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-sm"
+                        className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-xs"
                     >
                         Menu Principal
-                    </button>
-                    <button
-                        onClick={handleAgregarTraslado}
-                        className="bg-green-500 text-white p-2 rounded hover:bg-green-600 text-sm"
-                    >
-                        Agregar Traslado
                     </button>
                 </div>
             </div>

@@ -35,12 +35,12 @@ const InicioAreaJudicial = () => {
 
   return (
     <div className="bg-general bg-cover bg-center min-h-screen flex flex-col p-4">
-      <div className="bg-gray-300 flex-1 p-4 rounded-md flex flex-col">
-        <div className="flex flex-col md:flex-row md:justify-between items-center mb-4">
+      <div className="bg-gray-100 flex-1 p-4 rounded-md flex flex-col">
+        <div className="flex flex-col md:flex-row md:justify-between items-center">
           <div className="text-center md:text-left text-base mb-4 md:mb-0 flex flex-col items-center md:items-start">
-            <p><strong>Bienvenido, {user.name}</strong></p>
-            <p><strong>Área:</strong> {user.area}</p>
-            <p><strong>Unidad:</strong> {user.unit}</p>
+            <p className='text-lg'><strong>Bienvenido/a, {user.name}</strong></p>
+            <p className='text-sm'><strong>Área:</strong> {user.area}</p>
+            <p className='text-sm'><strong>Unidad:</strong> {user.unit}</p>
           </div>
 
           <div className="my-4 md:my-0 flex flex-col items-center">
@@ -49,14 +49,14 @@ const InicioAreaJudicial = () => {
 
           <div className="flex flex-col md:flex-row md:items-center">
             <div className="flex items-center mb-2 md:mb-0 md:mr-4">
-              <label htmlFor="search" className="mr-3 text-base font-semibold">Buscar:</label>
+              <label htmlFor="search" className="mr-3 text-base font-semibold text-sm">Buscar:</label>
               <input
                 type="text"
                 id="search"
                 placeholder="DNI / Legajo judicial"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full md:w-64 p-2 border border-gray-300 rounded-md text-sm"
+                className="w-full p-1 border border-gray-300 rounded text-sm"
               />
             </div>
           </div>
@@ -82,21 +82,21 @@ const InicioAreaJudicial = () => {
                 </tr>
               </thead>
               <tbody>
-                {data.slice(0, 16).map((item, index) => (
+                {data.slice(0, 30).map((item, index) => (
                   <tr key={index} className="hover:bg-gray-100">
-                    <td className="p-2 border">{index + 1}</td>
-                    <td className="p-2 border">{item.name}</td>
-                    <td className="p-2 border">{item.crime}</td>
-                    <td className="p-2 border">{item.sentenceDate}</td>
-                    <td className="p-2 border">{item.court}</td>
-                    <td className="p-2 border">{item.sentence}</td>
-                    <td className="p-2 border">{item.fileNumber}</td>
-                    <td className="p-2 border">{item.transferDate}</td>
-                    <td className="p-2 border">{item.conditionalDate}</td>
-                    <td className="p-2 border">{item.assistanceDate}</td>
-                    <td className="p-2 border">{item.admissionDate}</td>
+                    <td className="p-2 border text-xs">{index + 1}</td>
+                    <td className="p-2 border text-xs">{item.name}</td>
+                    <td className="p-2 border text-xs">{item.crime}</td>
+                    <td className="p-2 border text-xs">{item.sentenceDate}</td>
+                    <td className="p-2 border text-xs">{item.court}</td>
+                    <td className="p-2 border text-xs">{item.sentence}</td>
+                    <td className="p-2 border text-xs">{item.fileNumber}</td>
+                    <td className="p-2 border text-xs">{item.transferDate}</td>
+                    <td className="p-2 border text-xs">{item.conditionalDate}</td>
+                    <td className="p-2 border text-xs">{item.assistanceDate}</td>
+                    <td className="p-2 border text-xs">{item.admissionDate}</td>
                     <td className="p-2 border text-center">
-                      <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-sm"
+                      <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
                       onClick={() => navigate('/fichaingreso')}>
                         Ver
                       </button>
@@ -111,13 +111,13 @@ const InicioAreaJudicial = () => {
         <div className="flex justify-between mt-4">
           <button
             onClick={handleLogout}
-            className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-sm"
+            className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-xs"
           >
             Cerrar sesión
           </button>
           <button
             onClick={handleAddInterno}
-            className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 text-sm"
+            className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 text-xs"
           >
             Agregar Interno
           </button>
