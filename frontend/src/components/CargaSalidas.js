@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const CargaSalidas= () => {
+const CargaSalidas = () => {
     const navigate = useNavigate();
     const scrollContainerRef = useRef(null);
 
@@ -73,87 +73,91 @@ const CargaSalidas= () => {
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
-                {/* Foto y datos del usuario */}
-                <div className="flex items-start flex-grow">
-                    {/* Foto y botón de carga */}
-                    <div className="relative mr-4 flex-shrink-0 flex flex-col items-center mt-4">
-                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mb-2">
-                            <span className="text-center text-white">Foto</span>
-                        </div>
-                    </div>
-                    {/* Datos del usuario */}
-                    <div className="space-y-3">
-                        <h2 className="text-lg font-bold text-center">{user.name}</h2>
-                        <p className="mt-1 text-sm"><strong>Tipo de interno:</strong> {user.typeofintern}</p>
-                        <p className="mt-1 text-sm"><strong>Alias:</strong> {user.alias}</p>
-                        <p className="mt-1 text-sm"><strong>Unidad:</strong> {user.unit}</p>
-                        <p className="mt-1 text-sm"><strong>Legajo:</strong> {user.fileNumber}</p>
-                        <p className="mt-1 text-sm"><strong>Tipo de documento:</strong> {user.typedoc}</p>
-                        <p className="mt-1 text-sm"><strong>DNI:</strong> {user.dni}</p>
-                        <p className="mt-1 text-sm"><strong>Delito:</strong> {user.crime}</p>
-                    </div>
-                </div>
-                {/* Checkboxes alineados a la derecha */}
-                <div className="flex flex-col space-y-2 ml-auto mt-4 md:mt-0">
-                    {/* Egreso checkbox y campos */}
-                    <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
-                        <div className="flex items-center">
-                            <input
-                                type="checkbox"
-                                id="egreso"
-                                checked={true}
-                                readOnly
-                                className="mr-2"
-                            />
-                            <label htmlFor="egreso" className="text-sm">Egreso</label>
-                        </div>
-                        {true && ( // Condición para mostrar los campos
-                            <div className="w-full mt-2">
-                                <label htmlFor="egresoDate" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
-                                <input
-                                    type="date"
-                                    id="egresoDate"
-                                    value="2024-09-09" // Valor preestablecido
-                                    readOnly
-                                    className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
-                                />
-                                <label htmlFor="numOficioEgreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
-                                <input
-                                    type="text"
-                                    id="numOficioEgreso"
-                                    value="12345" // Valor preestablecido
-                                    readOnly
-                                    className="w-full p-1 border border-gray-300 rounded text-sm"
-                                />
+            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-center md:items-start">
+                {/* Contenedor principal para asegurar alineación */}
+                <div className="flex flex-col md:flex-row items-center md:items-start w-full">
+                    {/* Foto y datos del usuario */}
+                    <div className="flex flex-col md:flex-row items-center md:items-start mb-4 md:mb-0 w-full md:w-auto">
+                        {/* Foto y botón de carga */}
+                        <div className="relative flex-shrink-0 flex flex-col items-center mb-4 md:mr-4 text-center md:text-left w-full md:w-auto">
+                            <div className="w-32 h-32 md:w-48 md:h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
+                                <span className="text-center text-white text-xs md:text-base">Foto</span>
                             </div>
-                        )}
-                    </div>
-                    {/* Otros checkboxes */}
-                    <div className="flex space-x-2 mt-4">
-                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                            <input
-                                type="checkbox"
-                                id="leyBlumberg"
-                                checked={false}
-                                readOnly
-                                className="mr-2"
-                            />
-                            <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
                         </div>
-                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                            <input
-                                type="checkbox"
-                                id="leyMicaela"
-                                checked={false}
-                                readOnly
-                                className="mr-2"
-                            />
-                            <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
+                        {/* Datos del usuario */}
+                        <div className="space-y-2 md:space-y-3 flex-grow w-full md:w-auto">
+                            <h2 className="text-lg font-bold text-center md:text-left">{user.name}</h2>
+                            <p className="text-sm"><strong>Tipo de interno:</strong> {user.typeofintern}</p>
+                            <p className="text-sm"><strong>Alias:</strong> {user.alias}</p>
+                            <p className="text-sm"><strong>Unidad:</strong> {user.unit}</p>
+                            <p className="text-sm"><strong>Legajo:</strong> {user.fileNumber}</p>
+                            <p className="text-sm"><strong>Tipo de documento:</strong> {user.typedoc}</p>
+                            <p className="text-sm"><strong>DNI:</strong> {user.dni}</p>
+                            <p className="text-sm"><strong>Delito:</strong> {user.crime}</p>
+                        </div>
+                    </div>
+                    {/* Checkboxes alineados a la derecha en pantallas grandes y a la izquierda en pantallas pequeñas */}
+                    <div className="flex flex-col space-y-4 md:space-y-2 md:ml-auto w-full md:w-auto">
+                        {/* Egreso checkbox y campos */}
+                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    id="egreso"
+                                    checked={true}
+                                    readOnly
+                                    className="mr-2"
+                                />
+                                <label htmlFor="egreso" className="text-sm">Egreso</label>
+                            </div>
+                            {true && ( // Condición para mostrar los campos
+                                <div className="w-full">
+                                    <label htmlFor="egresoDate" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
+                                    <input
+                                        type="date"
+                                        id="egresoDate"
+                                        value="2024-09-09" // Valor preestablecido
+                                        readOnly
+                                        className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
+                                    />
+                                    <label htmlFor="numOficioEgreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
+                                    <input
+                                        type="text"
+                                        id="numOficioEgreso"
+                                        value="12345" // Valor preestablecido
+                                        readOnly
+                                        className="w-full p-1 border border-gray-300 rounded text-sm"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        {/* Otros checkboxes */}
+                        <div className="flex flex-col space-y-2">
+                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
+                                <input
+                                    type="checkbox"
+                                    id="leyBlumberg"
+                                    checked={false}
+                                    readOnly
+                                    className="mr-2"
+                                />
+                                <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
+                            </div>
+                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
+                                <input
+                                    type="checkbox"
+                                    id="leyMicaela"
+                                    checked={false}
+                                    readOnly
+                                    className="mr-2"
+                                />
+                                <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
 
             <div className="relative flex items-center justify-center w-full mb-4">
                 <button

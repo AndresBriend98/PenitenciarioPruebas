@@ -135,18 +135,18 @@ const CargaNuevoInterno = () => {
             )}
             {/* Información del usuario, foto y checkboxes */}
             <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
-                <div className="flex flex-col md:flex-row items-start p-4 bg-gray-300 rounded-md mb-4">
+                <div className="flex flex-col md:flex-row items-start w-full">
                     {/* Foto y botón de carga */}
-                    <div className="relative flex-shrink-0 mb-4 md:mb-0 md:mr-4">
-                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
+                    <div className="relative flex-shrink-0 mb-4 md:mb-0 md:mr-4 text-center md:text-left w-full md:w-auto">
+                        <div className="w-32 h-32 md:w-48 md:h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mx-auto">
                             {image ? (
                                 <img src={image} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
-                                <span className="text-white">Foto Presentacion</span>
+                                <span className="text-white text-xs md:text-base">Foto Presentacion</span>
                             )}
                         </div>
                         <button
-                            className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center absolute -right-2 top-2 cursor-pointer text-s hover:bg-blue-600"
+                            className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center absolute -right-2 top-2 md:-right-4 md:top-4 cursor-pointer hover:bg-blue-600"
                             onClick={() => fileInputRef.current.click()}
                         >
                             +
@@ -159,7 +159,7 @@ const CargaNuevoInterno = () => {
                             className="hidden"
                         />
                         {/* Botón de Fotos del Interno */}
-                        <div className="flex justify-between items-center mt-4 space-x-2 ml-2">
+                        <div className="flex justify-center md:justify-start mt-4 space-x-2">
                             <button
                                 className="bg-blue-500 text-white px-5 py-1 rounded hover:bg-blue-600 text-xs"
                                 onClick={() => adjuntoInputRef.current.click()}
@@ -176,7 +176,7 @@ const CargaNuevoInterno = () => {
                     </div>
 
                     {/* Datos del usuario */}
-                    <div className="ml-6 grid grid-cols-1 md:grid-cols-2 gap-8 flex-grow">
+                    <div className="flex-grow ml-0 md:ml-6 grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
                         <input
                             type="text"
                             placeholder="Nombre/s y Apellido/s"
@@ -222,11 +222,11 @@ const CargaNuevoInterno = () => {
                     </div>
                 </div>
 
-                {/* Checkboxes alineados a la derecha */}
-                <div className="flex flex-col space-y-2 ml-auto mt-2 md:mt-0">
+                {/* Checkboxes alineados a la derecha en pantallas grandes y a la izquierda en pantallas pequeñas */}
+                <div className="flex flex-col space-y-2 mt-4 md:mt-0 w-full md:w-auto">
                     {/* Egreso checkbox y fecha */}
                     <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
-                        <div className="flex items-center text-sm">
+                        <div className="flex items-center text-sm mb-2">
                             <input
                                 type="checkbox"
                                 id="egreso"
@@ -237,7 +237,7 @@ const CargaNuevoInterno = () => {
                             <label htmlFor="egreso">Egreso</label>
                         </div>
                         {egreso && (
-                            <div className="w-full mt-2">
+                            <div className="w-full">
                                 <label htmlFor="egresoDate" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
                                 <input
                                     type="date"
@@ -282,9 +282,10 @@ const CargaNuevoInterno = () => {
                 </div>
             </div>
 
+
             {/* Formulario de Detalles */}
             <div className="bg-white p-4 rounded-md shadow-md mb-4">
-            <h1 className="text-2xl font-bold mb-4">Carga de Nuevo Interno</h1>
+                <h1 className="text-2xl font-bold mb-4">Carga de Nuevo Interno</h1>
                 <div className="flex items-center p-2 bg-gray-100 rounded-md shadow-sm mb-4">
                     <input
                         type="checkbox"
@@ -448,7 +449,6 @@ const CargaNuevoInterno = () => {
                     />
                 </div>
 
-
                 <div className="flex justify-between items-center mt-10 space-x-2">
                     <button
                         className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-xs"
@@ -457,10 +457,10 @@ const CargaNuevoInterno = () => {
                         Menu Principal
                     </button>
                     <button
-                        className="bg-green-500 text-white py-1 px-3 rounded shadow-md hover:bg-green-600 text-xs"
+                        className="bg-blue-500 text-white py-1 px-3 rounded shadow-md hover:bg-blue-600 text-xs"
                         onClick={handleAgregarNuevoInterno}
                     >
-                        Agregar Nuevo Interno
+                        Cargar
                     </button>
                 </div>
             </div>
