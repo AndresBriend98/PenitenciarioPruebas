@@ -2,9 +2,31 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const CargaAlojamientoYMovimiento = () => {
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editedFechaEgreso, setEditedFechaEgreso] = useState('');
+    const [historial, setHistorial] = useState([]);
+
+    const handleEditClick = (index, fechaEgreso) => {
+        setEditingIndex(index);
+        setEditedFechaEgreso(fechaEgreso || '');
+    };
+
+    const handleSaveClick = (index) => {
+        setHistorial(prevHistorial =>
+            prevHistorial.map((registro, i) =>
+                i === index ? {
+                    ...registro,
+                    fechaEgreso: editedFechaEgreso,
+                    fechaCargaEgreso: new Date().toLocaleString() // Guardar la fecha de carga de egreso
+                } : registro
+            )
+        );
+        setEditingIndex(null);
+    };
+
+
     const navigate = useNavigate();
     const scrollContainerRef = useRef(null);
-    const [historial, setHistorial] = useState([]);
 
     const scroll = (direction) => {
         if (scrollContainerRef.current) {
@@ -32,10 +54,6 @@ const CargaAlojamientoYMovimiento = () => {
 
         if (!formData.movement.entryDate) {
             newErrors.entryDate = 'Fecha de ingreso es obligatoria.';
-        }
-
-        if (!formData.movement.exitDate) {
-            newErrors.exitDate = 'Fecha de egreso es obligatoria.';
         }
 
         if (!formData.movement.reason.trim()) {
@@ -81,7 +99,7 @@ const CargaAlojamientoYMovimiento = () => {
                 fechaEgreso: formData.movement.exitDate,
                 motivo: formData.movement.reason,
                 archivo: formData.movement.actFile ? URL.createObjectURL(formData.movement.actFile) : null,
-                fechaCarga: new Date().toLocaleDateString() // Generar la fecha de carga actual
+                fechaCarga: new Date().toLocaleString() // Generar la fecha de carga actual
             }
         ]);
 
@@ -195,88 +213,91 @@ const CargaAlojamientoYMovimiento = () => {
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
-            {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
-                {/* Foto y datos del usuario */}
-                <div className="flex items-start flex-grow">
-                    {/* Foto y botón de carga */}
-                    <div className="relative mr-4 flex-shrink-0 flex flex-col items-center mt-4">
-                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mb-2">
-                            <span className="text-center text-white">Foto</span>
-                        </div>
-                    </div>
-                    {/* Datos del usuario */}
-                    <div className="space-y-3">
-                        <h2 className="text-lg font-bold text-center">{user.name}</h2>
-                        <p className="mt-1 text-sm"><strong>Tipo de interno:</strong> {user.typeofintern}</p>
-                        <p className="mt-1 text-sm"><strong>Alias:</strong> {user.alias}</p>
-                        <p className="mt-1 text-sm"><strong>Unidad:</strong> {user.unit}</p>
-                        <p className="mt-1 text-sm"><strong>Legajo:</strong> {user.fileNumber}</p>
-                        <p className="mt-1 text-sm"><strong>Tipo de documento:</strong> {user.typedoc}</p>
-                        <p className="mt-1 text-sm"><strong>DNI:</strong> {user.dni}</p>
-                        <p className="mt-1 text-sm"><strong>Delito:</strong> {user.crime}</p>
-                    </div>
-                </div>
-                {/* Checkboxes alineados a la derecha */}
-                <div className="flex flex-col space-y-2 ml-auto mt-4 md:mt-0">
-                    {/* Egreso checkbox y campos */}
-                    <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
-                        <div className="flex items-center">
-                            <input
-                                type="checkbox"
-                                id="egreso"
-                                checked={true}
-                                readOnly
-                                className="mr-2"
-                            />
-                            <label htmlFor="egreso" className="text-sm">Egreso</label>
-                        </div>
-                        {true && ( // Condición para mostrar los campos
-                            <div className="w-full mt-2">
-                                <label htmlFor="egresoDate" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
-                                <input
-                                    type="date"
-                                    id="egresoDate"
-                                    value="2024-09-09" // Valor preestablecido
-                                    readOnly
-                                    className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
-                                />
-                                <label htmlFor="numOficioEgreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
-                                <input
-                                    type="text"
-                                    id="numOficioEgreso"
-                                    value="12345" // Valor preestablecido
-                                    readOnly
-                                    className="w-full p-1 border border-gray-300 rounded text-sm"
-                                />
+            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-center md:items-start">
+                {/* Contenedor principal para asegurar alineación */}
+                <div className="flex flex-col md:flex-row items-center md:items-start w-full">
+                    {/* Foto y datos del usuario */}
+                    <div className="flex flex-col md:flex-row items-center md:items-start mb-4 md:mb-0 w-full md:w-auto">
+                        {/* Foto y botón de carga */}
+                        <div className="relative flex-shrink-0 flex flex-col items-center mb-4 md:mr-4 text-center md:text-left w-full md:w-auto">
+                            <div className="w-32 h-32 md:w-48 md:h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
+                                <span className="text-center text-white text-xs md:text-base">Foto</span>
                             </div>
-                        )}
-                    </div>
-                    {/* Otros checkboxes */}
-                    <div className="flex space-x-2 mt-4">
-                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                            <input
-                                type="checkbox"
-                                id="leyBlumberg"
-                                checked={false}
-                                readOnly
-                                className="mr-2"
-                            />
-                            <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
                         </div>
-                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                            <input
-                                type="checkbox"
-                                id="leyMicaela"
-                                checked={false}
-                                readOnly
-                                className="mr-2"
-                            />
-                            <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
+                        {/* Datos del usuario */}
+                        <div className="space-y-2 md:space-y-3 flex-grow w-full md:w-auto">
+                            <h2 className="text-lg font-bold text-center md:text-left">{user.name}</h2>
+                            <p className="text-sm"><strong>Tipo de interno:</strong> {user.typeofintern}</p>
+                            <p className="text-sm"><strong>Alias:</strong> {user.alias}</p>
+                            <p className="text-sm"><strong>Unidad:</strong> {user.unit}</p>
+                            <p className="text-sm"><strong>Legajo:</strong> {user.fileNumber}</p>
+                            <p className="text-sm"><strong>Tipo de documento:</strong> {user.typedoc}</p>
+                            <p className="text-sm"><strong>DNI:</strong> {user.dni}</p>
+                            <p className="text-sm"><strong>Delito:</strong> {user.crime}</p>
+                        </div>
+                    </div>
+                    {/* Checkboxes alineados a la derecha en pantallas grandes y a la izquierda en pantallas pequeñas */}
+                    <div className="flex flex-col space-y-4 md:space-y-2 md:ml-auto w-full md:w-auto">
+                        {/* Egreso checkbox y campos */}
+                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    id="egreso"
+                                    checked={true}
+                                    readOnly
+                                    className="mr-2"
+                                />
+                                <label htmlFor="egreso" className="text-sm">Egreso</label>
+                            </div>
+                            {true && ( // Condición para mostrar los campos
+                                <div className="w-full">
+                                    <label htmlFor="egresoDate" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
+                                    <input
+                                        type="date"
+                                        id="egresoDate"
+                                        value="2024-09-09" // Valor preestablecido
+                                        readOnly
+                                        className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
+                                    />
+                                    <label htmlFor="numOficioEgreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
+                                    <input
+                                        type="text"
+                                        id="numOficioEgreso"
+                                        value="12345" // Valor preestablecido
+                                        readOnly
+                                        className="w-full p-1 border border-gray-300 rounded text-sm"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        {/* Otros checkboxes */}
+                        <div className="flex flex-col space-y-2">
+                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
+                                <input
+                                    type="checkbox"
+                                    id="leyBlumberg"
+                                    checked={false}
+                                    readOnly
+                                    className="mr-2"
+                                />
+                                <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
+                            </div>
+                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
+                                <input
+                                    type="checkbox"
+                                    id="leyMicaela"
+                                    checked={false}
+                                    readOnly
+                                    className="mr-2"
+                                />
+                                <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
 
             <div className="relative flex items-center justify-center w-full mb-4">
                 <button
@@ -407,17 +428,6 @@ const CargaAlojamientoYMovimiento = () => {
                             />
                             {errors.entryDate && <p className="text-red-500 text-sm mb-4">{errors.entryDate}</p>}
 
-                            <label htmlFor="exitDate" className="block text-sm font-semibold mb-1 mt-2">Fecha de egreso</label>
-                            <input
-                                type="date"
-                                id="exitDate"
-                                name="exitDate"
-                                value={formData.movement.exitDate}
-                                onChange={handleInputChange}
-                                className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.exitDate ? 'border-red-500' : ''}`}
-                            />
-                            {errors.exitDate && <p className="text-red-500 text-sm mb-4">{errors.exitDate}</p>}
-
                             <label htmlFor="reason" className="block text-sm font-semibold mb-1 mt-2">Motivo del traslado</label>
                             <textarea
                                 placeholder='Ingrese el motivo del traslado'
@@ -451,7 +461,6 @@ const CargaAlojamientoYMovimiento = () => {
                     </div>
 
 
-                    {/* Historial */}
                     <div className="w-full md:w-1/3 p-4 bg-white rounded-md shadow-md mt-4 md:mt-0">
                         <h1 className="text-lg font-bold mb-4">Historial de Alojamiento y Movimiento</h1>
                         <div className="space-y-4">
@@ -459,11 +468,38 @@ const CargaAlojamientoYMovimiento = () => {
                                 {historial.length === 0 ? (
                                     <p className="text-sm text-gray-500 text-center">No hay registros de alojamiento y movimiento.</p>
                                 ) : (
-                                    historial.map((registro) => (
+                                    historial.map((registro, index) => (
                                         <div key={registro.id} className="p-4 border border-gray-300 rounded-md mt-4">
                                             <p className="text-sm"><strong>Lugar de alojamiento:</strong> {registro.lugar}</p>
                                             <p className="text-sm"><strong>Fecha de ingreso:</strong> {registro.fechaIngreso}</p>
-                                            <p className="text-sm"><strong>Fecha de egreso:</strong> {registro.fechaEgreso}</p>
+                                            <p className="text-sm"><strong>Fecha de egreso:</strong>
+                                                {editingIndex === index ? (
+                                                    <>
+                                                        <input
+                                                            type="date"
+                                                            value={editedFechaEgreso}
+                                                            onChange={(e) => setEditedFechaEgreso(e.target.value)}
+                                                            className="p-1 border border-gray-300 rounded text-sm ml-1"
+                                                        />
+                                                        <button
+                                                            onClick={() => handleSaveClick(index)}
+                                                            className="bg-green-500 text-white p-1 rounded mt-1 hover:bg-green-600 text-xs ml-1"
+                                                        >
+                                                            Guardar
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {registro.fechaEgreso || ' Sin definir'}
+                                                        <button
+                                                            onClick={() => handleEditClick(index, registro.fechaEgreso)}
+                                                            className={`ml-2 p-1 rounded text-xs text-white ${registro.fechaEgreso ? 'bg-orange-400 hover:bg-orange-500' : 'bg-blue-500 hover:bg-blue-600'}`}
+                                                        >
+                                                            {registro.fechaEgreso ? 'Editar Fecha Egreso' : 'Agregar Fecha Egreso'}
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </p>
                                             <p className="text-sm"><strong>Motivo del traslado:</strong> {registro.motivo}</p>
                                             {registro.archivo && (
                                                 <div>
@@ -480,12 +516,18 @@ const CargaAlojamientoYMovimiento = () => {
                                             <p className="text-sm text-gray-500 mt-2">
                                                 <strong>Fecha de Carga:</strong> {registro.fechaCarga}
                                             </p>
+                                            {registro.fechaCargaEgreso && (
+                                                <p className="text-sm text-gray-500 mt-2">
+                                                    <strong>Fecha de Carga de Egreso:</strong> {registro.fechaCargaEgreso}
+                                                </p>
+                                            )}
                                         </div>
                                     ))
                                 )}
                             </div>
                         </div>
                     </div>
+
 
                 </div>
                 <div className="flex justify-between mt-10">

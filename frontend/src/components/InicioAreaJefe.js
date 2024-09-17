@@ -26,7 +26,6 @@ const InicioAreaJefe = () => {
   });
 
   const handleLogout = () => {
-    // Logica falta
     navigate('/login');
   };
 
@@ -35,8 +34,8 @@ const InicioAreaJefe = () => {
       <div className="bg-gray-100 flex-1 p-4 rounded-md flex flex-col">
         <div className="flex flex-col md:flex-row md:justify-between items-start mb-4">
           <div className="text-left text-base mb-4 md:mb-0">
-          <p className='text-lg'><strong>Bienvenido/a, {user.name}</strong></p>
-          <p className='text-sm'><strong>Área:</strong> {user.area}</p>
+            <p className='text-lg'><strong>Bienvenido/a, {user.name}</strong></p>
+            <p className='text-sm'><strong>Área:</strong> {user.area}</p>
           </div>
 
           <div className="my-4 md:my-0 flex flex-col items-center">
@@ -81,14 +80,14 @@ const InicioAreaJefe = () => {
                   <th className="p-2 border">#</th>
                   <th className="p-2 border">Nombre/Apellido</th>
                   <th className="p-2 border">Delitos</th>
-                  <th className="p-2 border">Cumple</th>
+                  <th className="p-2 border">Tipo Interno</th>
                   <th className="p-2 border">Juzgado</th>
-                  <th className="p-2 border">Condena</th>
+                  <th className="p-2 border">Fecha Ingreso</th>
+                  <th className="p-2 border">Cumple Condena</th>
+                  <th className="p-2 border">Duración Condena</th>
                   <th className="p-2 border">Legajo</th>
-                  <th className="p-2 border">F_TRANS</th>
-                  <th className="p-2 border">F_COND</th>
-                  <th className="p-2 border">F_ASIST</th>
-                  <th className="p-2 border">F_ING</th>
+                  <th className="p-2 border">Fecha Asistida</th>
+                  <th className="p-2 border">Fecha Conmutación</th>
                   <th className="p-2 border">Acciones</th>
                 </tr>
               </thead>
@@ -98,17 +97,19 @@ const InicioAreaJefe = () => {
                     <td className="p-2 border text-xs">{index + 1}</td>
                     <td className="p-2 border text-xs">{item.name}</td>
                     <td className="p-2 border text-xs">{item.crime}</td>
-                    <td className="p-2 border text-xs">{item.sentenceDate}</td>
+                    <td className="p-2 border text-xs">Tipo Interno {index + 1}</td> {/* Ejemplo de valor para "Tipo Interno" */}
                     <td className="p-2 border text-xs">{item.court}</td>
-                    <td className="p-2 border text-xs">{item.sentence}</td>
-                    <td className="p-2 border text-xs">{item.fileNumber}</td>
-                    <td className="p-2 border text-xs">{item.transferDate}</td>
-                    <td className="p-2 border text-xs">{item.conditionalDate}</td>
-                    <td className="p-2 border text-xs">{item.assistanceDate}</td>
                     <td className="p-2 border text-xs">{item.admissionDate}</td>
+                    <td className="p-2 border text-xs">{item.sentenceDate}</td>
+                    <td className="p-2 border text-xs">Duración Condena {index + 1}</td> {/* Ejemplo de valor para "Duración Condena" */}
+                    <td className="p-2 border text-xs">{item.fileNumber}</td>
+                    <td className="p-2 border text-xs">{item.assistanceDate}</td>
+                    <td className="p-2 border text-xs">{item.conditionalDate}</td>
                     <td className="p-2 border text-center">
-                      <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
-                      onClick={() => navigate('/fichaingreso')}>
+                      <button
+                        className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
+                        onClick={() => navigate('/fichaingreso')}
+                      >
                         Ver
                       </button>
                     </td>
@@ -127,7 +128,7 @@ const InicioAreaJefe = () => {
             Cerrar sesión
           </button>
           <button className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 text-xs">
-            Generar Carta Situacion
+            Generar Carta Situación
           </button>
         </div>
       </div>

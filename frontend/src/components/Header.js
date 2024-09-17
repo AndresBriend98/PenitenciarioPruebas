@@ -1,20 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const CargaFisionomia = () => {
+const Header = () => {
     const navigate = useNavigate();
+    const location = useLocation(); // Para obtener la ubicación actual
     const scrollContainerRef = useRef(null);
-
-    const scroll = (direction) => {
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollBy({
-                left: direction === 'left' ? -200 : 200,
-                behavior: 'smooth'
-            });
-        }
-    };
-
-    const [user, setUser] = useState({
+    
+    const user = {
         name: 'Maximiliano Ezequiel Dominguez',
         alias: 'JL',
         unit: 'Unidad Penitenciaria 9',
@@ -26,7 +18,7 @@ const CargaFisionomia = () => {
         entryDate: '10/06/2024',
         sentenceEndDate: '10/06/2030',
         remainingSentence: '3 años 2 meses 5 días',
-    });
+    };
 
     const areas = [
         'Ficha ingreso',
@@ -47,51 +39,68 @@ const CargaFisionomia = () => {
         'Psicología',
         'Fisionomía'
     ];
-
-    const [selectedArea, setSelectedArea] = useState('Fisionomia');
-
-    const [egreso, setEgreso] = useState(true);
-    const [egresoDate, setEgresoDate] = useState('');
-    const [leyMicaela, setLeyMicaela] = useState(true);
-    const [leyBlumberg, setLeyBlumberg] = useState(true);
-    const [image, setImage] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-
-    const handleVolver = () => {
-        navigate('/general');
-    };
-
-    const handleGuardarCambios = () => {
-        setShowModal(true);
-        setTimeout(() => {
-            setShowModal(false);
-        }, 3000);
-    };
-
-    useEffect(() => {
-        if (scrollContainerRef.current) {
-            const container = scrollContainerRef.current;
-            const selectedButton = container.querySelector(`[data-area="${selectedArea}"]`);
-            if (selectedButton) {
-                container.scrollTo({
-                    left: selectedButton.offsetLeft - (container.offsetWidth / 2) + (selectedButton.offsetWidth / 2),
-                    behavior: 'smooth'
-                });
-            }
-            setSelectedArea('Fisionomía');
+    // Obtener el área de la URL actual
+    const getAreaFromPath = (path) => {
+        switch (path) {
+            case '/cargasalud':
+                return 'Salud';
+            case '/cargacriminologia':
+                return 'Criminología';
+            case '/cargafisionomia':
+                return 'Fisionomía';
+            case '/cargapermisos':
+                return 'Permisos';
+            case '/cargaantecedentespenales':
+                return 'Antecedentes penales';
+            case '/cargaconducconcepfases':
+                return 'Conducta-Concepto-Fases';
+            case '/cargatraslado':
+                return 'Traslado';
+            case '/cargagrupofamiliar':
+                return 'Grupo Familiar';
+            case '/cargajudicial':
+                return 'Área judicial';
+            case '/cargavisitas':
+                return 'Visitas';
+            case '/cargasalidas':
+                return 'Salidas';
+            case '/cargaalojamientoymovimiento':
+                return 'Alojamiento y movimiento';
+            case '/cargaeducacion':
+                return 'Educación';
+            case '/cargatrabajo':
+                return 'Trabajo';
+            case '/cargapsicologia':
+                return 'Psicología';
+            case '/cargadatospersonales':
+                return 'Datos personales';
+            case '/fichaingreso':
+                return 'Ficha ingreso';
+            default:
+                return 'Psicología'; // Valor por defecto si el path no coincide
         }
-    }, [selectedArea]);
+    };
+
+    // Estado para el área seleccionada
+    const [selectedArea, setSelectedArea] = useState(getAreaFromPath(location.pathname));
+
+    // Actualiza el área seleccionada cuando la URL cambia
+    useEffect(() => {
+        setSelectedArea(getAreaFromPath(location.pathname));
+    }, [location.pathname]);
+
+    // Función de desplazamiento
+    const scroll = (direction) => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({
+                left: direction === 'left' ? -150 : 150,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     return (
-        <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
-            {showModal && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
-                    <div className="bg-white p-4 rounded-md shadow-lg text-center">
-                        <h2 className="text-sm font-bold mb-2">Datos cargados con éxito</h2>
-                    </div>
-                </div>
-            )}
-
+        <div>
             {/* Información del usuario, foto y checkboxes */}
             <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-center md:items-start">
                 {/* Contenedor principal para asegurar alineación */}
@@ -178,7 +187,6 @@ const CargaFisionomia = () => {
                 </div>
             </div>
 
-
             <div className="relative flex items-center justify-center w-full mb-4">
                 <button
                     onClick={() => scroll('left')}
@@ -223,7 +231,7 @@ const CargaFisionomia = () => {
                                     case 'Grupo Familiar':  // Añadido caso para Grupo Familiar
                                         navigate('/cargagrupofamiliar');
                                         break;
-                                    case 'Area judicial':  // Añadido caso para Judicial
+                                    case 'Área judicial':  // Añadido caso para Judicial
                                         navigate('/cargajudicial');
                                         break;
                                     case 'Visitas':  // Añadido caso para Visitas
@@ -275,113 +283,8 @@ const CargaFisionomia = () => {
                     </svg>
                 </button>
             </div>
-
-            {/* Formulario de Detalles */}
-            <div className="bg-white p-4 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Carga de Fisionomia</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Estatura</label>
-                        <input type="text" placeholder="Introduce la estatura" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Cuerpo</label>
-                        <input type="text" placeholder="Describe el cuerpo" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Cabello</label>
-                        <input type="text" placeholder="Describe el cabello" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Frente</label>
-                        <input type="text" placeholder="Describe la frente" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Cejas</label>
-                        <input type="text" placeholder="Describe las cejas" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Parpados</label>
-                        <input type="text" placeholder="Describe los párpados" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Ojos</label>
-                        <input type="text" placeholder="Describe los ojos" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Orejas</label>
-                        <input type="text" placeholder="Describe las orejas" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Tatuajes</label>
-                        <input type="text" placeholder="Describe los tatuajes" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Bigotes</label>
-                        <input type="text" placeholder="Describe los bigotes" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Cutis</label>
-                        <input type="text" placeholder="Describe el cutis" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Barba</label>
-                        <input type="text" placeholder="Describe la barba" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Labios</label>
-                        <input type="text" placeholder="Describe los labios" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Boca</label>
-                        <input type="text" placeholder="Describe la boca" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Lóbulos</label>
-                        <input type="text" placeholder="Describe los lóbulos" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Mentón</label>
-                        <input type="text" placeholder="Describe el mentón" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Nariz Dorso</label>
-                        <input type="text" placeholder="Describe el dorso de la nariz" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Nariz Base</label>
-                        <input type="text" placeholder="Describe la base de la nariz" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Tatuajes/Marcas Distintivas</label>
-                        <input
-                            type="file"
-                            className="w-full p-1 border border-gray-300 rounded text-sm"
-                            onChange={(e) => setImage(e.target.files[0])}
-                        />
-                    </div>
-                </div>
-
-                <div className="flex justify-between mt-10">
-                    <button
-                        onClick={() => navigate('/general')}
-                        className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-xs"
-                    >
-                        Menu Principal
-                    </button>
-                    <div className="flex space-x-3">
-                        <button
-                            onClick={handleGuardarCambios}
-                            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
-                        >
-                            Cargar
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
     );
-
 };
 
-export default CargaFisionomia;
+export default Header;

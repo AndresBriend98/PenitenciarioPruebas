@@ -1,258 +1,457 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Header from './Header'; // Asegúrate de usar la ruta correcta
 
-const CargaSalidas= () => {
+// Componente CargaSalidas.js
+const CargaSalidas = () => {
+
+    // Función para determinar el estado
+    const getEstadoVisita = (fechaSalida, fechaEntrada) => {
+        const ahora = new Date();
+        if (fechaSalida < ahora && fechaEntrada < ahora) {
+            return { color: 'bg-green-500', texto: 'Concretada', colorTexto: 'text-green-500' };
+        } else if (fechaSalida > ahora) {
+            return { color: 'bg-yellow-500', texto: 'Pendiente', colorTexto: 'text-yellow-500' };
+        }
+        return { color: 'bg-red-500', texto: 'Anulada', colorTexto: 'text-red-500' };
+    };
+
+    // Componente del historial
+    const HistorialCarga = ({ registros }) => (
+        <div>
+            {registros.map((registro) => {
+                const estado = getEstadoVisita(registro.fechaSalida, registro.fechaEntrada);
+                return (
+                    <div key={registro.id} className="flex items-center mt-2">
+                        <div className={`w-3 h-3 rounded-full ${estado.color}`}></div>
+                        <p className={`text-sm ml-2 ${estado.colorTexto} italic font-bold`}>Estado de la Salida: {estado.texto}</p>
+                    </div>
+                );
+            })}
+        </div>
+    );
+
     const navigate = useNavigate();
-    const scrollContainerRef = useRef(null);
+    const [formData, setFormData] = useState({
+        motivoSalida: '',
+        acompananteInterno: '',
+        fechaSalida: '',
+        horaSalida: '',
+        fechaEntrada: '',
+        horaEntrada: '',
+        observacion: ''
+    });
+    const [errors, setErrors] = useState({});
+    const [historial, setHistorial] = useState([]);
+    const [historialAnulados, setHistorialAnulados] = useState([]);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalType, setModalType] = useState('');
+    const [inputValue, setInputValue] = useState('');
+    const [selectedIndex, setSelectedIndex] = useState(null);
+    const [anularModalOpen, setAnularModalOpen] = useState(false);
+    const [anularMotivo, setAnularMotivo] = useState('');
 
-    const scroll = (direction) => {
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollBy({
-                left: direction === 'left' ? -150 : 150,
-                behavior: 'smooth'
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        if (!formData.motivoSalida) errors.motivoSalida = 'Motivo de la salida es obligatorio.';
+        if (!formData.acompananteInterno) errors.acompananteInterno = 'Acompañante del interno es obligatorio.';
+        if (!formData.fechaSalida) errors.fechaSalida = 'Fecha de salida es obligatoria.';
+        if (!formData.horaSalida) errors.horaSalida = 'Hora de salida es obligatoria.';
+        if (!formData.fechaEntrada) errors.fechaEntrada = 'Fecha de entrada es obligatoria.';
+        if (!formData.horaEntrada) errors.horaEntrada = 'Hora de entrada es obligatoria.';
+
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    const handleSubmit = () => {
+        if (validateForm()) {
+            const now = new Date();
+            const fechaCarga = now.toLocaleString();
+            const fechaEntrada = new Date(`${formData.fechaEntrada}T${formData.horaEntrada}`);
+            const estadoVisita = getEstadoVisita(fechaEntrada);
+
+            const newHistorial = {
+                ...formData,
+                fechaCarga,
+                estadoVisita
+            };
+            setHistorial((prev) => [...prev, newHistorial]);
+            setFormData({
+                motivoSalida: '',
+                acompananteInterno: '',
+                fechaSalida: '',
+                horaSalida: '',
+                fechaEntrada: '',
+                horaEntrada: '',
+                observacion: ''
             });
+            setErrors({});
         }
     };
 
+    const handleOpenModal = (type, index) => {
+        setModalType(type);
+        setSelectedIndex(index);
+        setInputValue(type === 'observacion' ? historial[index]?.observacion : '');
+        setModalOpen(true);
+    };
 
-    const [user, setUser] = useState({
-        name: 'Maximiliano Ezequiel Dominguez',
-        alias: 'JL',
-        unit: 'Unidad Penitenciaria 9',
-        fileNumber: '3576',
-        typedoc: 'Cédula Ejemplar B',
-        dni: '23123564',
-        crime: 'Robo',
-        typeofintern: 'Condenado',
-        entryDate: '10/06/2024',
-        sentenceEndDate: '10/06/2030',
-        remainingSentence: '3 años 2 meses 5 días',
-    });
+    const handleSave = () => {
+        const updatedHistorial = [...historial];
+        if (modalType === 'observacion') {
+            updatedHistorial[selectedIndex] = {
+                ...updatedHistorial[selectedIndex],
+                observacion: inputValue,
+                fechaCargaObservacion: new Date().toLocaleString()
+            };
+        }
+        setHistorial(updatedHistorial);
+        setModalOpen(false);
+    };
 
-    const areas = [
-        'Ficha ingreso',
-        'Area judicial',
-        'Datos personales',
-        'Conducta-Concepto-Fases',
-        'Permisos',
-        'Antecedentes penales',
-        'Grupo Familiar',
-        'Visitas',
-        'Salidas',
-        'Traslado',
-        'Alojamiento y movimiento',
-        'Salud',
-        'Educación',
-        'Trabajo',
-        'Criminología',
-        'Psicología',
-        'Fisionomía'
-    ];
+    const handleAnularVisita = (index) => {
+        setSelectedIndex(index);
+        setAnularModalOpen(true);
+    };
 
-    const [selectedArea, setSelectedArea] = useState('Salidas');;
-    const [showModal, setShowModal] = useState(false);
+    const handleSaveAnulacion = () => {
+        const now = new Date().toLocaleString();
+        const updatedHistorial = [...historial];
+        const anulacion = {
+            ...updatedHistorial[selectedIndex],
+            motivoAnulacion: anularMotivo,
+            fechaAnulacion: now,
+            estadoVisita: 'Anulada'
+        };
+        setHistorialAnulados((prev) => [...prev, anulacion]);
+        setHistorial(updatedHistorial.filter((_, i) => i !== selectedIndex));
+        setAnularModalOpen(false);
+        setAnularMotivo('');
+    };
 
     const handleVolver = () => {
         navigate('/general');
     };
-    useEffect(() => {
-        if (scrollContainerRef.current) {
-            const container = scrollContainerRef.current;
-            const selectedButton = container.querySelector(`[data-area="${selectedArea}"]`);
-            if (selectedButton) {
-                container.scrollTo({
-                    left: selectedButton.offsetLeft - (container.offsetWidth / 2) + (selectedButton.offsetWidth / 2),
-                    behavior: 'smooth'
-                });
-            }
-            setSelectedArea('Salidas');
-        }
-    }, [selectedArea]);
 
+    const handleGenerarInforme = () => {
+    };
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
-            {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-start">
-                {/* Foto y datos del usuario */}
-                <div className="flex items-start flex-grow">
-                    {/* Foto y botón de carga */}
-                    <div className="relative mr-4 flex-shrink-0 flex flex-col items-center mt-4">
-                        <div className="w-48 h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden mb-2">
-                            <span className="text-center text-white">Foto</span>
-                        </div>
-                    </div>
-                    {/* Datos del usuario */}
+            <Header />
+            <div className="bg-white p-6 rounded-md shadow-md">
+                {/* Formulario de Carga */}
+                <div className="bg-white rounded-md shadow-md mb-4 p-3">
+                    <h2 className="text-xl font-bold mb-3">Carga de Salidas</h2>
                     <div className="space-y-3">
-                        <h2 className="text-lg font-bold text-center">{user.name}</h2>
-                        <p className="mt-1 text-sm"><strong>Tipo de interno:</strong> {user.typeofintern}</p>
-                        <p className="mt-1 text-sm"><strong>Alias:</strong> {user.alias}</p>
-                        <p className="mt-1 text-sm"><strong>Unidad:</strong> {user.unit}</p>
-                        <p className="mt-1 text-sm"><strong>Legajo:</strong> {user.fileNumber}</p>
-                        <p className="mt-1 text-sm"><strong>Tipo de documento:</strong> {user.typedoc}</p>
-                        <p className="mt-1 text-sm"><strong>DNI:</strong> {user.dni}</p>
-                        <p className="mt-1 text-sm"><strong>Delito:</strong> {user.crime}</p>
-                    </div>
-                </div>
-                {/* Checkboxes alineados a la derecha */}
-                <div className="flex flex-col space-y-2 ml-auto mt-4 md:mt-0">
-                    {/* Egreso checkbox y campos */}
-                    <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
-                        <div className="flex items-center">
+                        <div>
+                            <label className="block text-sm font-medium mb-1" htmlFor="motivoSalida">Motivo de la salida:</label>
                             <input
-                                type="checkbox"
-                                id="egreso"
-                                checked={true}
-                                readOnly
-                                className="mr-2"
+                                type="text"
+                                id="motivoSalida"
+                                name="motivoSalida"
+                                value={formData.motivoSalida}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                placeholder='Ingrese el motivo de la salida'
                             />
-                            <label htmlFor="egreso" className="text-sm">Egreso</label>
+                            {errors.motivoSalida && <p className="text-red-500 text-xs mt-1">{errors.motivoSalida}</p>}
                         </div>
-                        {true && ( // Condición para mostrar los campos
-                            <div className="w-full mt-2">
-                                <label htmlFor="egresoDate" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
+                        <div>
+                            <label className="block text-sm font-medium mb-1" htmlFor="acompananteInterno">Acompañante del interno:</label>
+                            <input
+                                type="text"
+                                id="acompananteInterno"
+                                name="acompananteInterno"
+                                value={formData.acompananteInterno}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                placeholder='Ingrese el acompañante del interno'
+                            />
+                            {errors.acompananteInterno && <p className="text-red-500 text-xs mt-1">{errors.acompananteInterno}</p>}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="block text-sm font-medium mb-1" htmlFor="fechaSalida">Fecha de salida:</label>
                                 <input
                                     type="date"
-                                    id="egresoDate"
-                                    value="2024-09-09" // Valor preestablecido
-                                    readOnly
-                                    className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
+                                    id="fechaSalida"
+                                    name="fechaSalida"
+                                    value={formData.fechaSalida}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
                                 />
-                                <label htmlFor="numOficioEgreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
-                                <input
-                                    type="text"
-                                    id="numOficioEgreso"
-                                    value="12345" // Valor preestablecido
-                                    readOnly
-                                    className="w-full p-1 border border-gray-300 rounded text-sm"
-                                />
+                                {errors.fechaSalida && <p className="text-red-500 text-xs mt-1">{errors.fechaSalida}</p>}
                             </div>
-                        )}
-                    </div>
-                    {/* Otros checkboxes */}
-                    <div className="flex space-x-2 mt-4">
-                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                            <input
-                                type="checkbox"
-                                id="leyBlumberg"
-                                checked={false}
-                                readOnly
-                                className="mr-2"
-                            />
-                            <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
+                            <div>
+                                <label className="block text-sm font-medium mb-1" htmlFor="horaSalida">Hora de salida:</label>
+                                <input
+                                    type="time"
+                                    id="horaSalida"
+                                    name="horaSalida"
+                                    value={formData.horaSalida}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                />
+                                {errors.horaSalida && <p className="text-red-500 text-xs mt-1">{errors.horaSalida}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1" htmlFor="fechaEntrada">Fecha de entrada:</label>
+                                <input
+                                    type="date"
+                                    id="fechaEntrada"
+                                    name="fechaEntrada"
+                                    value={formData.fechaEntrada}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                />
+                                {errors.fechaEntrada && <p className="text-red-500 text-xs mt-1">{errors.fechaEntrada}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1" htmlFor="horaEntrada">Hora de entrada:</label>
+                                <input
+                                    type="time"
+                                    id="horaEntrada"
+                                    name="horaEntrada"
+                                    value={formData.horaEntrada}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                />
+                                {errors.horaEntrada && <p className="text-red-500 text-xs mt-1">{errors.horaEntrada}</p>}
+                            </div>
                         </div>
-                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                            <input
-                                type="checkbox"
-                                id="leyMicaela"
-                                checked={false}
-                                readOnly
-                                className="mr-2"
+                        <div>
+                            <label className="block text-sm font-medium mb-1" htmlFor="observacion">Observación:</label>
+                            <textarea
+                                id="observacion"
+                                name="observacion"
+                                value={formData.observacion}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                placeholder='Ingrese alguna observación aqui'
+                                rows="3"
                             />
-                            <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
+                        </div>
+                        <div className="flex justify-center mt-2">
+                            <button
+                                onClick={handleSubmit}
+                                className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 text-xs"
+                            >
+                                Cargar
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="relative flex items-center justify-center w-full mb-4">
-                <button
-                    onClick={() => scroll('left')}
-                    className="absolute left-0 bg-white text-gray-800 p-2 rounded-full shadow-lg border border-black hover:bg-gray-100 transition-colors z-20"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </button>
+                {/* Dividir Historiales */}
+                <div className="flex flex-col md:flex-row gap-4">
+                    {/* Historial de Cargas */}
+                    {/* Historial de Cargas */}
+                    <div className="flex-1 bg-white p-4 rounded-md shadow-md mb-4 mt-5">
+                        <h2 className="text-sm font-bold mt-4">Historial de Carga</h2>
+                        <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-96 overflow-y-auto">
+                            {historial.length === 0 ? (
+                                <p className="text-sm text-gray-500 text-center">
+                                    No hay registros de carga aún.
+                                </p>
+                            ) : (
+                                <ul className="space-y-3">
+                                    {historial.map((registro, index) => {
+                                        // Calcular el estado de la salida
+                                        const fechaHoraSalida = new Date(`${registro.fechaSalida}T${registro.horaSalida}`);
+                                        const fechaHoraEntrada = new Date(`${registro.fechaEntrada}T${registro.horaEntrada}`);
+                                        const ahora = new Date();
+                                        let estadoColor, estadoTexto, estadoTextoColor;
 
-                <div
-                    ref={scrollContainerRef}
-                    className="flex items-center overflow-hidden whitespace-nowrap px-4 mx-4"
-                >
-                    {areas.map((area) => (
-                        <button
-                            key={area}
-                            data-area={area}
-                            onClick={() => {
-                                switch (area) {
-                                    case 'Salud':
-                                        navigate('/cargasalud');
-                                        break;
-                                    case 'Criminología':
-                                        navigate('/cargacriminologia');
-                                        break;
-                                    case 'Fisionomía':
-                                        navigate('/cargafisionomia');
-                                        break;
-                                    case 'Permisos':
-                                        navigate('/cargapermisos');
-                                        break;
-                                    case 'Antecedentes penales':
-                                        navigate('/cargaantecedentespenales');
-                                        break;
-                                    case 'Conducta-Concepto-Fases':
-                                        navigate('/cargaconducconcepfases');
-                                        break;
-                                    case 'Traslado':
-                                        navigate('/cargatraslado');
-                                        break;
-                                    case 'Grupo Familiar':  // Añadido caso para Grupo Familiar
-                                        navigate('/cargagrupofamiliar');
-                                        break;
-                                    case 'Area judicial':  // Añadido caso para Judicial
-                                        navigate('/cargajudicial');
-                                        break;
-                                    case 'Visitas':  // Añadido caso para Visitas
-                                        navigate('/cargavisitas');
-                                        break;
-                                    case 'Salidas':  // Añadido caso para Salidas
-                                        navigate('/cargasalidas');
-                                        break;
-                                    case 'Alojamiento y movimiento':  // Añadido caso para Alojamiento y Movimiento
-                                        navigate('/cargaalojamientoymovimiento');
-                                        break;
-                                    case 'Educación':  // Añadido caso para Educación
-                                        navigate('/cargaeducacion');
-                                        break;
-                                    case 'Trabajo':  // Añadido caso para Trabajo
-                                        navigate('/cargatrabajo');
-                                        break;
-                                    case 'Psicología':  // Añadido caso para Psicología
-                                        navigate('/cargapsicologia');
-                                        break;
-                                    case 'Datos personales':  // Añadido caso para datos personales
-                                        navigate('/cargadatospersonales');
-                                        break;
-                                    case 'Ficha ingreso':  // Añadido caso para datos personales
-                                        navigate('/fichaingreso');
-                                        break;
-                                    default:
-                                        // Manejo de casos no definidos
-                                        console.error('Área no definida: ', area);
-                                        break;
-                                }
-                            }}
-                            className={`px-12 py-2 text-sm font-medium rounded-full transition-transform transform border border-black ${selectedArea === area
-                                ? 'bg-gradient-to-r from-blue-500 to-teal-500 text-white shadow-lg scale-95'
-                                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                }`}
-                        >
-                            {area}
-                        </button>
-                    ))}
+                                        if (registro.motivoAnulacion) {
+                                            estadoColor = 'bg-red-500';
+                                            estadoTextoColor = 'text-red-500';
+                                            estadoTexto = 'Anulada';
+                                        } else if (fechaHoraEntrada < ahora) {
+                                            estadoColor = 'bg-green-500';
+                                            estadoTextoColor = 'text-green-500';
+                                            estadoTexto = 'Concretada';
+                                        } else if (fechaHoraSalida > ahora) {
+                                            estadoColor = 'bg-yellow-500';
+                                            estadoTextoColor = 'text-yellow-500';
+                                            estadoTexto = 'Pendiente';
+                                        }
+
+                                        return (
+                                            <li key={index} className="p-3 bg-gray-100 rounded-md shadow-sm">
+                                                <p className='text-sm'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
+                                                <p className='text-sm'><strong>Acompañante del interno:</strong> {registro.acompananteInterno}</p>
+                                                <p className='text-sm'><strong>Fecha de salida:</strong> {registro.fechaSalida}</p>
+                                                <p className='text-sm'><strong>Hora de salida:</strong> {registro.horaSalida}</p>
+                                                <p className='text-sm'><strong>Fecha de entrada:</strong> {registro.fechaEntrada}</p>
+                                                <p className='text-sm'><strong>Hora de entrada:</strong> {registro.horaEntrada}</p>
+                                                {registro.observacion && (
+                                                    <p className='text-sm'>
+                                                        <strong>Observación:</strong> {registro.observacion}
+                                                        {registro.fechaCargaObservacion && (
+                                                            <>
+                                                                {' '}
+                                                                <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga observacion:</strong> {registro.fechaCargaObservacion}</p>
+                                                            </>
+                                                        )}
+                                                    </p>
+                                                )}
+                                                <p className="text-sm text-gray-500"><strong>Fecha de carga:</strong> {registro.fechaCarga}</p>
+                                                <div className="flex items-center mt-2">
+                                                    <div className={`w-3 h-3 rounded-full ${estadoColor}`}></div>
+                                                    <p className={`text-sm ml-2 ${estadoTextoColor} italic font-bold`}>Estado de la Salida: {estadoTexto}</p>
+                                                </div>
+                                                <div className="flex space-x-2 mt-2">
+                                                    <button
+                                                        onClick={() => handleOpenModal('observacion', index)}
+                                                        className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 text-xs"
+                                                    >
+                                                        {registro.observacion ? 'Editar Observación' : 'Agregar Observación'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleAnularVisita(index)}
+                                                        className="bg-red-500 text-white p-1 rounded-md hover:bg-red-600 text-xs"
+                                                    >
+                                                        Anular Visita
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Historial de Salidas Anuladas */}
+                    <div className="flex-1 bg-white p-4 rounded-md shadow-md mb-4 mt-5">
+                        <h2 className="text-sm font-bold mt-4">Historial de Salidas Anuladas</h2>
+                        <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-96 overflow-y-auto">
+                            {historialAnulados.length === 0 ? (
+                                <p className="text-sm text-gray-500 text-center">
+                                    No hay registros de salidas anuladas aún.
+                                </p>
+                            ) : (
+                                <ul className="space-y-3">
+                                    {historialAnulados.map((registro, index) => (
+                                        <li key={index} className="p-3 bg-gray-100 rounded-md shadow-sm">
+                                            <div className="border border-gray-300 rounded-lg p-3 mb-2 bg-gray-100">
+                                                <div className="flex items-center mt-2">
+                                                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                                    <p className="text-sm ml-2 text-red-500 italic font-bold">Estado de la Salida: Anulada</p>
+                                                </div>
+                                                <p className='text-sm italic'><strong>Motivo de anulación:</strong> {registro.motivoAnulacion}</p>
+                                                <p className='text-sm italic'><strong>Fecha de anulación:</strong> {registro.fechaAnulacion}</p>
+                                            </div>
+                                            <p className='text-sm'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
+                                            <p className='text-sm'><strong>Acompañante del interno:</strong> {registro.acompananteInterno}</p>
+                                            <p className='text-sm'><strong>Fecha de salida:</strong> {registro.fechaSalida}</p>
+                                            <p className='text-sm'><strong>Hora de salida:</strong> {registro.horaSalida}</p>
+                                            <p className='text-sm'><strong>Fecha de entrada:</strong> {registro.fechaEntrada}</p>
+                                            <p className='text-sm'><strong>Hora de entrada:</strong> {registro.horaEntrada}</p>
+                                            {registro.observacion && (
+                                                <p className='text-sm'>
+                                                    <strong>Observación:</strong> {registro.observacion}
+                                                    {registro.fechaCargaObservacion && (
+                                                        <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga observación:</strong> {registro.fechaCargaObservacion}</p>
+                                                    )}
+                                                </p>
+                                            )}
+                                            <p className="text-sm text-gray-500"><strong>Fecha de carga:</strong> {registro.fechaCarga}</p>
+
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+
                 </div>
 
-                <button
-                    onClick={() => scroll('right')}
-                    className="absolute right-0 bg-white text-gray-800 p-2 rounded-full shadow-lg border border-black hover:bg-gray-100 transition-colors z-20"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
-            <div className="bg-white p-6 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">EN DESARROLLO</h1>
+                {/* Modal para observaciones */}
+                {modalOpen && (
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+                        <div className="bg-white p-4 rounded-md shadow-lg w-80">
+                            <h3 className="text-sm font-bold mb-3">
+                                {modalType === 'observacion' ? 'Agregar/Editar Observación' : 'Agregar/Editar Otro Campo'}
+                            </h3>
+                            <textarea
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                rows="4"
+                                placeholder='Ingrese la oservación aqui...'
+                            />
+                            <div className="mt-3 flex justify-end space-x-2">
+                                <button
+                                    onClick={handleSave}
+                                    className={`bg-green-500 text-white p-2 rounded-md hover:bg-green-600 text-xs ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    disabled={!inputValue.trim()}  // Deshabilitar si está vacío
+                                >
+                                    Guardar
+                                </button>
+                                <button
+                                    onClick={() => setModalOpen(false)}
+                                    className="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600 text-xs"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal para anulación */}
+                {anularModalOpen && (
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+                        <div className="bg-white p-4 rounded-md shadow-lg w-80">
+                            <h3 className="text-sm font-bold mb-3">Motivo de Anulación</h3>
+                            <textarea
+                                value={anularMotivo}
+                                onChange={(e) => setAnularMotivo(e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                placeholder='Ingrese en motivo de la anulación'
+                                rows="4"
+                            />
+                            <div className="mt-3 flex justify-end space-x-2">
+                                <button
+                                    onClick={handleSaveAnulacion}
+                                    className={`bg-red-500 text-white p-2 rounded-md hover:bg-red-600 text-xs ${!anularMotivo.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    disabled={!anularMotivo.trim()}
+                                >
+                                    Anular
+                                </button>
+                                <button
+                                    onClick={() => setAnularModalOpen(false)}
+                                    className="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600 text-xs"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {/* Botones de acción */}
+                <div className="mt-6 flex justify-between items-center">
+                    <button
+                        onClick={handleVolver}
+                        className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-xs"
+                    >
+                        Menu Principal
+                    </button>
+                    <button
+                        onClick={handleGenerarInforme}
+                        className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600 text-xs"
+                    >
+                        Generar Informe
+                    </button>
+                </div>
             </div>
         </div>
     );
