@@ -22,7 +22,6 @@ const InicioAreaAdministrador = () => {
     sentence: '25/06/2025',
     fileNumber: '3544',
     assistanceDate: '25/06/2025',
-    conditionalDate: '25/06/2025',
     transferDate: '25/06/2025',
   }));
 
@@ -77,7 +76,6 @@ const InicioAreaAdministrador = () => {
                   <th className="p-2 border">Duración Condena</th>
                   <th className="p-2 border">Legajo</th>
                   <th className="p-2 border">Fecha Asistida</th>
-                  <th className="p-2 border">Fecha Conmutacion</th>
                   <th className="p-2 border">Acciones</th>
                 </tr>
               </thead>
@@ -101,9 +99,6 @@ const InicioAreaAdministrador = () => {
                     </td>
                     <td className="p-2 border text-xs">
                       {item.internalType === 'Condenado' ? item.assistanceDate : '-'}
-                    </td>
-                    <td className="p-2 border text-xs">
-                      {item.internalType === 'Condenado' ? item.conditionalDate : '-'}
                     </td>
                     <td className="p-2 border text-center">
                       <button 

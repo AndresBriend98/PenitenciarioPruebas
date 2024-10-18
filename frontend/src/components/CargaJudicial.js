@@ -1,19 +1,277 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Header from './Header';
+import Modal from './ModalChanges';
 
 const CargaJudicial = () => {
-    const navigate = useNavigate();
-    const scrollContainerRef = useRef(null);
+    const [victimas, setVictimas] = useState([]);
+    const [victima, setVictima] = useState({ nombres: '', dni: '', foto: null });
+    const [fotoVictima, setFotoVictima] = useState(null);
+    const [victimaErrors, setVictimaErrors] = useState({ nombres: '', dni: '' });
+
+    // Estado para manejar el modal de foto
+    const [showModalFoto, setShowModalFoto] = useState(false);  // Para mostrar o ocultar el modal
+    const [modalPhoto, setModalPhoto] = useState('');  // La foto que se verá en el modal
+
+    const handleFotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFotoVictima(reader.result);
+                setVictima({ ...victima, foto: reader.result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    const validarCampos = () => {
+        let errores = { nombres: '', dni: '' };
+        if (!victima.nombres) {
+            errores.nombres = 'El nombre es requerido';
+        }
+        if (!victima.dni) {
+            errores.dni = 'El DNI es requerido';
+        }
+        setVictimaErrors(errores);
+        return Object.values(errores).every((error) => error === '');
+    };
 
     const agregarVictima = () => {
-        if (validarCamposVictima()) {
-            const fechaCarga = new Date().toLocaleString(); // Obtener la fecha de carga actual
-            setVictimas([...victimas, { ...victima, fechaCarga }]);
-            setVictima({ nombres: '', dni: '' });
-            setVictimaErrors({ nombres: false, dni: false });
+        if (validarCampos()) {
+            const nuevaVictima = {
+                id: Date.now(),
+                ...victima,
+                fechaCarga: new Date().toLocaleString(),
+            };
+            setVictimas((prevVictimas) => [...prevVictimas, nuevaVictima]);
+            setVictima({ nombres: '', dni: '', foto: null });
+            setFotoVictima(null);
         }
     };
 
+    const handleCloseFilesModal = () => {
+        setIsModalOpenFiles(false); // Simplemente cierra el modal sin recargar la página
+    };
+
+    const verFoto = (foto) => {
+        if (foto) {
+            return (
+                <div className="w-16 h-16 bg-gray-500 rounded-full overflow-hidden">
+                    <img src={foto} alt="Foto Victima" className="w-full h-full object-cover" />
+                </div>
+            );
+        } else {
+            return (
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+                    <span className="text-white">Sin foto</span>
+                </div>
+            );
+        }
+    };
+
+    // Función para manejar la apertura del modal
+    const openModal = (foto) => {
+        setModalPhoto(foto);
+        setShowModalFoto(true);
+    };
+
+    // Función para manejar el cierre del modal
+    const handleCloseModal = () => {
+        setShowModalFoto(false);
+        setModalPhoto('');
+    };
+
+    const navigate = useNavigate();
+    const [isModalOpenFiles, setIsModalOpenFiles] = useState(false);
+    const [files, setFiles] = useState({
+        resolucionFinal: null,
+        fundamentoSentencia: null,
+        abocamiento: null,
+        computo: null,
+    });
+    const [fileHistorial, setFileHistorial] = useState([]);
+
+    const fileLabels = {
+        resolucionFinal: "Resolución Final",
+        fundamentoSentencia: "Fundamento de la Sentencia",
+        abocamiento: "Abocamiento",
+        computo: "Cómputo",
+    };
+
+    const handleFileEdit = (key, e) => {
+        e.preventDefault(); // Prevenir la recarga del formulario o página
+        e.stopPropagation(); // Detener cualquier otro evento que pueda afectar
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.onchange = (e) => handleFileChange(e, key, true);
+        fileInput.click();
+    };
+
+    const handleFileChange = (e, key, isEdit = false) => {
+        const file = e.target.files[0];
+        if (file) {
+            const updatedFile = {
+                file,
+                fileName: file.name,
+                fechaCarga: isEdit ? fileHistorial.find(item => item.tipo === key)?.fechaCarga : new Date().toLocaleString(),
+                fechaEdicion: isEdit ? new Date().toLocaleString() : null,
+                tipo: key,
+            };
+            setFiles({ ...files, [key]: file });
+
+            setFileHistorial((prev) => {
+                const existingFile = prev.find(item => item.tipo === key);
+                if (existingFile) {
+                    return prev.map(item => (item.tipo === key ? { ...item, ...updatedFile } : item));
+                } else {
+                    return [...prev, updatedFile];
+                }
+            });
+        }
+    };
+
+    // Nueva función para abrir el modal de archivos cargados
+    const handleOpenFilesModal = () => {
+        setIsModalOpenFiles(true);  // Establece el estado para abrir el modal de archivos
+    };
+
+    //Judicial------------------------------------------------------------------------
+
+    const handleInputChange = (e, field) => {
+        const value = e.target.value;
+        const currentDate = new Date().toLocaleString();
+
+        if (value !== initialDatosJudiciales[field]) {
+            setIsDataModified(true); // Marca como modificado
+            setHistorialCambios(prev => ({
+                ...prev,
+                [field]: {
+                    ...prev[field],
+                    fechaCarga: prev[field]?.fechaCarga || currentDate,
+                    ultimaModificacion: currentDate, // Siempre actualiza la fecha de modificación
+                }
+            }));
+        } else {
+            setIsDataModified(false); // Si el valor no cambió, desmarca como modificado
+        }
+
+        setDatosJudiciales({ ...datosJudiciales, [field]: value });
+    };
+
+    const [isModalOpen, setIsModalOpen] = useState('');
+    const handleFotoHistorialChange = (e, index) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const updatedVictimas = [...victimas];
+                updatedVictimas[index] = {
+                    ...updatedVictimas[index],
+                    foto: reader.result,
+                };
+                setVictimas(updatedVictimas);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    const [historialCambios, setHistorialCambios] = useState({});
+    const [isEditable, setIsEditable] = useState(true); // Los campos inician habilitados
+    const [buttonText, setButtonText] = useState('Cargar'); // Inicia con "Cargar"
+    const [isDataModified, setIsDataModified] = useState(false); // Controla si los datos fueron modificados
+
+    const handleCargarActualizar = (e) => {
+        const currentDate = new Date().toLocaleString();
+
+        if (buttonText === 'Cargar') {
+            const isAnyFieldFilled = Object.values(datosJudiciales).some(value => value.trim() !== '');
+            if (!isAnyFieldFilled) return; // No hacer nada si ningún campo está lleno
+
+            // Guardamos los datos iniciales (fechas de carga y modificación)
+            setInitialDatosJudiciales(datosJudiciales);
+
+            // Actualizar historial con fecha de carga
+            setHistorialCambios(prev => {
+                const newHistorial = {};
+                Object.keys(datosJudiciales).forEach(field => {
+                    if (datosJudiciales[field].trim() !== '') {
+                        newHistorial[field] = {
+                            fechaCarga: currentDate, // Establece la fecha de carga
+                            ultimaModificacion: currentDate, // Establece la fecha de modificación
+                        };
+                    }
+                });
+                return { ...prev, ...newHistorial };
+            });
+
+            setIsEditable(false); // No se puede editar después de cargar
+            setButtonText('Actualizar'); // Cambia el botón a 'Actualizar'
+
+        } else if (buttonText === 'Actualizar') {
+            setIsEditable(true); // Permite la edición
+            setButtonText('Guardar Cambios'); // Cambia el texto del botón
+            setIsDataModified(false); // Resetear el estado de modificación
+
+        } else if (buttonText === 'Guardar Cambios') {
+            // Verifica si realmente hay cambios antes de guardarlos
+            const hasChanges = Object.keys(datosJudiciales).some(key => datosJudiciales[key] !== initialDatosJudiciales[key]);
+            if (!hasChanges) return; // No hace nada si no hay cambios
+
+            console.log('Datos guardados');
+            setIsEditable(false); // Deshabilitar la edición
+            setButtonText('Actualizar'); // Cambia el texto del botón
+            setIsDataModified(false); // Resetear el estado de modificación
+        }
+    };
+
+    const [errors, setErrors] = useState({
+        nombreJuzgado: false,
+        tipoJuzgado: false,
+        fueroJudicial: false,
+        ubicacionJuzgado: false,
+        fechaInicioCausa: false,
+        estadoCaso: false,
+        numeroCaso: false,
+        fechaResolucionFinal: false,
+    });
+
+    const [datosJudiciales, setDatosJudiciales] = useState({
+        nombreJuzgado: '',
+        tipoJuzgado: '',
+        fueroJudicial: '',
+        ubicacionJuzgado: '',
+        fechaInicioCausa: '',
+        estadoCaso: '',
+        numeroCaso: '',
+        fechaResolucionFinal: '',
+        observacion: '',
+    });
+
+    const campoMapeadoDatosJudiciales = {
+        nombreJuzgado: 'Nombre del Juzgado',
+        tipoJuzgado: 'Tipo de Juzgado',
+        fueroJudicial: 'Fuero Judicial',
+        ubicacionJuzgado: 'Ubicación del Juzgado',
+        fechaInicioCausa: 'Fecha de Inicio de Causa',
+        estadoCaso: 'Estado del Caso',
+        numeroCaso: 'Número de Caso',
+        fechaResolucionFinal: 'Fecha de Resolución Final',
+        observacion: 'Observaciones',
+    }
+
+    const [initialDatosJudiciales, setInitialDatosJudiciales] = useState({
+        nombreJuzgado: '',
+        tipoJuzgado: '',
+        fueroJudicial: '',
+        ubicacionJuzgado: '',
+        fechaInicioCausa: '',
+        estadoCaso: '',
+        numeroCaso: '',
+        fechaResolucionFinal: '',
+        observacion: '',
+    });
+
+    //Abogado------------------------------------------------------------------------
     const [abogados, setAbogados] = useState([]);
 
     const handleAgregarAbogadoData = (event) => {
@@ -30,119 +288,11 @@ const CargaJudicial = () => {
         setAbogadoErrors({ nombreApellido: false, matricula: false, poderes: false });
     };
 
-
-    const handleAgregar = (e) => {
-        e.preventDefault(); // Evita que la página se recargue
-
-        if (validateFields()) {
-            const fechaCarga = new Date().toLocaleString(); // Obtener la fecha de carga actual
-
-            // Aquí va la lógica para agregar los datos, por ejemplo:
-            console.log('Datos válidos, proceder con la acción de agregar.');
-            console.log('Fecha de carga:', fechaCarga);
-            // Aquí podrías hacer una llamada a la API o actualizar el estado
-        } else {
-            console.log('Por favor, complete todos los campos obligatorios.');
-        }
-    };
-
-
-    const [judicialData, setJudicialData] = useState({
-        nombreJuzgado: '',
-        tipoJuzgado: '',
-        distritoJuzgado: '',
-        ubicacionJuzgado: '',
-        fechaInicioCausa: '',
-        estadoCaso: '',
-        numeroCaso: '',
-        fechaResolucionFinal: '',
-        expediente: '',
-        observacion: '',
-        archivos: {
-            resolucionFinal: null,
-            dictamen: null,
-            expediente: null
-        },
-    });
-
-    const [victima, setVictima] = useState({ nombres: '', dni: '' });
-    const [victimaErrors, setVictimaErrors] = useState({ nombres: false, dni: false });
-
-    const validarCamposVictima = () => {
-        let isValid = true;
-        const errors = { nombres: false, dni: false };
-
-        if (!victima.nombres.trim()) {
-            errors.nombres = true;
-            isValid = false;
-        }
-
-        if (!victima.dni.trim()) {
-            errors.dni = true;
-            isValid = false;
-        }
-
-        setVictimaErrors(errors);
-        return isValid;
-    };
-
     const [abogado, setAbogado] = useState({
         nombreApellido: '',
         matricula: '',
         poderes: '',
     });
-
-    const [victimas, setVictimas] = useState([]); // Añade este estado
-
-    const handleInputChange = (e, field, group = 'judicialData') => {
-        const value = e.target.value;
-        if (group === 'judicialData') {
-            setJudicialData({ ...judicialData, [field]: value });
-        } else if (group === 'abogado') {
-            setAbogado({ ...abogado, [field]: value });
-        } else if (group === 'victima') {
-            setVictima({ ...victima, [field]: value });
-        }
-    };
-
-    const scroll = (direction) => {
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollBy({
-                left: direction === 'left' ? -150 : 150,
-                behavior: 'smooth'
-            });
-        }
-    };
-    const handleFileChange = (e, key) => {
-        setFiles({
-            ...files,
-            [key]: e.target.files[0],  // Asume que solo se selecciona un archivo por entrada
-        });
-    };
-
-    const validateFields = () => {
-        const newErrors = {};
-
-        newErrors.nombreJuzgado = !judicialData.nombreJuzgado.trim();
-        newErrors.tipoJuzgado = !judicialData.tipoJuzgado.trim();
-        newErrors.distritoJuzgado = !judicialData.distritoJuzgado.trim();
-        newErrors.ubicacionJuzgado = !judicialData.ubicacionJuzgado.trim();
-        newErrors.fechaInicioCausa = !judicialData.fechaInicioCausa;
-        newErrors.estadoCaso = !judicialData.estadoCaso.trim();
-        newErrors.numeroCaso = !judicialData.numeroCaso.trim();
-        newErrors.fechaResolucionFinal = !judicialData.fechaResolucionFinal;
-        newErrors.expediente = !judicialData.expediente.trim();
-
-        // Verificar archivos cargados
-        newErrors.resolucionFinal = !files.resolucionFinal;
-        newErrors.dictamen = !files.dictamen;
-        newErrors.expedienteArchivo = !files.expediente;
-
-        setErrors(newErrors);
-
-        // Devuelve true si no hay errores
-        return !Object.values(newErrors).includes(true);
-    };
 
     const validateAbogadoFields = () => {
         const newErrors = {};
@@ -161,281 +311,26 @@ const CargaJudicial = () => {
         poderes: false, // Si también quieres que poderes sea obligatorio
     });
 
-    const [files, setFiles] = useState({
-        resolucionFinal: null,
-        dictamen: null,
-        expediente: null,
-    });
-
-    // Al inicio del componente, define el estado para los errores de validación
-    const [errors, setErrors] = useState({
-        nombreJuzgado: false,
-        tipoJuzgado: false,
-        distritoJuzgado: false,
-        ubicacionJuzgado: false,
-        fechaInicioCausa: false,
-        estadoCaso: false,
-        numeroCaso: false,
-        fechaResolucionFinal: false,
-        expediente: false,
-        observacion: false,
-        resolucionFinal: false,
-        dictamen: false,
-        expedienteArchivo: false,
-    });
-
-    const [user, setUser] = useState({
-        name: 'Maximiliano Ezequiel Dominguez',
-        alias: 'JL',
-        unit: 'Unidad Penitenciaria 9',
-        fileNumber: '3576',
-        typedoc: 'Cédula Ejemplar B',
-        dni: '23123564',
-        crime: 'Robo',
-        typeofintern: 'Condenado',
-        entryDate: '10/06/2024',
-        sentenceEndDate: '10/06/2030',
-        remainingSentence: '3 años 2 meses 5 días',
-    });
-
-    const areas = [
-        'Ficha ingreso',
-        'Area judicial',
-        'Datos personales',
-        'Conducta-Concepto-Fases',
-        'Permisos',
-        'Antecedentes penales',
-        'Grupo Familiar',
-        'Visitas',
-        'Salidas',
-        'Traslado',
-        'Alojamiento y movimiento',
-        'Salud',
-        'Educación',
-        'Trabajo',
-        'Criminología',
-        'Psicología',
-        'Fisionomía'
-    ];
-
-    const [selectedArea, setSelectedArea] = useState('Area judicial');;
-    const [showModal, setShowModal] = useState(false);
-
     const handleVolver = () => {
         navigate('/general');
     };
 
-    useEffect(() => {
-        if (scrollContainerRef.current) {
-            const container = scrollContainerRef.current;
-            const selectedButton = container.querySelector(`[data-area="${selectedArea}"]`);
-            if (selectedButton) {
-                container.scrollTo({
-                    left: selectedButton.offsetLeft - (container.offsetWidth / 2) + (selectedButton.offsetWidth / 2),
-                    behavior: 'smooth'
-                });
-            }
-            setSelectedArea('Area judicial');
-        }
-    }, [selectedArea]);
-
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
-            {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-center md:items-start">
-                {/* Contenedor principal para asegurar alineación */}
-                <div className="flex flex-col md:flex-row items-center md:items-start w-full">
-                    {/* Foto y datos del usuario */}
-                    <div className="flex flex-col md:flex-row items-center md:items-start mb-4 md:mb-0 w-full md:w-auto">
-                        {/* Foto y botón de carga */}
-                        <div className="relative flex-shrink-0 flex flex-col items-center mb-4 md:mr-4 text-center md:text-left w-full md:w-auto">
-                            <div className="w-32 h-32 md:w-48 md:h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
-                                <span className="text-center text-white text-xs md:text-base">Foto</span>
-                            </div>
-                        </div>
-                        {/* Datos del usuario */}
-                        <div className="space-y-2 md:space-y-3 flex-grow w-full md:w-auto">
-                            <h2 className="text-lg font-bold text-center md:text-left">{user.name}</h2>
-                            <p className="text-sm"><strong>Tipo de interno:</strong> {user.typeofintern}</p>
-                            <p className="text-sm"><strong>Alias:</strong> {user.alias}</p>
-                            <p className="text-sm"><strong>Unidad:</strong> {user.unit}</p>
-                            <p className="text-sm"><strong>Legajo:</strong> {user.fileNumber}</p>
-                            <p className="text-sm"><strong>Tipo de documento:</strong> {user.typedoc}</p>
-                            <p className="text-sm"><strong>DNI:</strong> {user.dni}</p>
-                            <p className="text-sm"><strong>Delito:</strong> {user.crime}</p>
-                        </div>
-                    </div>
-                    {/* Checkboxes alineados a la derecha en pantallas grandes y a la izquierda en pantallas pequeñas */}
-                    <div className="flex flex-col space-y-4 md:space-y-2 md:ml-auto w-full md:w-auto">
-                        {/* Egreso checkbox y campos */}
-                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
-                            <div className="flex items-center mb-2">
-                                <input
-                                    type="checkbox"
-                                    id="egreso"
-                                    checked={true}
-                                    readOnly
-                                    className="mr-2"
-                                />
-                                <label htmlFor="egreso" className="text-sm">Egreso</label>
-                            </div>
-                            {true && ( // Condición para mostrar los campos
-                                <div className="w-full">
-                                    <label htmlFor="egresoDate" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
-                                    <input
-                                        type="date"
-                                        id="egresoDate"
-                                        value="2024-09-09" // Valor preestablecido
-                                        readOnly
-                                        className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
-                                    />
-                                    <label htmlFor="numOficioEgreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
-                                    <input
-                                        type="text"
-                                        id="numOficioEgreso"
-                                        value="12345" // Valor preestablecido
-                                        readOnly
-                                        className="w-full p-1 border border-gray-300 rounded text-sm"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        {/* Otros checkboxes */}
-                        <div className="flex flex-col space-y-2">
-                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                                <input
-                                    type="checkbox"
-                                    id="leyBlumberg"
-                                    checked={false}
-                                    readOnly
-                                    className="mr-2"
-                                />
-                                <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
-                            </div>
-                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                                <input
-                                    type="checkbox"
-                                    id="leyMicaela"
-                                    checked={false}
-                                    readOnly
-                                    className="mr-2"
-                                />
-                                <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div className="relative flex items-center justify-center w-full mb-4">
-                <button
-                    onClick={() => scroll('left')}
-                    className="absolute left-0 bg-white text-gray-800 p-2 rounded-full shadow-lg border border-black hover:bg-gray-100 transition-colors z-20"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </button>
-
-                <div
-                    ref={scrollContainerRef}
-                    className="flex items-center overflow-hidden whitespace-nowrap px-4 mx-4"
-                >
-                    {areas.map((area) => (
-                        <button
-                            key={area}
-                            data-area={area}
-                            onClick={() => {
-                                switch (area) {
-                                    case 'Salud':
-                                        navigate('/cargasalud');
-                                        break;
-                                    case 'Criminología':
-                                        navigate('/cargacriminologia');
-                                        break;
-                                    case 'Fisionomía':
-                                        navigate('/cargafisionomia');
-                                        break;
-                                    case 'Permisos':
-                                        navigate('/cargapermisos');
-                                        break;
-                                    case 'Antecedentes penales':
-                                        navigate('/cargaantecedentespenales');
-                                        break;
-                                    case 'Conducta-Concepto-Fases':
-                                        navigate('/cargaconducconcepfases');
-                                        break;
-                                    case 'Traslado':
-                                        navigate('/cargatraslado');
-                                        break;
-                                    case 'Grupo Familiar':  // Añadido caso para Grupo Familiar
-                                        navigate('/cargagrupofamiliar');
-                                        break;
-                                    case 'Area judicial':  // Añadido caso para Judicial
-                                        navigate('/cargajudicial');
-                                        break;
-                                    case 'Visitas':  // Añadido caso para Visitas
-                                        navigate('/cargavisitas');
-                                        break;
-                                    case 'Salidas':  // Añadido caso para Salidas
-                                        navigate('/cargasalidas');
-                                        break;
-                                    case 'Alojamiento y movimiento':  // Añadido caso para Alojamiento y Movimiento
-                                        navigate('/cargaalojamientoymovimiento');
-                                        break;
-                                    case 'Educación':  // Añadido caso para Educación
-                                        navigate('/cargaeducacion');
-                                        break;
-                                    case 'Trabajo':  // Añadido caso para Trabajo
-                                        navigate('/cargatrabajo');
-                                        break;
-                                    case 'Psicología':  // Añadido caso para Psicología
-                                        navigate('/cargapsicologia');
-                                        break;
-                                    case 'Datos personales':  // Añadido caso para datos personales
-                                        navigate('/cargadatospersonales');
-                                        break;
-                                    case 'Ficha ingreso':  // Añadido caso para datos personales
-                                        navigate('/fichaingreso');
-                                        break;
-                                    default:
-                                        // Manejo de casos no definidos
-                                        console.error('Área no definida: ', area);
-                                        break;
-                                }
-                            }}
-                            className={`px-12 py-2 text-sm font-medium rounded-full transition-transform transform border border-black ${selectedArea === area
-                                ? 'bg-gradient-to-r from-blue-500 to-teal-500 text-white shadow-lg scale-95'
-                                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                }`}
-                        >
-                            {area}
-                        </button>
-                    ))}
-                </div>
-
-                <button
-                    onClick={() => scroll('right')}
-                    className="absolute right-0 bg-white text-gray-800 p-2 rounded-full shadow-lg border border-black hover:bg-gray-100 transition-colors z-20"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
+            <Header />
             <div className="bg-white p-6 rounded-md shadow-md flex flex-col">
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold mb-4">Área Judicial</h1>
-                    <form className='bg-white p-4 rounded-md shadow-md'>
+                    <div className='bg-white p-4 rounded-md shadow-md'>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className="block text-sm font-semibold mb-1">Nombre del Juzgado</label>
                                 <input
                                     placeholder="Ingrese el nombre del juzgado"
                                     type="text"
-                                    value={judicialData.nombreJuzgado}
+                                    value={datosJudiciales.nombreJuzgado}
                                     onChange={(e) => handleInputChange(e, 'nombreJuzgado')}
+                                    disabled={!isEditable} // Bloqueo condicional
                                     className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.nombreJuzgado ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.nombreJuzgado && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
@@ -445,31 +340,34 @@ const CargaJudicial = () => {
                                 <input
                                     placeholder="Ingrese el tipo de juzgado"
                                     type="text"
-                                    value={judicialData.tipoJuzgado}
+                                    value={datosJudiciales.tipoJuzgado}
                                     onChange={(e) => handleInputChange(e, 'tipoJuzgado')}
+                                    disabled={!isEditable} // Bloqueo condicional
                                     className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.tipoJuzgado ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.tipoJuzgado && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
-                            {/* Otros campos del juzgado */}
+
                             <div>
-                                <label className="block text-sm font-semibold mb-1">Distrito del Juzgado</label>
+                                <label className="block text-sm font-semibold mb-1">Fuero Judicial</label>
                                 <input
-                                    placeholder="Ingrese la distrito del juzgado"
+                                    placeholder="Ingrese el fuero judicial"
                                     type="text"
-                                    value={judicialData.distritoJuzgado}
-                                    onChange={(e) => handleInputChange(e, 'distritoJuzgado')}
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.distritoJuzgado ? 'border-red-500' : 'border-gray-300'}`}
+                                    value={datosJudiciales.fueroJudicial}
+                                    onChange={(e) => handleInputChange(e, 'fueroJudicial')}
+                                    disabled={!isEditable} // Bloqueo condicional
+                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.fueroJudicial ? 'border-red-500' : 'border-gray-300'}`}
                                 />
-                                {errors.distritoJuzgado && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
+                                {errors.fueroJudicial && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold mb-1">Ubicación del Juzgado</label>
                                 <input
                                     placeholder="Ingrese la ubicación del juzgado"
                                     type="text"
-                                    value={judicialData.ubicacionJuzgado}
+                                    value={datosJudiciales.ubicacionJuzgado}
                                     onChange={(e) => handleInputChange(e, 'ubicacionJuzgado')}
+                                    disabled={!isEditable} // Bloqueo condicional
                                     className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.ubicacionJuzgado ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.ubicacionJuzgado && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
@@ -479,8 +377,9 @@ const CargaJudicial = () => {
                                 <input
                                     placeholder="Ingrese fecha de inicio de la causa"
                                     type="date"
-                                    value={judicialData.fechaInicioCausa}
+                                    value={datosJudiciales.fechaInicioCausa}
                                     onChange={(e) => handleInputChange(e, 'fechaInicioCausa')}
+                                    disabled={!isEditable} // Bloqueo condicional
                                     className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.fechaInicioCausa ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.fechaInicioCausa && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
@@ -490,8 +389,9 @@ const CargaJudicial = () => {
                                 <input
                                     placeholder="Ingrese el estado del caso"
                                     type="text"
-                                    value={judicialData.estadoCaso}
+                                    value={datosJudiciales.estadoCaso}
                                     onChange={(e) => handleInputChange(e, 'estadoCaso')}
+                                    disabled={!isEditable} // Bloqueo condicional
                                     className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.estadoCaso ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.estadoCaso && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
@@ -499,10 +399,11 @@ const CargaJudicial = () => {
                             <div>
                                 <label className="block text-sm font-semibold mb-1">Número del Caso</label>
                                 <input
-                                    placeholder="Ingrese el múmero del caso"
+                                    placeholder="Ingrese el número del caso"
                                     type="number"
-                                    value={judicialData.numeroCaso}
+                                    value={datosJudiciales.numeroCaso}
                                     onChange={(e) => handleInputChange(e, 'numeroCaso')}
+                                    disabled={!isEditable} // Bloqueo condicional
                                     className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.numeroCaso ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.numeroCaso && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
@@ -510,76 +411,190 @@ const CargaJudicial = () => {
                             <div>
                                 <label className="block text-sm font-semibold mb-1">Fecha Resolución Final</label>
                                 <input
-                                    placeholder="Ingrese la resolucion final"
+                                    placeholder="Ingrese la resolución final"
                                     type="date"
-                                    value={judicialData.fechaResolucionFinal}
+                                    value={datosJudiciales.fechaResolucionFinal}
                                     onChange={(e) => handleInputChange(e, 'fechaResolucionFinal')}
+                                    disabled={!isEditable} // Bloqueo condicional
                                     className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.fechaResolucionFinal ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.fechaResolucionFinal && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-semibold mb-1">Expediente</label>
-                            <input
-                                placeholder="Ingrese el expediente"
-                                type="text"
-                                value={judicialData.expediente}
-                                onChange={(e) => handleInputChange(e, 'expediente')}
-                                className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.expediente ? 'border-red-500' : 'border-gray-300'}`}
-                            />
-                            {errors.expediente && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
-                        </div>
+
                         <div className="mb-4">
                             <label className="block text-sm font-semibold mb-1">Observación</label>
                             <textarea
                                 placeholder="Ingrese las observaciones"
-                                value={judicialData.observacion}
+                                value={datosJudiciales.observacion}
                                 onChange={(e) => handleInputChange(e, 'observacion')}
+                                disabled={!isEditable} // Bloqueo condicional
                                 className="w-full p-2 border border-gray-300 rounded text-sm border-gray-300"
                             />
                         </div>
-                        <div className="bg-white p-4 rounded-md shadow-md">
-                            <h2 className="text-xl font-bold mb-4">Documentos Adjuntos</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
+
+                        <div className="flex justify-center mt-4">
+                            <button
+                                onClick={handleCargarActualizar}
+                                className={`text-white px-4 py-2 rounded-md text-xs ${buttonText === 'Guardar Cambios' && !isDataModified
+                                    ? 'bg-blue-300 cursor-not-allowed' // Deshabilitado si no hay cambios
+                                    : 'bg-blue-500' // Habilitado si hay cambios
+                                    }`}
+                                disabled={buttonText === 'Guardar Cambios' && !isDataModified || buttonText === 'Cargar' && !Object.values(datosJudiciales).some(value => value.trim() !== '')}
+                            >
+                                {buttonText}
+                            </button>
+                        </div>
+                        <div className="flex justify-center lg:justify-end mb-4 mt-4">
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="bg-blue-800 text-white p-2 rounded hover:bg-blue-900 text-xs"
+                            >
+                                Ver Historial de Cambios
+                            </button>
+                        </div>
+
+                        <Modal
+                            isOpen={isModalOpen}
+                            onClose={() => setIsModalOpen(false)}
+                            historialCambios={historialCambios}
+                            campoMapeado={campoMapeadoDatosJudiciales}
+                        />
+
+                        <div className="border border-gray-300 bg-gray-50 p-2 bg-white rounded-md shadow-md flex flex-col mt-5">
+                            <h2 className="text-l font-bold mb-4">Documentos Adjuntos</h2>
+
+                            <div className="flex flex-col md:flex-row md:space-x-4 items-center space-y-4 md:space-y-0">
+                                <div className="w-full">
                                     <label className="block text-sm font-semibold mb-1">Resolución Final</label>
                                     <input
-                                        placeholder="Ingrese la resolución final"
                                         type="file"
                                         onChange={(e) => handleFileChange(e, 'resolucionFinal')}
-                                        className="w-full p-2 border border-gray-300 rounded text-sm"
+                                        disabled={!!files.resolucionFinal}
+                                        className={`w-full p-2 border ${files.resolucionFinal ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-semibold mb-1">Dictamen</label>
+
+                                <div className="w-full">
+                                    <label className="block text-sm font-semibold mb-1">Fundamento de la Sentencia</label>
                                     <input
-                                        placeholder="Ingrese el dictamen"
                                         type="file"
-                                        onChange={(e) => handleFileChange(e, 'dictamen')}
-                                        className="w-full p-2 border border-gray-300 rounded text-sm"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold mb-1">Expediente</label>
-                                    <input
-                                        placeholder="Ingrese el expediente"
-                                        type="file"
-                                        onChange={(e) => handleFileChange(e, 'expediente')}
-                                        className="w-full p-2 border border-gray-300 rounded text-sm"
+                                        onChange={(e) => handleFileChange(e, 'fundamentoSentencia')}
+                                        disabled={!!files.fundamentoSentencia}
+                                        className={`w-full p-2 border ${files.fundamentoSentencia ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
                                     />
                                 </div>
                             </div>
+
+                            <div className="flex flex-col md:flex-row md:space-x-4 items-center mt-4 space-y-4 md:space-y-0">
+                                <div className="w-full">
+                                    <label className="block text-sm font-semibold mb-1">Abocamiento</label>
+                                    <input
+                                        type="file"
+                                        onChange={(e) => handleFileChange(e, 'abocamiento')}
+                                        disabled={!!files.abocamiento}
+                                        className={`w-full p-2 border ${files.abocamiento ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
+                                    />
+                                </div>
+
+                                <div className="w-full">
+                                    <label className="block text-sm font-semibold mb-1">Cómputo</label>
+                                    <input
+                                        type="file"
+                                        onChange={(e) => handleFileChange(e, 'computo')}
+                                        disabled={!!files.computo}
+                                        className={`w-full p-2 border ${files.computo ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Botón para abrir el modal de archivos cargados */}
+                            <div className="flex justify-center mt-4 mb-4">
+                                <button
+                                    type="button"
+                                    onClick={handleOpenFilesModal}
+                                    className="bg-blue-800 text-white p-2 rounded hover:bg-blue-900 text-xs"
+                                >
+                                    Ver archivos cargados
+                                </button>
+                            </div>
+
+
+
+                            {/* Modal para ver y editar los archivos cargados */}
+                            {isModalOpenFiles && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+                                    <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-lg mx-auto">
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();  // Previene el comportamiento por defecto (recarga de la página)
+                                                handleCloseFilesModal();  // Llama a tu función de cierre del modal
+                                            }}
+                                            className="absolute top-2 right-2 bg-gray-400 text-white p-2 rounded-full shadow-lg hover:bg-gray-500 focus:outline-none"
+                                            aria-label="Cerrar modal"
+                                        >
+                                            <svg
+                                                className="w-4 h-4"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+
+                                        <h3 className="text-lg font-bold text-center">Archivos cargados</h3>
+                                        <div className="mt-4 max-h-64 md:max-h-96 overflow-y-auto">
+                                            {fileHistorial.length > 0 ? (
+                                                <ul className="space-y-2">
+                                                    {fileHistorial.map((item, index) => (
+                                                        <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
+                                                            <div>
+                                                                <span className="text-sm"><strong>{fileLabels[item.tipo]}:</strong></span>
+                                                                <a
+                                                                    href={URL.createObjectURL(item.file)}
+                                                                    download={item.fileName}
+                                                                    className="ml-2 bg-blue-500 text-white p-2 rounded-full text-xs hover:bg-blue-600"
+                                                                >
+                                                                    {item.fileName}
+                                                                </a>
+                                                            </div>
+
+                                                            <div className="text-sm text-gray-500 mt-2">
+                                                                <strong className="text-xs">Fecha de Carga:</strong> {item.fechaCarga}
+                                                            </div>
+
+                                                            {item.fechaEdicion && (
+                                                                <div className="text-sm text-gray-500 mt-2">
+                                                                    <strong className="text-xs">Fecha de Edición:</strong> {item.fechaEdicion}
+                                                                </div>
+                                                            )}
+
+                                                            {/* Botón de editar archivo */}
+                                                            <div className="mt-2">
+                                                                <button
+                                                                    onClick={(e) => handleFileEdit(item.tipo, e)}  // Prevenir la recarga y manejar el evento correctamente
+                                                                    className="bg-orange-400 text-white p-1 rounded hover:bg-orange-500 text-xs"
+                                                                >
+                                                                    Editar Archivo
+                                                                </button>
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <p className="text-sm text-gray-500 text-center">No hay archivos cargados aún.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                        <div className="flex justify-center mt-4">
-                            <button
-                                onClick={handleAgregar}
-                                className="bg-blue-500 text-white px-4 py-2 rounded-md text-xs"
-                            >
-                                Cargar
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row">
@@ -602,13 +617,14 @@ const CargaJudicial = () => {
                                     <label className="block text-sm font-semibold mb-1">Matrícula</label>
                                     <input
                                         placeholder="Ingrese la matrícula"
-                                        type="number"
+                                        type="text"
                                         value={abogado.matricula}
                                         onChange={(e) => handleInputChange(e, 'matricula', 'abogado')}
                                         className={`w-full p-2 border border-gray-300 rounded text-sm ${abogadoErrors.matricula ? 'border-red-500' : 'border-gray-300'}`}
                                     />
                                     {abogadoErrors.matricula && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                                 </div>
+
                             </div>
                             <div className="mb-4">
                                 <label className="block text-sm font-semibold mb-1">Poderes</label>
@@ -652,9 +668,35 @@ const CargaJudicial = () => {
                             </div>
                         </form>
                     </div>
+
                     <div className="w-full md:w-1/2 pl-0 md:pl-4">
                         <h2 className="text-xl font-bold mb-4">Carga de Víctima</h2>
                         <form className="bg-white p-4 rounded-md shadow-md">
+                            <div className="flex flex-col items-center mb-4">
+                                <div className="relative flex justify-center items-center">
+                                    <div className="relative w-28 h-28 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
+                                        {fotoVictima ? (
+                                            <img src={fotoVictima} alt="Foto Victima" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-white text-xs">Foto</span>
+                                        )}
+                                    </div>
+                                    <input
+                                        id="foto-victima"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFotoChange}
+                                        className="hidden"
+                                    />
+                                    <label
+                                        htmlFor="foto-victima"
+                                        className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer"
+                                    >
+                                        +
+                                    </label>
+                                </div>
+                            </div>
+
                             <div className="mb-4">
                                 <label className="block text-sm font-semibold mb-1">Nombre/s y Apellido/s</label>
                                 <input
@@ -662,52 +704,107 @@ const CargaJudicial = () => {
                                     placeholder="Ingrese el nombre y apellido"
                                     value={victima.nombres}
                                     onChange={(e) => setVictima({ ...victima, nombres: e.target.value })}
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${victimaErrors.nombres ? 'border-red-500' : 'border-gray-300'}`}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm"
                                 />
-                                {victimaErrors.nombres && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
+                                {victimaErrors.nombres && <p className="text-red-500 text-xs">{victimaErrors.nombres}</p>}
                             </div>
+
                             <div className="mb-4">
                                 <label className="block text-sm font-semibold mb-1">DNI</label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     placeholder="Ingrese el DNI"
                                     value={victima.dni}
                                     onChange={(e) => setVictima({ ...victima, dni: e.target.value })}
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${victimaErrors.dni ? 'border-red-500' : 'border-gray-300'}`}
+                                    className="w-full p-2 border border-gray-300 rounded text-sm"
                                 />
-                                {victimaErrors.dni && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
+                                {victimaErrors.dni && <p className="text-red-500 text-xs">{victimaErrors.dni}</p>}
                             </div>
+
                             <div className="flex justify-center mb-4">
                                 <button
-                                    type="button" // Cambiado a tipo button para evitar recarga
+                                    type="button"
                                     onClick={agregarVictima}
                                     className="bg-blue-500 text-white px-4 py-2 rounded-md text-xs"
                                 >
                                     Cargar
                                 </button>
                             </div>
+
                             <h3 className="text-sm font-bold mt-4">Historial de Víctimas</h3>
                             <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
                                 {victimas.length > 0 ? (
                                     <ul className="mt-2">
                                         {victimas.map((item, index) => (
-                                            <li key={index} className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm">
-                                                <p className='text-sm'><strong>Nombres:</strong> {item.nombres}</p>
-                                                <p className='text-sm'><strong>DNI:</strong> {item.dni}</p>
-                                                <div>
-                                                    <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
+                                            <li key={item.id} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
+                                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                                                    <div className="flex-grow">
+                                                        <p className="text-sm"><strong>Nombres:</strong> {item.nombres}</p>
+                                                        <p className="text-sm"><strong>DNI:</strong> {item.dni}</p>
+                                                        <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
+                                                    </div>
+                                                    <div className="mt-4 md:mt-0 md:ml-4 flex flex-col items-center">
+                                                        {verFoto(item.foto)}
+
+                                                        {item.foto ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => openModal(item.foto)}
+                                                                className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs"
+                                                            >
+                                                                Ver Foto
+                                                            </button>
+                                                        ) : (
+                                                            <>
+                                                                <input
+                                                                    id={`foto-historial-${item.id}`}
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    onChange={(e) => handleFotoHistorialChange(e, index)}
+                                                                    className="hidden"
+                                                                />
+                                                                <label
+                                                                    htmlFor={`foto-historial-${item.id}`}
+                                                                    className="mt-2 bg-blue-400 text-white p-2 rounded-full cursor-pointer text-xs"
+                                                                >
+                                                                    Subir Foto
+                                                                </label>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </li>
                                         ))}
                                     </ul>
                                 ) : (
-                                    <p className="text-sm text-gray-500 text-center">
-                                        No hay historial de víctimas registrado aún.
-                                    </p>
+                                    <p className="text-sm text-gray-500 text-center">No hay víctimas cargadas aún.</p>
                                 )}
                             </div>
                         </form>
+
+                        {/* Modal para mostrar la foto */}
+                        {showModalFoto && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                                <div className="bg-white p-4 rounded-md shadow-lg relative max-w-full w-full sm:max-w-lg sm:w-auto">
+                                    {/* Botón para cerrar el modal */}
+                                    <button
+                                        onClick={handleCloseModal}
+                                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                                    >
+                                        ×
+                                    </button>
+                                    {/* Imagen dentro del modal, que será responsive */}
+                                    <img
+                                        src={modalPhoto}
+                                        alt="Modal Foto"
+                                        className="w-full h-auto object-contain max-h-[80vh] mx-auto"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                     </div>
+
                 </div>
                 <div className="flex justify-between mt-6">
                     <button
@@ -717,8 +814,8 @@ const CargaJudicial = () => {
                         Menú Principal
                     </button>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

@@ -14,6 +14,7 @@ const InicioAreaTecnica = () => {
 
   const data = Array.from({ length: 50 }, (_, index) => ({
     name: `Juan Carlos López ${index + 1}`,
+    dni: '12345678', // Agrega el campo DNI aquí
     crime: 'Robo',
     internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado', // Añadir tipo de interno
     court: 'T.O.P.LIBRES',
@@ -22,9 +23,9 @@ const InicioAreaTecnica = () => {
     sentence: '25/06/2025',
     fileNumber: '3544',
     assistanceDate: '25/06/2025',
-    conditionalDate: '25/06/2025',
     transferDate: '25/06/2025',
-    unit: '3'
+    unit: '3',
+    unidad: `Unidad ${Math.floor(Math.random() * 12) + 1}` // Campo Unidad agregado
   }));
 
   const handleLogout = () => {
@@ -80,6 +81,8 @@ const InicioAreaTecnica = () => {
               <thead className="bg-gray-400">
                 <tr>
                   <th className="p-2 border">Nombre/Apellido</th>
+                  <th className="p-2 border">DNI</th> {/* Agrega esta fila */}
+                  <th className="p-2 border">Unidad</th> {/* Nueva columna Unidad */}
                   <th className="p-2 border">Delitos</th>
                   <th className="p-2 border">Tipo Interno</th>
                   <th className="p-2 border">Juzgado</th>
@@ -88,8 +91,7 @@ const InicioAreaTecnica = () => {
                   <th className="p-2 border">Duración Condena</th>
                   <th className="p-2 border">Legajo</th>
                   <th className="p-2 border">Fecha Asistida</th>
-                  <th className="p-2 border">Fecha Conmutación</th>
-                  <th className="p-2 border">Unidad</th> {/* Nueva posición */}
+                  <th className="p-2 border">Unidad</th>
                   <th className="p-2 border">Acciones</th>
                 </tr>
               </thead>
@@ -97,6 +99,8 @@ const InicioAreaTecnica = () => {
                 {data.slice(0, 30).map((item, index) => (
                   <tr key={index} className="hover:bg-gray-100">
                     <td className="p-2 border text-xs">{item.name}</td>
+                    <td className="p-2 border text-xs">{item.dni}</td>
+                    <td className="p-2 border text-xs">{item.unidad}</td> {/* Muestra la Unidad aquí */}
                     <td className="p-2 border text-xs">{item.crime}</td>
                     <td className="p-2 border text-xs">{item.internalType}</td>
                     <td className="p-2 border text-xs">{item.court}</td>
@@ -112,9 +116,6 @@ const InicioAreaTecnica = () => {
                     </td>
                     <td className="p-2 border text-xs">
                       {item.internalType === 'Condenado' ? item.assistanceDate : '-'}
-                    </td>
-                    <td className="p-2 border text-xs">
-                      {item.internalType === 'Condenado' ? item.conditionalDate : '-'}
                     </td>
                     <td className="p-2 border text-xs">{item.unit}</td> {/* Nueva posición */}
                     <td className="p-2 border text-center">

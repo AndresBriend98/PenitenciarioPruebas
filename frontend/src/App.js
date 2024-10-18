@@ -20,7 +20,7 @@ import CargaFisionomia from './components/CargaFisionomia';
 import CargaPermisos from './components/CargaPermisos';
 import CargaAntecedentesPenales from './components/CargaAntecedentesPenales';
 import CargaConducConcepFases from './components/CargaConducConcepFases';
-import CargaTraslado from './components/CargaTraslado';
+import CargaRealojamiento from './components/CargaRealojamiento';
 import CargaGrupoFamiliar from './components/CargaGrupoFamiliar';
 import CargaJudicial from './components/CargaJudicial';
 import CargaVisitas from './components/CargaVisitas';
@@ -30,6 +30,7 @@ import CargaEducacion from './components/CargaEducacion';
 import CargaTrabajo from './components/CargaTrabajo';
 import CargaPsicologia from './components/CargaPsicologia';
 import FichaIngreso from './components/FichaIngreso';
+import CargaConsejo from './components/CargaConsejo';
 
 function App() {
   return (
@@ -55,7 +56,7 @@ function App() {
         <Route path="/cargapermisos" element={<CargaPermisos />} />
         <Route path="/cargaantecedentespenales" element={<CargaAntecedentesPenales />} />
         <Route path="/cargaconducconcepfases" element={<CargaConducConcepFases />} />
-        <Route path="/cargatraslado" element={<CargaTraslado />} />
+        <Route path="/CargaRealojamiento" element={<CargaRealojamiento />} />
         <Route path="/cargagrupofamiliar" element={<CargaGrupoFamiliar />} />
         <Route path="/cargajudicial" element={<CargaJudicial />} />
         <Route path="/cargavisitas" element={<CargaVisitas />} />
@@ -65,6 +66,7 @@ function App() {
         <Route path="/cargatrabajo" element={<CargaTrabajo />} />
         <Route path="/cargapsicologia" element={<CargaPsicologia />} />
         <Route path="/fichaingreso" element={<FichaIngreso/>} />
+        <Route path="/cargaconsejo" element={<CargaConsejo/>} />
       </Routes>
     </Router>
   );

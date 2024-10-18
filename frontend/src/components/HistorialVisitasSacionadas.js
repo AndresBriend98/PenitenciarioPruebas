@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-const HistorialVisitasSancionadas = () => {
-    const [visitasSancionadas, setVisitasSancionadas] = useState([]);
+const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
     const [nuevaVisitaSancionada, setNuevaVisitaSancionada] = useState({
         nombre: '',
         dni: '',
@@ -14,7 +13,11 @@ const HistorialVisitasSancionadas = () => {
         fechaFoto: ''
     });
     const [errors, setErrors] = useState({});
+    const [visitasSancionadas, setVisitasSancionadas] = useState([]);
     const fileInputRefSancionada = useRef(null);
+    const [showModal, setShowModal] = useState(false);
+    const [modalPhoto, setModalPhoto] = useState('');
+    const fileInputRefs = useRef([]);
 
     const handleInputChange = (e) => {
         const { id, value } = e.target;
@@ -36,48 +39,6 @@ const HistorialVisitasSancionadas = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handlePhotoChangeSancionada = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setNuevaVisitaSancionada(prevState => ({
-                    ...prevState,
-                    foto: reader.result,
-                    fechaFoto: '' // No mostrar la fecha de carga de foto desde el formulario
-                }));
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleAddVisitaSancionada = () => {
-        if (validateForm()) {
-            setVisitasSancionadas(prevState => [
-                ...prevState,
-                { ...nuevaVisitaSancionada, id: prevState.length + 1, desdeHistorial: false }
-            ]);
-            setNuevaVisitaSancionada({
-                nombre: '',
-                dni: '',
-                relacion: '',
-                motivo: '',
-                fechaSancion: '',
-                fechaCumplimiento: '',
-                tiempoSancionado: '',
-                foto: '',
-                fechaFoto: ''
-            });
-            setErrors({});
-        }
-    };
-
-    const [fotoSeleccionada, setFotoSeleccionada] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [modalPhoto, setModalPhoto] = useState('');
-    const fileInputRefs = useRef([]);
-
-
     const calcularTiempoSancionado = () => {
         const { fechaSancion, fechaCumplimiento } = nuevaVisitaSancionada;
         if (fechaSancion && fechaCumplimiento) {
@@ -92,7 +53,7 @@ const HistorialVisitasSancionadas = () => {
         }
     };
 
-    const handleNuevaVisitaFotoChange = (e) => {
+    const handlePhotoChangeSancionada = (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
@@ -109,10 +70,13 @@ const HistorialVisitasSancionadas = () => {
 
     const handleAddVisita = () => {
         if (validateForm()) {
-            setVisitasSancionadas(prevState => [
-                ...prevState,
-                { ...nuevaVisitaSancionada, id: prevState.length + 1, desdeHistorial: false }
-            ]);
+            calcularTiempoSancionado();  // Calcular tiempo sancionado antes de agregar
+            const nueva = { ...nuevaVisitaSancionada, id: visitasSancionadas.length + 1 };
+            setVisitasSancionadas(prevState => {
+                const updatedList = [...prevState, nueva];
+                setHistorialVisitasSancionadas(updatedList);  // Pasar el estado hacia el componente padre
+                return updatedList;
+            });
             setNuevaVisitaSancionada({
                 nombre: '',
                 dni: '',
@@ -136,6 +100,7 @@ const HistorialVisitasSancionadas = () => {
     const handleCloseModal = () => {
         setShowModal(false);
     };
+
     // HistorialVisitasSancionadas
     const handleUploadPhotoDesdeHistorialSancionadas = (index) => {
         const file = fileInputRefs.current[index].files[0];
@@ -156,6 +121,8 @@ const HistorialVisitasSancionadas = () => {
             reader.readAsDataURL(file);
         }
     };
+
+
     return (
         <div>
             <div className="flex space-x-4">
@@ -289,55 +256,60 @@ const HistorialVisitasSancionadas = () => {
             </div>
 
             <div className="mt-6">
-                <h2 className="text-lg font-bold mb-4">Historial de Visitas Sancionadas</h2>
+                <h2 className="text-sm font-bold mb-4">Historial de Visitas Sancionadas</h2>
                 <div className="bg-white p-4 rounded-md shadow-md">
                     <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                         {visitasSancionadas.length > 0 ? (
-                            <ul className="space-y-4">
-                                {visitasSancionadas.map((item, index) => (
-                                    <li key={item.id} className="bg-white p-4 rounded-md shadow-md">
-                                        <div className="flex flex-col md:flex-row items-center">
-                                            <div className="flex-1">
-                                                <p className='text-sm'><strong>Nombre/s y Apellido/s:</strong> {item.nombre}</p>
-                                                <p className='text-sm'><strong>Relación con el interno:</strong> {item.relacion}</p>
-                                                <p className='text-sm'><strong>DNI:</strong> {item.dni}</p>
-                                                <p className='text-sm'><strong>Motivo de la Sanción:</strong> {item.motivo}</p>
-                                                <p className='text-sm'><strong>Fecha de Sanción:</strong> {item.fechaSancion}</p>
-                                                <p className='text-sm'><strong>Fecha de Cumplimiento:</strong> {item.fechaCumplimiento}</p>
-                                                <p className='text-sm'><strong>Tiempo Sancionado:</strong> {item.tiempoSancionado} días</p>
-                                                <p className="text-sm text-gray-500"><strong>Fecha de carga:</strong> {item.desdeHistorial ? item.fechaFoto : new Date().toLocaleString()}</p>
-                                                {item.desdeHistorial && item.fechaFoto && (
-                                                    <p className="text-sm text-gray-500"><strong>Fecha de carga de foto:</strong> {item.fechaFoto}</p>
-                                                )}
-                                                {/* Aquí puedes agregar otros detalles si es necesario */}
+                            <ul className="space-y-4 ">
+                                {visitasSancionadas.map((item, index) => {
+                                    const sancionDate = new Date(item.fechaSancion);
+                                    const cumplimientoDate = new Date(item.fechaCumplimiento);
+                                    const diffTime = Math.abs(cumplimientoDate - sancionDate);
+                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));  // Calcular la diferencia en días
+                                    return (
+                                        <li key={item.id} className="border border-gray-300 p-2 rounded mt-2 bg-gray-50">
+                                            <div className="flex flex-col md:flex-row items-center">
+                                                <div className="flex-1">
+                                                    <p className='text-sm'><strong>Nombre/s y Apellido/s:</strong> {item.nombre}</p>
+                                                    <p className='text-sm'><strong>Relación con el interno:</strong> {item.relacion}</p>
+                                                    <p className='text-sm'><strong>DNI:</strong> {item.dni}</p>
+                                                    <p className='text-sm'><strong>Motivo de la Sanción:</strong> {item.motivo}</p>
+                                                    <p className='text-sm'><strong>Fecha de Sanción:</strong> {item.fechaSancion}</p>
+                                                    <p className='text-sm'><strong>Fecha de Cumplimiento:</strong> {item.fechaCumplimiento}</p>
+                                                    <p className='text-sm'><strong>Tiempo Sancionado:</strong> {diffDays} días</p>
+                                                    <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.desdeHistorial ? item.fechaFoto : new Date().toLocaleString()}</p>
+                                                    {item.desdeHistorial && item.fechaFoto && (
+                                                        <p className="text-sm text-gray-500"><strong>Fecha de carga de foto:</strong> {item.fechaFoto}</p>
+                                                    )}
+                                                </div>
+                                                <div className="mt-4 md:mt-0 md:ml-4 flex flex-col items-center">
+                                                    {item.foto ? (
+                                                        <div className="w-16 h-16 bg-gray-500 rounded-full overflow-hidden">
+                                                            <img src={item.foto} alt="Foto Visita" className="w-full h-full object-cover" />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+                                                            <span className="text-white">Sin foto</span>
+                                                        </div>
+                                                    )}
+                                                    <button
+                                                        className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500"
+                                                        onClick={() => item.foto ? handleViewPhoto(item.foto) : fileInputRefs.current[index].click()}
+                                                    >
+                                                        {item.foto ? 'Ver foto' : 'Subir foto'}
+                                                    </button>
+                                                    <input
+                                                        type="file"
+                                                        ref={el => fileInputRefs.current[index] = el}
+                                                        accept="image/*"
+                                                        onChange={() => handleUploadPhotoDesdeHistorialSancionadas(index)}
+                                                        className="hidden"
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="mt-4 md:mt-0 md:ml-4 flex flex-col items-center">
-                                                {item.foto ? (
-                                                    <div className="w-16 h-16 bg-gray-500 rounded-full overflow-hidden">
-                                                        <img src={item.foto} alt="Foto Visita" className="w-full h-full object-cover" />
-                                                    </div>
-                                                ) : (
-                                                    <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
-                                                        <span className="text-white">Sin foto</span>
-                                                    </div>
-                                                )}
-                                                <button
-                                                    className="mt-2 bg-blue-500 text-white p-2 rounded-full text-xs hover:bg-blue-600"
-                                                    onClick={() => item.foto ? handleViewPhoto(item.foto) : fileInputRefs.current[index].click()}
-                                                >
-                                                    {item.foto ? 'Ver foto' : 'Subir foto'}
-                                                </button>
-                                                <input
-                                                    type="file"
-                                                    ref={el => fileInputRefs.current[index] = el}
-                                                    accept="image/*"
-                                                    onChange={() => handleUploadPhotoDesdeHistorialSancionadas(index)}
-                                                    className="hidden"
-                                                />
-                                            </div>
-                                        </div>
-                                    </li>
-                                ))}
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         ) : (
                             <p className="text-sm text-gray-500 text-center">No hay visitas registradas aún.</p>

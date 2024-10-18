@@ -5,7 +5,7 @@ const Header = () => {
     const navigate = useNavigate();
     const location = useLocation(); // Para obtener la ubicación actual
     const scrollContainerRef = useRef(null);
-    
+
     const user = {
         name: 'Maximiliano Ezequiel Dominguez',
         alias: 'JL',
@@ -21,23 +21,24 @@ const Header = () => {
     };
 
     const areas = [
-        'Ficha ingreso',
-        'Area judicial',
-        'Datos personales',
+        'Ficha Ingreso',
+        'Área Judicial',
+        'Datos Personales',
         'Conducta-Concepto-Fases',
         'Permisos',
-        'Antecedentes penales',
+        'Antecedentes Penales',
         'Grupo Familiar',
         'Visitas',
         'Salidas',
-        'Traslado',
+        'Realojamiento',
         'Alojamiento y movimiento',
         'Salud',
         'Educación',
         'Trabajo',
         'Criminología',
-        'Psicología',
-        'Fisionomía'
+        'Psicológica',
+        'Fisionomía',
+        'Consejo'
     ];
     // Obtener el área de la URL actual
     const getAreaFromPath = (path) => {
@@ -51,15 +52,15 @@ const Header = () => {
             case '/cargapermisos':
                 return 'Permisos';
             case '/cargaantecedentespenales':
-                return 'Antecedentes penales';
+                return 'Antecedentes Penales';
             case '/cargaconducconcepfases':
                 return 'Conducta-Concepto-Fases';
-            case '/cargatraslado':
-                return 'Traslado';
+            case '/cargarealojamiento':
+                return 'Realojamiento';
             case '/cargagrupofamiliar':
                 return 'Grupo Familiar';
             case '/cargajudicial':
-                return 'Área judicial';
+                return 'Área Judicial';
             case '/cargavisitas':
                 return 'Visitas';
             case '/cargasalidas':
@@ -71,13 +72,15 @@ const Header = () => {
             case '/cargatrabajo':
                 return 'Trabajo';
             case '/cargapsicologia':
-                return 'Psicología';
+                return 'Psicológica';
             case '/cargadatospersonales':
-                return 'Datos personales';
+                return 'Datos Personales';
             case '/fichaingreso':
-                return 'Ficha ingreso';
+                return 'Ficha Ingreso';
+            case '/cargaconsejo':
+                return 'Consejo';
             default:
-                return 'Psicología'; // Valor por defecto si el path no coincide
+                return 'Psicológica'; // Valor por defecto si el path no coincide
         }
     };
 
@@ -98,6 +101,84 @@ const Header = () => {
             });
         }
     };
+    // Función que maneja el cambio de área y la navegación
+    const handleAreaChange = (area) => {
+        setSelectedArea(area); // Actualiza el área seleccionada
+
+        // Navega a la ruta correspondiente según el área seleccionada
+        switch (area) {
+            case 'Salud':
+                navigate('/cargasalud');
+                break;
+            case 'Criminología':
+                navigate('/cargacriminologia');
+                break;
+            case 'Fisionomía':
+                navigate('/cargafisionomia');
+                break;
+            case 'Permisos':
+                navigate('/cargapermisos');
+                break;
+            case 'Antecedentes Penales':
+                navigate('/cargaantecedentespenales');
+                break;
+            case 'Conducta-Concepto-Fases':
+                navigate('/cargaconducconcepfases');
+                break;
+            case 'Realojamiento':
+                navigate('/cargarealojamiento');
+                break;
+            case 'Grupo Familiar':
+                navigate('/cargagrupofamiliar');
+                break;
+            case 'Área Judicial':
+                navigate('/cargajudicial');
+                break;
+            case 'Visitas':
+                navigate('/cargavisitas');
+                break;
+            case 'Salidas':
+                navigate('/cargasalidas');
+                break;
+            case 'Alojamiento y movimiento':
+                navigate('/cargaalojamientoymovimiento');
+                break;
+            case 'Educación':
+                navigate('/cargaeducacion');
+                break;
+            case 'Trabajo':
+                navigate('/cargatrabajo');
+                break;
+            case 'Psicológica':
+                navigate('/cargapsicologia');
+                break;
+            case 'Datos Personales':
+                navigate('/cargadatospersonales');
+                break;
+            case 'Ficha Ingreso':
+                navigate('/fichaingreso');
+                break;
+            case 'Consejo':
+                navigate('/cargaconsejo');
+                break;
+            default:
+                console.error('Área no definida: ', area);
+                break;
+        }
+    };
+    useEffect(() => {
+        if (scrollContainerRef.current) {
+            const container = scrollContainerRef.current;
+            const selectedButton = container.querySelector(`[data-area="${selectedArea}"]`);
+
+            if (selectedButton) {
+                container.scrollTo({
+                    left: selectedButton.offsetLeft - (container.offsetWidth / 2) + (selectedButton.offsetWidth / 2),
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }, [selectedArea]);  // Este efecto solo se ejecuta cuando 'selectedArea' cambia
 
     return (
         <div>
@@ -205,65 +286,7 @@ const Header = () => {
                         <button
                             key={area}
                             data-area={area}
-                            onClick={() => {
-                                switch (area) {
-                                    case 'Salud':
-                                        navigate('/cargasalud');
-                                        break;
-                                    case 'Criminología':
-                                        navigate('/cargacriminologia');
-                                        break;
-                                    case 'Fisionomía':
-                                        navigate('/cargafisionomia');
-                                        break;
-                                    case 'Permisos':
-                                        navigate('/cargapermisos');
-                                        break;
-                                    case 'Antecedentes penales':
-                                        navigate('/cargaantecedentespenales');
-                                        break;
-                                    case 'Conducta-Concepto-Fases':
-                                        navigate('/cargaconducconcepfases');
-                                        break;
-                                    case 'Traslado':
-                                        navigate('/cargatraslado');
-                                        break;
-                                    case 'Grupo Familiar':  // Añadido caso para Grupo Familiar
-                                        navigate('/cargagrupofamiliar');
-                                        break;
-                                    case 'Área judicial':  // Añadido caso para Judicial
-                                        navigate('/cargajudicial');
-                                        break;
-                                    case 'Visitas':  // Añadido caso para Visitas
-                                        navigate('/cargavisitas');
-                                        break;
-                                    case 'Salidas':  // Añadido caso para Salidas
-                                        navigate('/cargasalidas');
-                                        break;
-                                    case 'Alojamiento y movimiento':  // Añadido caso para Alojamiento y Movimiento
-                                        navigate('/cargaalojamientoymovimiento');
-                                        break;
-                                    case 'Educación':  // Añadido caso para Educación
-                                        navigate('/cargaeducacion');
-                                        break;
-                                    case 'Trabajo':  // Añadido caso para Trabajo
-                                        navigate('/cargatrabajo');
-                                        break;
-                                    case 'Psicología':  // Añadido caso para Psicología
-                                        navigate('/cargapsicologia');
-                                        break;
-                                    case 'Datos personales':  // Añadido caso para datos personales
-                                        navigate('/cargadatospersonales');
-                                        break;
-                                    case 'Ficha ingreso':  // Añadido caso para datos personales
-                                        navigate('/fichaingreso');
-                                        break;
-                                    default:
-                                        // Manejo de casos no definidos
-                                        console.error('Área no definida: ', area);
-                                        break;
-                                }
-                            }}
+                            onClick={() => handleAreaChange(area)} // Utiliza la función handleAreaChange
                             className={`px-12 py-2 text-sm font-medium rounded-full transition-transform transform border border-black ${selectedArea === area
                                 ? 'bg-gradient-to-r from-blue-500 to-teal-500 text-white shadow-lg scale-95'
                                 : 'bg-gray-200 text-gray-800 hover:bg-gray-300'

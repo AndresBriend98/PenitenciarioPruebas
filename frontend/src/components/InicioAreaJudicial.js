@@ -19,7 +19,6 @@ const InicioAreaJudicial = () => {
     sentence: '25/06/2025',
     fileNumber: '3544',
     transferDate: '25/06/2025',
-    conditionalDate: '25/06/2025',
     assistanceDate: '25/06/2025',
     admissionDate: '25/06/2025',
     internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado'
@@ -77,7 +76,6 @@ const InicioAreaJudicial = () => {
                   <th className="p-2 border">Duración Condena</th>
                   <th className="p-2 border">Legajo</th>
                   <th className="p-2 border">Fecha Asistida</th>
-                  <th className="p-2 border">Fecha Conmutacion</th>
                   <th className="p-2 border">Acciones</th>
                 </tr>
               </thead>
@@ -100,9 +98,6 @@ const InicioAreaJudicial = () => {
                     </td>
                     <td className="p-2 border text-xs">
                       {item.internalType === 'Condenado' ? item.assistanceDate : '-'}
-                    </td>
-                    <td className="p-2 border text-xs">
-                      {item.internalType === 'Condenado' ? item.conditionalDate : '-'}
                     </td>
                     <td className="p-2 border text-center">
                       <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"

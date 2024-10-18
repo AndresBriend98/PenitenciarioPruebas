@@ -1,9 +1,45 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Header from './Header';
 
 const CargaEducacion = () => {
+    const [sabeLeer, setSabeLeer] = useState(false);
+    const [sabeEscribir, setSabeEscribir] = useState(false);
+    const [documentacion, setDocumentacion] = useState(false);
+    const [nivelEducativo, setNivelEducativo] = useState("");
+
+    // Esta función se llamará para actualizar el estado de los checkboxes y el nivel educativo en la base de datos
+    const actualizarDatosEnBase = async () => {
+        try {
+            const respuesta = await fetch('/api/actualizar-datos-educacion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sabeLeer,
+                    sabeEscribir,
+                    documentacion,
+                    nivelEducativo
+                }),
+            });
+
+            if (respuesta.ok) {
+                console.log("Datos actualizados correctamente.");
+            } else {
+                throw new Error("Hubo un problema al actualizar los datos.");
+            }
+        } catch (error) {
+            console.error("Error al actualizar los datos:", error);
+        }
+    };
+
+    // Usamos useEffect para que se actualice en la base de datos cada vez que uno de los estados cambie
+    useEffect(() => {
+        actualizarDatosEnBase();
+    }, [sabeLeer, sabeEscribir, documentacion, nivelEducativo]);  // Se ejecuta cada vez que uno de los estados cambia
+
     const navigate = useNavigate();
-    const scrollContainerRef = useRef(null);
     const [historialPlan, setHistorialPlan] = useState([]);
     const [historialCurso, setHistorialCurso] = useState([]);
     const [planCursado, setPlanCursado] = useState("");
@@ -14,64 +50,64 @@ const CargaEducacion = () => {
     const [fechaInicioCurso, setFechaInicioCurso] = useState("");
     const [fechaFinCurso, setFechaFinCurso] = useState("");
     const [tiempoCursandoCurso, setTiempoCursandoCurso] = useState("");
+    const [historialCursoAnulado, setHistorialCursoAnulado] = useState([]);
     const [editingPlanIndex, setEditingPlanIndex] = useState(null);
     const [editingCursoIndex, setEditingCursoIndex] = useState(null);
     const [editedFechaFinPlan, setEditedFechaFinPlan] = useState('');
     const [editedFechaFinCurso, setEditedFechaFinCurso] = useState('');
-    const [planCursando, setPlanCursando] = useState('');
-    const [nivelEducativo, setNivelEducativo] = useState('');
-    const [sabeLeer, setSabeLeer] = useState(false);
-    const [sabeEscribir, setSabeEscribir] = useState(false);
-    const [documentacion, setDocumentacion] = useState(false);
-    const [historial, setHistorial] = useState([]);
+    const archivoInputRef = useRef(); // Ref para el input de archivo
+    const handleArchivoAdjunto = (e, index) => {
+        const archivo = e.target.files[0];
+        if (archivo) {
+            const nuevaLista = [...historialCurso];
+            nuevaLista[index].archivoAdjunto = archivo;  // Guardamos el archivo como un objeto File
+            nuevaLista[index].fechaArchivoAdjunto = new Date().toLocaleString();  // Guardamos la fecha de carga
+            setHistorialCurso(nuevaLista);
+        }
+    };
+
     const [errors, setErrors] = useState({
-        planCursando: '',
         nivelEducativo: ''
     });
-
-    const handleCargar = () => {
-        let valid = true;
-        const newErrors = { planCursando: '', nivelEducativo: '' };
-
-        if (!planCursando) {
-            newErrors.planCursando = "El campo 'Plan cursando' es requerido.";;
-            valid = false;
-        }
-
-        if (!nivelEducativo) {
-            newErrors.nivelEducativo = "El campo 'Nivel educativo actual' es requerido.";
-            valid = false;
-        }
-
-        if (!valid) {
-            setErrors(newErrors);
+    const [archivoAnulacion, setArchivoAnulacion] = useState(null);  // Define el estado
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [motivoAnulacion, setMotivoAnulacion] = useState("");
+    const [cursoAnuladoIndex, setCursoAnuladoIndex] = useState(null); // Para saber qué curso se está anulando
+    const handleAnularCursoConMotivo = () => {
+        // Verifica si el motivo y el archivo son válidos
+        if (motivoAnulacion.trim() === "" || !archivoAnulacion) {
+            alert("Debe ingresar el motivo y el archivo adjunto.");
             return;
         }
 
-        const nuevaEntrada = {
-            fechaSeleccion: new Date().toLocaleString(),
-            seleccionado: {
-                sabeLeer: sabeLeer,
-                sabeEscribir: sabeEscribir,
-                documentacion: documentacion
-            },
-            planCursando,
-            nivelEducativo
-        };
+        // Creamos el nuevo historial de anulaciones, añadiendo la información relevante
+        const nuevoHistorialAnulado = [...historialCursoAnulado];
+        const cursoAAnular = historialCurso[cursoAnuladoIndex];
 
-        setHistorial([...historial, nuevaEntrada]);
+        // Añadimos la anulación con motivo, fecha, archivo adjunto y archivo original del curso
+        nuevoHistorialAnulado.push({
+            ...cursoAAnular, // Información original del curso
+            motivoAnulacion: motivoAnulacion,
+            fechaAnulacion: new Date().toISOString().split('T')[0], // Fecha de anulación actual
+            archivoAnulacion: archivoAnulacion, // El archivo adjunto
+            nombreArchivo: archivoAnulacion.name, // Nombre original del archivo adjunto
+            archivoOriginalCurso: cursoAAnular.archivoAdjunto, // Agregar archivo original del curso
+            nombreArchivoOriginalCurso: cursoAAnular.archivoAdjunto, // Nombre del archivo original
+        });
 
-        // Limpiar los campos después de cargar
-        setPlanCursando('');
-        setNivelEducativo('');
-        setSabeLeer(false);
-        setSabeEscribir(false);
-        setDocumentacion(false);
-        setErrors({ planCursando: '', nivelEducativo: '' }); // Limpiar errores
+        // Eliminamos el curso del historial de cursos
+        const nuevoHistorialCurso = historialCurso.filter((_, index) => index !== cursoAnuladoIndex);
+
+        // Actualizamos los estados
+        setHistorialCurso(nuevoHistorialCurso);
+        setHistorialCursoAnulado(nuevoHistorialAnulado);
+
+        // Limpiamos el motivo y el archivo tras anular el curso
+        setMotivoAnulacion("");
+        setArchivoAnulacion(null); // Limpiamos el archivo adjunto
+        setIsModalOpen(false); // Cerramos el modal de anulación
+        setCursoAnuladoIndex(null); // Restablecemos el índice de curso anulado
     };
-
-
-
 
     const handleSaveFechaFinPlan = (index) => {
         const updatedHistorialPlan = [...historialPlan];
@@ -111,8 +147,6 @@ const CargaEducacion = () => {
         return partes.join(', ');
     };
 
-
-
     const handleSaveFechaFinCurso = (index) => {
         const updatedHistorialCurso = [...historialCurso];
         updatedHistorialCurso[index].fechaFin = editedFechaFinCurso;
@@ -146,7 +180,7 @@ const CargaEducacion = () => {
             fechaInicio: fechaInicioPlan,
             fechaFin: fechaFinPlan,
             tiempoCursando: tiempoCursandoPlan,
-            fechaCarga: new Date().toLocaleDateString(),
+            fechaCarga: new Date().toLocaleString(),
         };
         setHistorialPlan([...historialPlan, nuevoRegistroPlan]);
         // Limpiar campos después de agregar
@@ -155,18 +189,9 @@ const CargaEducacion = () => {
         setFechaFinPlan("");
         setTiempoCursandoPlan("");
     };
-    const [formData, setFormData] = useState({
-        planCursado: "",
-        fechaInicioPlan: "",
-        fechaFinPlan: "",
-        tiempoCursandoPlan: "",
-        curso: "",
-        fechaInicioCurso: "",
-        fechaFinCurso: "",
-        tiempoCursandoCurso: ""
-    });
 
-    // Función para manejar la carga del registro de un curso
+    const [archivo, setArchivo] = useState(null);  // Nuevo estado para manejar el archivo
+
     const handleAgregarCurso = () => {
         let hasError = false;
         const newErrors = {};
@@ -186,421 +211,44 @@ const CargaEducacion = () => {
         }
 
         setErrors({});
-        // Agregar el registro al historial de cursos
+
         const nuevoRegistroCurso = {
             curso,
             fechaInicio: fechaInicioCurso,
             fechaFin: fechaFinCurso,
             tiempoCursando: tiempoCursandoCurso,
-            fechaCarga: new Date().toLocaleDateString(),
+            fechaCarga: new Date().toLocaleString(),
+            archivoAdjunto: archivo,  // Guardar el archivo completo
+            fechaArchivoAdjunto: new Date().toLocaleString(),  // Guardar la fecha de carga del archivo
         };
+
         setHistorialCurso([...historialCurso, nuevoRegistroCurso]);
+
         // Limpiar campos después de agregar
         setCurso("");
         setFechaInicioCurso("");
         setFechaFinCurso("");
         setTiempoCursandoCurso("");
-    };
-
-    // Función de validación para los campos
-    const validateForm = () => {
-        const newErrors = {};
-
-        // Validación para "Registro de un Plan"
-        if (!formData.planCursado) newErrors.planCursado = "El campo 'Plan cursado' es obligatorio.";
-        if (!formData.fechaInicioPlan) newErrors.fechaInicioPlan = "El campo 'Fecha de inicio' es obligatorio.";
-
-        // Validación para "Registro de un Curso"
-        if (!formData.curso) newErrors.curso = "El campo 'Curso' es obligatorio.";
-        if (!formData.fechaInicioCurso) newErrors.fechaInicioCurso = "El campo 'Fecha de inicio' es obligatorio.";
-
-        setErrors(newErrors);
-
-        // Devuelve verdadero si no hay errores
-        return Object.keys(newErrors).length === 0;
-    };
-
-    // Manejador para la carga del formulario
-    const handleSubmitPlan = (e) => {
-        e.preventDefault();
-
-        if (validateForm()) {
-            // Lógica para cargar el plan si pasa la validación
-            console.log("Plan cargado con éxito:", formData);
-        }
-    };
-
-    const handleSubmitCurso = (e) => {
-        e.preventDefault();
-
-        if (validateForm()) {
-            // Lógica para cargar el curso si pasa la validación
-            console.log("Curso cargado con éxito:", formData);
-        }
-    };
-
-    // Función para actualizar el estado del formulario
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevState) => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
-    const [errorsPlan, setErrorsPlan] = useState({
-        planCursado: "",
-        fechaInicioPlan: "",
-        fechaFinPlan: "",
-        tiempoCursandoPlan: "",
-    });
-    const [errorsCurso, setErrorsCurso] = useState({
-        curso: "",
-        fechaInicioCurso: "",
-        fechaFinCurso: "",
-        tiempoCursandoCurso: "",
-    });
-
-    const scroll = (direction) => {
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollBy({
-                left: direction === 'left' ? -150 : 150,
-                behavior: 'smooth'
-            });
-        }
-    };
-
-    const handleCargarRegistroPlan = () => {
-        let hasErrors = false;
-        const newErrors = { ...errorsPlan };
-
-        // Validaciones
-        if (!document.getElementById('planCursado').value) {
-            newErrors.planCursado = "El campo Plan cursado es requerido.";
-            hasErrors = true;
-        } else {
-            newErrors.planCursado = "";
-        }
-
-        if (!document.getElementById('fechaInicioPlan').value) {
-            newErrors.fechaInicioPlan = "El campo Fecha de inicio es requerido.";
-            hasErrors = true;
-        } else {
-            newErrors.fechaInicioPlan = "";
-        }
-
-        setErrorsPlan(newErrors);
-
-        if (!hasErrors) {
-            // Agregar datos al historial de planes
-            const nuevoRegistroPlan = {
-                plan: document.getElementById('planCursado').value,
-                fechaInicio: document.getElementById('fechaInicioPlan').value,
-                fechaFin: document.getElementById('fechaFinPlan').value,
-                tiempoCursando: document.getElementById('tiempoCursandoPlan').value,
-                fechaCarga: new Date().toLocaleDateString()
-            };
-
-            setHistorialPlan([...historialPlan, nuevoRegistroPlan]);
-
-            // Limpiar los campos del formulario
-            document.getElementById('planCursado').value = '';
-            document.getElementById('fechaInicioPlan').value = '';
-            document.getElementById('fechaFinPlan').value = '';
-            document.getElementById('tiempoCursandoPlan').value = '';
-        }
-    };
-
-    const handleCargarRegistroCurso = () => {
-        let hasErrors = false;
-        const newErrors = { ...errorsCurso };
-
-        // Validaciones
-        if (!document.getElementById('curso').value) {
-            newErrors.curso = "El campo Curso es requerido.";
-            hasErrors = true;
-        } else {
-            newErrors.curso = "";
-        }
-
-        if (!document.getElementById('fechaInicioCurso').value) {
-            newErrors.fechaInicioCurso = "El campo Fecha de inicio es requerido.";
-            hasErrors = true;
-        } else {
-            newErrors.fechaInicioCurso = "";
-        }
-
-
-        setErrorsCurso(newErrors);
-
-        if (!hasErrors) {
-            // Agregar datos al historial
-            const nuevoRegistroCurso = {
-                curso: document.getElementById('curso').value,
-                fechaInicio: document.getElementById('fechaInicioCurso').value,
-                fechaFin: document.getElementById('fechaFinCurso').value,
-                tiempoCursando: document.getElementById('tiempoCursandoCurso').value,
-                fechaCarga: new Date().toLocaleDateString() // Fecha de carga actual
-            };
-
-            setHistorialCurso([...historialCurso, nuevoRegistroCurso]);
-
-            // Limpiar los campos del formulario después de agregar
-            document.getElementById('curso').value = '';
-            document.getElementById('fechaInicioCurso').value = '';
-            document.getElementById('fechaFinCurso').value = '';
-            document.getElementById('tiempoCursandoCurso').value = '';
-        }
+        setArchivo(null); // Limpiar archivo
+        archivoInputRef.current.value = ""; // Limpiar el input de archivo
     };
 
     const handleGenerarInforme = () => {
 
     };
 
-    const [user, setUser] = useState({
-        name: 'Maximiliano Ezequiel Dominguez',
-        alias: 'JL',
-        unit: 'Unidad Penitenciaria 9',
-        fileNumber: '3576',
-        typedoc: 'Cédula Ejemplar B',
-        dni: '23123564',
-        crime: 'Robo',
-        typeofintern: 'Condenado',
-        entryDate: '10/06/2024',
-        sentenceEndDate: '10/06/2030',
-        remainingSentence: '3 años 2 meses 5 días',
-    });
-
-    const areas = [
-        'Ficha ingreso',
-        'Area judicial',
-        'Datos personales',
-        'Conducta-Concepto-Fases',
-        'Permisos',
-        'Antecedentes penales',
-        'Grupo Familiar',
-        'Visitas',
-        'Salidas',
-        'Traslado',
-        'Alojamiento y movimiento',
-        'Salud',
-        'Educación',
-        'Trabajo',
-        'Criminología',
-        'Psicología',
-        'Fisionomía'
-    ];
-
-    const [selectedArea, setSelectedArea] = useState('Educacion');;
-    const [showModal, setShowModal] = useState(false);
-
     const handleVolver = () => {
         navigate('/general');
     };
 
-    useEffect(() => {
-        if (scrollContainerRef.current) {
-            const container = scrollContainerRef.current;
-            const selectedButton = container.querySelector(`[data-area="${selectedArea}"]`);
-            if (selectedButton) {
-                container.scrollTo({
-                    left: selectedButton.offsetLeft - (container.offsetWidth / 2) + (selectedButton.offsetWidth / 2),
-                    behavior: 'smooth'
-                });
-            }
-            setSelectedArea('Educación');
-        }
-    }, [selectedArea]);
-
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
-            {/* Información del usuario, foto y checkboxes */}
-            <div className="bg-gray-300 p-4 rounded-md flex flex-col md:flex-row mb-4 items-center md:items-start">
-                {/* Contenedor principal para asegurar alineación */}
-                <div className="flex flex-col md:flex-row items-center md:items-start w-full">
-                    {/* Foto y datos del usuario */}
-                    <div className="flex flex-col md:flex-row items-center md:items-start mb-4 md:mb-0 w-full md:w-auto">
-                        {/* Foto y botón de carga */}
-                        <div className="relative flex-shrink-0 flex flex-col items-center mb-4 md:mr-4 text-center md:text-left w-full md:w-auto">
-                            <div className="w-32 h-32 md:w-48 md:h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
-                                <span className="text-center text-white text-xs md:text-base">Foto</span>
-                            </div>
-                        </div>
-                        {/* Datos del usuario */}
-                        <div className="space-y-2 md:space-y-3 flex-grow w-full md:w-auto">
-                            <h2 className="text-lg font-bold text-center md:text-left">{user.name}</h2>
-                            <p className="text-sm"><strong>Tipo de interno:</strong> {user.typeofintern}</p>
-                            <p className="text-sm"><strong>Alias:</strong> {user.alias}</p>
-                            <p className="text-sm"><strong>Unidad:</strong> {user.unit}</p>
-                            <p className="text-sm"><strong>Legajo:</strong> {user.fileNumber}</p>
-                            <p className="text-sm"><strong>Tipo de documento:</strong> {user.typedoc}</p>
-                            <p className="text-sm"><strong>DNI:</strong> {user.dni}</p>
-                            <p className="text-sm"><strong>Delito:</strong> {user.crime}</p>
-                        </div>
-                    </div>
-                    {/* Checkboxes alineados a la derecha en pantallas grandes y a la izquierda en pantallas pequeñas */}
-                    <div className="flex flex-col space-y-4 md:space-y-2 md:ml-auto w-full md:w-auto">
-                        {/* Egreso checkbox y campos */}
-                        <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
-                            <div className="flex items-center mb-2">
-                                <input
-                                    type="checkbox"
-                                    id="egreso"
-                                    checked={true}
-                                    readOnly
-                                    className="mr-2"
-                                />
-                                <label htmlFor="egreso" className="text-sm">Egreso</label>
-                            </div>
-                            {true && ( // Condición para mostrar los campos
-                                <div className="w-full">
-                                    <label htmlFor="egresoDate" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
-                                    <input
-                                        type="date"
-                                        id="egresoDate"
-                                        value="2024-09-09" // Valor preestablecido
-                                        readOnly
-                                        className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
-                                    />
-                                    <label htmlFor="numOficioEgreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
-                                    <input
-                                        type="text"
-                                        id="numOficioEgreso"
-                                        value="12345" // Valor preestablecido
-                                        readOnly
-                                        className="w-full p-1 border border-gray-300 rounded text-sm"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        {/* Otros checkboxes */}
-                        <div className="flex flex-col space-y-2">
-                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                                <input
-                                    type="checkbox"
-                                    id="leyBlumberg"
-                                    checked={false}
-                                    readOnly
-                                    className="mr-2"
-                                />
-                                <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
-                            </div>
-                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                                <input
-                                    type="checkbox"
-                                    id="leyMicaela"
-                                    checked={false}
-                                    readOnly
-                                    className="mr-2"
-                                />
-                                <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div className="relative flex items-center justify-center w-full mb-4">
-                <button
-                    onClick={() => scroll('left')}
-                    className="absolute left-0 bg-white text-gray-800 p-2 rounded-full shadow-lg border border-black hover:bg-gray-100 transition-colors z-20"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </button>
-
-                <div
-                    ref={scrollContainerRef}
-                    className="flex items-center overflow-hidden whitespace-nowrap px-4 mx-4"
-                >
-                    {areas.map((area) => (
-                        <button
-                            key={area}
-                            data-area={area}
-                            onClick={() => {
-                                switch (area) {
-                                    case 'Salud':
-                                        navigate('/cargasalud');
-                                        break;
-                                    case 'Criminología':
-                                        navigate('/cargacriminologia');
-                                        break;
-                                    case 'Fisionomía':
-                                        navigate('/cargafisionomia');
-                                        break;
-                                    case 'Permisos':
-                                        navigate('/cargapermisos');
-                                        break;
-                                    case 'Antecedentes penales':
-                                        navigate('/cargaantecedentespenales');
-                                        break;
-                                    case 'Conducta-Concepto-Fases':
-                                        navigate('/cargaconducconcepfases');
-                                        break;
-                                    case 'Traslado':
-                                        navigate('/cargatraslado');
-                                        break;
-                                    case 'Grupo Familiar':  // Añadido caso para Grupo Familiar
-                                        navigate('/cargagrupofamiliar');
-                                        break;
-                                    case 'Area judicial':  // Añadido caso para Judicial
-                                        navigate('/cargajudicial');
-                                        break;
-                                    case 'Visitas':  // Añadido caso para Visitas
-                                        navigate('/cargavisitas');
-                                        break;
-                                    case 'Salidas':  // Añadido caso para Salidas
-                                        navigate('/cargasalidas');
-                                        break;
-                                    case 'Alojamiento y movimiento':  // Añadido caso para Alojamiento y Movimiento
-                                        navigate('/cargaalojamientoymovimiento');
-                                        break;
-                                    case 'Educación':  // Añadido caso para Educación
-                                        navigate('/cargaeducacion');
-                                        break;
-                                    case 'Trabajo':  // Añadido caso para Trabajo
-                                        navigate('/cargatrabajo');
-                                        break;
-                                    case 'Psicología':  // Añadido caso para Psicología
-                                        navigate('/cargapsicologia');
-                                        break;
-                                    case 'Datos personales':  // Añadido caso para datos personales
-                                        navigate('/cargadatospersonales');
-                                        break;
-                                    case 'Ficha ingreso':  // Añadido caso para datos personales
-                                        navigate('/fichaingreso');
-                                        break;
-                                    default:
-                                        // Manejo de casos no definidos
-                                        console.error('Área no definida: ', area);
-                                        break;
-                                }
-                            }}
-                            className={`px-12 py-2 text-sm font-medium rounded-full transition-transform transform border border-black ${selectedArea === area
-                                ? 'bg-gradient-to-r from-blue-500 to-teal-500 text-white shadow-lg scale-95'
-                                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                }`}
-                        >
-                            {area}
-                        </button>
-                    ))}
-                </div>
-
-                <button
-                    onClick={() => scroll('right')}
-                    className="absolute right-0 bg-white text-gray-800 p-2 rounded-full shadow-lg border border-black hover:bg-gray-100 transition-colors z-20"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
+            <Header/>
             <div className="bg-white p-6 rounded-md shadow-md">
                 <h1 className="text-2xl font-bold mb-4">Carga Educación</h1>
 
                 {/* Checkboxes */}
-                <div className="flex flex-col sm:flex-row sm:gap-4 mb-4">
+                <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 bg-white rounded-md shadow-md flex flex-col sm:flex-row sm:gap-4 mb-4">
                     <div className="flex items-center bg-white p-4 rounded-md shadow-md mb-2 sm:mb-0 sm:w-auto">
                         <input
                             type="checkbox"
@@ -633,20 +281,9 @@ const CargaEducacion = () => {
                     </div>
                 </div>
 
-                {/* Campos de texto */}
-                <div className="mb-4 bg-white p-4 rounded-md shadow-md">
-                    <label htmlFor="planCursando" className="text-sm font-bold">Plan cursando</label>
-                    <input
-                        type="text"
-                        id="planCursando"
-                        value={planCursando}
-                        onChange={(e) => setPlanCursando(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded text-sm mb-2 mt-2"
-                        placeholder="Ingrese el plan que esta cursando"
-                    />
-                    {errors.planCursando && <p className="text-red-500 text-sm">{errors.planCursando}</p>} {/* Mensaje de error */}
-
-                    <label htmlFor="nivelEducativo" className="text-sm font-bold">Nivel educativo actual</label>
+                {/* Nivel Educativo */}
+                <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 mb-4 bg-white rounded-md shadow-md">
+                    <label htmlFor="nivelEducativo" className="block text-sm font-semibold mb-2">Nivel educativo actual</label>
                     <select
                         id="nivelEducativo"
                         value={nivelEducativo}
@@ -655,58 +292,17 @@ const CargaEducacion = () => {
                     >
                         <option value="">Seleccione un nivel educativo</option>
                         <option value="Analfabeto">Analfabeto</option>
-                        <option value="Primario">Primario</option>
-                        <option value="Secundario">Secundario</option>
-                        <option value="Terciario">Terciario</option>
-                        <option value="Universitario">Universitario</option>
+                        <option value="Primario Completo">Primario Completo</option>
+                        <option value="Primario Incompleto">Primario Incompleto</option>
+                        <option value="Secundario Completo">Secundario Completo</option>
+                        <option value="Secundario Incompleto">Secundario Incompleto</option>
+                        <option value="Terciario Completo">Terciario Completo</option>
+                        <option value="Terciario Incompleto">Terciario Incompleto</option>
+                        <option value="Universitario Completo">Universitario Completo</option>
+                        <option value="Universitario Incompleto">Universitario Incompleto</option>
                     </select>
-                    {errors.nivelEducativo && <p className="text-red-500 text-sm">{errors.nivelEducativo}</p>} {/* Mensaje de error */}
-
-                    <div className="flex justify-center mt-4">
-                        <button
-                            onClick={handleCargar}
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
-                        >
-                            Cargar
-                        </button>
-                    </div>
-
                 </div>
-                <div className="bg-white p-4 rounded-md shadow-md mb-4">
-                    <h3 className="text-sm font-bold mt-4">Historial de Carga</h3>
-                    <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
-                        {historial.length === 0 ? (
-                            <p className="text-sm text-gray-500 text-center">
-                                No hay registros cargados aún.
-                            </p>
-                        ) : (
-                            <ul className="space-y-2">
-                                {historial.map((registro, index) => (
-                                    <li key={index} className="border border-gray-300 p-2 rounded">
-                                        <div><strong className="text-sm">Plan Cursando:</strong> {registro.planCursando}</div>
-                                        <div><strong className="text-sm">Nivel Educativo Actual:</strong> {registro.nivelEducativo}</div>
-                                        <div className="flex flex-col sm:flex-row sm:space-x-4 mt-2">
-                                            <div className="flex items-center mb-2 sm:mb-0">
-                                                <div className={`w-4 h-4 rounded-full ${registro.seleccionado.sabeLeer ? 'bg-green-500' : 'bg-red-300'}`}></div>
-                                                <span className="ml-2 text-sm">Sabe leer</span>
-                                            </div>
-                                            <div className="flex items-center mb-2 sm:mb-0">
-                                                <div className={`w-4 h-4 rounded-full ${registro.seleccionado.sabeEscribir ? 'bg-green-500' : 'bg-red-300'}`}></div>
-                                                <span className="ml-2 text-sm">Sabe escribir</span>
-                                            </div>
-                                            <div className="flex items-center mb-2 sm:mb-0">
-                                                <div className={`w-4 h-4 rounded-full ${registro.seleccionado.documentacion ? 'bg-green-500' : 'bg-red-300'}`}></div>
-                                                <span className="ml-2 text-sm">Documentación</span>
-                                            </div>
-                                        </div>
-                                        <div><p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {registro.fechaSeleccion}</p></div>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                </div>
-
+            
                 {/* Dividir pantalla en dos */}
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1 bg-white p-4 rounded-md shadow-md">
@@ -715,7 +311,7 @@ const CargaEducacion = () => {
                         {/* Registro de un Plan */}
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="planCursado" className="text-sm font-bold">Plan cursado</label>
+                                <label htmlFor="planCursado" className="block text-sm font-semibold mb-2">Plan cursado</label>
                                 <input
                                     type="text"
                                     id="planCursado"
@@ -730,7 +326,7 @@ const CargaEducacion = () => {
                                 {errors.planCursado && <p className="text-red-500 text-sm">{errors.planCursado}</p>}
                             </div>
                             <div>
-                                <label htmlFor="fechaInicioPlan" className="text-sm font-bold">Fecha de inicio</label>
+                                <label htmlFor="fechaInicioPlan" className="block text-sm font-semibold mb-2">Fecha de inicio</label>
                                 <input
                                     type="date"
                                     id="fechaInicioPlan"
@@ -754,7 +350,7 @@ const CargaEducacion = () => {
                         </div>
 
                         <div className="bg-white p-4 rounded-md shadow-md mb-4">
-                            <h3 className="text-sm font-bold mt-4">Historial de Carga</h3>
+                            <h3 className="block text-sm font-semibold mb-2 mt-4">Historial de Carga</h3>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                                 {historialPlan.length === 0 ? (
                                     <p className="text-sm text-gray-500 text-center">
@@ -805,7 +401,6 @@ const CargaEducacion = () => {
                             </div>
                         </div>
 
-
                     </div>
 
                     {/* Derecha: Cargar Registro de un Curso */}
@@ -814,7 +409,7 @@ const CargaEducacion = () => {
                         {/* Registro de un Curso */}
                         <div className="space-y-4">
                             <div className="mb-2">
-                                <label htmlFor="curso" className="text-sm font-bold">Curso</label>
+                                <label htmlFor="curso" className="block text-sm font-semibold mb-2">Curso</label>
                                 <input
                                     id="curso"
                                     type="text"
@@ -829,7 +424,7 @@ const CargaEducacion = () => {
                                 {errors.curso && <p className="text-red-500 text-sm">{errors.curso}</p>}
                             </div>
                             <div className="mb-2">
-                                <label htmlFor="fechaInicioCurso" className="text-sm font-bold">Fecha de inicio</label>
+                                <label htmlFor="fechaInicioCurso" className="block text-sm font-semibold mb-2">Fecha de inicio</label>
                                 <input
                                     id="fechaInicioCurso"
                                     type="date"
@@ -841,6 +436,18 @@ const CargaEducacion = () => {
                                     }}
                                 />
                                 {errors.fechaInicioCurso && <p className="text-red-500 text-sm">{errors.fechaInicioCurso}</p>}
+                            </div>
+                            <div className="mb-2">
+                                <label htmlFor="archivo" className="block text-sm font-semibold mb-2">Archivo adjunto</label>
+                                <input
+                                    id="archivo"
+                                    type="file"
+                                    ref={archivoInputRef} // Asignamos la ref aquí
+                                    className="w-full p-2 border border-gray-300 rounded text-sm mb-2 mt-2"
+                                    onChange={(e) => {
+                                        setArchivo(e.target.files[0]); // Guardamos el archivo completo
+                                    }}
+                                />
                             </div>
                             <div className="flex justify-center mt-4">
                                 <button
@@ -854,7 +461,7 @@ const CargaEducacion = () => {
                         </div>
 
                         <div className="bg-white p-4 rounded-md shadow-md mb-4">
-                            <h3 className="text-sm font-bold mt-4">Historial de Carga</h3>
+                            <h3 className="block text-sm font-semibold mb-2 mt-4">Historial de Carga</h3>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                                 {historialCurso.length === 0 ? (
                                     <p className="text-sm text-gray-500 text-center">
@@ -912,12 +519,180 @@ const CargaEducacion = () => {
                                                 </div>
                                                 <div className="text-sm"><strong>Tiempo Cursando:</strong> {calcularTiempoCursando(registro.fechaInicio, registro.fechaFin)}</div>
                                                 <div className="text-sm text-gray-500 mt-2"><strong>Fecha de Carga:</strong> {registro.fechaCarga}</div>
+
+                                                {/* Mostrar el archivo adjunto si existe */}
+                                                {/* Mostrar el archivo adjunto si existe */}
+                                                {registro.archivoAdjunto ? (
+                                                    <div className="text-sm mt-2">
+                                                        <strong>Archivo adjunto:</strong>{" "}
+                                                        {registro.archivoAdjunto instanceof File ? (
+                                                            <a
+                                                                href={URL.createObjectURL(registro.archivoAdjunto)} // Si es un objeto File válido
+                                                                download={registro.archivoAdjunto.name} // Usamos el nombre del archivo para la descarga
+                                                                className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                            >
+                                                                Descargar
+                                                            </a>
+                                                        ) : (
+                                                            <span className="text-red-500">Error: No se puede generar enlace para el archivo adjunto.</span>
+                                                        )}
+
+                                                        {/* Mostrar la fecha de carga del archivo */}
+                                                        {registro.fechaArchivoAdjunto && (
+                                                            <div className="text-xs text-gray-500 mt-1">
+                                                                <div className="text-sm text-gray-500 mt-2"><strong>Fecha de Carga del Archivo:</strong> {registro.fechaArchivoAdjunto} </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ) : null}
+
+
+                                                {/* Mostrar el campo para cargar archivo solo si no existe uno */}
+                                                {!registro.archivoAdjunto && (
+                                                    <div className="flex flex-col mt-2">
+                                                        <span className="text-sm"><strong>Archivo adjunto:</strong></span>
+                                                        <input
+                                                            type="file"
+                                                            onChange={(e) => handleArchivoAdjunto(e, index)}
+                                                            className="mt-1 mb-2 text-sm border border-gray-300 rounded p-1 w-full"
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                <div className="flex justify-end mt-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setCursoAnuladoIndex(index); // Guardamos el índice del curso que se está anulando
+                                                            setIsModalOpen(true);        // Abrimos el modal para el motivo
+                                                        }}
+                                                        className="bg-red-500 text-white p-1 rounded hover:bg-red-600 text-xs"
+                                                    >
+                                                        Anular Curso
+                                                    </button>
+                                                </div>
                                             </li>
                                         ))}
                                     </ul>
                                 )}
                             </div>
                         </div>
+
+
+                        {isModalOpen && (
+                            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+                                <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-full md:max-w-md mx-4 md:mx-auto"> {/* Responsivo */}
+                                    <h2 className="text-lg font-bold mb-4 text-center md:text-left">Ingrese el Motivo de la Anulación</h2>
+
+                                    {/* Textarea para el motivo */}
+                                    <textarea
+                                        className="w-full p-2 border border-gray-300 rounded text-sm mb-4 resize-none"
+                                        rows="4"
+                                        placeholder="Motivo de la anulación"
+                                        value={motivoAnulacion}
+                                        onChange={(e) => setMotivoAnulacion(e.target.value)}
+                                    />
+
+                                    {/* Input para el archivo adjunto */}
+                                    <div className="text-sm mb-1"><strong>Archivo adjunto:</strong></div>
+                                    <input
+                                        type="file"
+                                        onChange={(e) => setArchivoAnulacion(e.target.files[0])}
+                                        className="w-full p-2 border border-gray-300 rounded text-sm mb-4"
+                                    />
+
+                                    {/* Botones de acción */}
+                                    <div className="flex justify-between">
+                                        <button
+                                            onClick={() => setIsModalOpen(false)}
+                                            className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 text-xs w-1/2 mr-2"
+                                        >
+                                            Cancelar
+                                        </button>
+
+                                        {/* Botón habilitado solo si ambos campos están completos */}
+                                        <button
+                                            onClick={handleAnularCursoConMotivo}
+                                            className={`bg-red-500 text-white px-4 py-2 rounded text-xs w-1/2 ${(!motivoAnulacion.trim() || !archivoAnulacion) ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600"}`}
+                                            disabled={!motivoAnulacion.trim() || !archivoAnulacion}
+                                        >
+                                            Anular Curso
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+
+                        <div className="bg-white p-4 rounded-md shadow-md mb-4">
+                            <h3 className="block text-sm font-semibold mb-2 mt-4">Historial de Cursos Anulados</h3>
+                            <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
+                                {historialCursoAnulado.length === 0 ? (
+                                    <p className="text-sm text-gray-500 text-center">
+                                        No hay registros de cursos anulados.
+                                    </p>
+                                ) : (
+                                    <ul className="space-y-2">
+                                        {historialCursoAnulado.map((registro, index) => (
+                                            <li key={index} className="border border-gray-300 p-3 mb-2 rounded-lg bg-gray-100">
+                                                {/* Estado de la anulación */}
+                                                <div className="border border-gray-300 rounded-lg p-3 mb-2 bg-gray-100 mt-3">
+                                                    <div className="flex items-center mt-2">
+                                                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                                        <p className="text-sm ml-2 text-red-500 italic font-bold">Curso Anulado</p>
+                                                    </div>
+
+                                                    {/* Motivo y fecha de anulación */}
+                                                    <p className="text-sm italic"><strong>Motivo de anulación:</strong> {registro.motivoAnulacion}</p>
+                                                    <p className="text-sm italic"><strong>Fecha de anulación:</strong> {registro.fechaAnulacion}</p>
+
+                                                    {/* Mostrar archivo adjunto de la anulación solo si existe */}
+                                                    {registro.archivoAnulacion && (
+                                                        <div className="text-sm italic mt-2">
+                                                            <strong>Archivo adjunto:</strong>{" "}
+                                                            <a
+                                                                href={URL.createObjectURL(registro.archivoAnulacion)} // URL temporal para archivos locales
+                                                                download={registro.nombreArchivo} // Nombre del archivo para la descarga
+                                                                className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                            >
+                                                                Descargar
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Información del curso */}
+                                                <div className="text-sm"><strong>Curso:</strong> {registro.curso}</div>
+                                                <div className="text-sm"><strong>Fecha Inicio:</strong> {registro.fechaInicio}</div>
+                                                <div className="text-sm"><strong>Fecha Fin:</strong> {registro.fechaFin || 'No se definió'}</div>
+
+                                                {/* Mostrar tiempo cursando si la fecha de fin está definida */}
+                                                <div className="text-sm">
+                                                    <strong>Tiempo Cursando:</strong> {registro.fechaFin ? calcularTiempoCursando(registro.fechaInicio, registro.fechaFin) : 'No se definió'}
+                                                </div>
+
+                                                {/* Mostrar archivo original solo si existe */}
+                                                {registro.archivoOriginalCurso && (
+                                                    <div className="text-sm">
+                                                        <strong>Archivo adjunto:</strong>{" "}
+                                                        <a
+                                                            href={URL.createObjectURL(registro.archivoOriginalCurso)} // URL temporal para archivos locales
+                                                            download={registro.archivoOriginalCurso.name} // Nombre del archivo para la descarga
+                                                            className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                        >
+                                                            Descargar
+                                                        </a>
+                                                    </div>
+                                                )}
+
+                                                {/* Fecha de carga */}
+                                                <div><p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {registro.fechaCarga}</p></div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        </div>
+
 
                     </div>
                 </div>
@@ -927,7 +702,6 @@ const CargaEducacion = () => {
                     <label className="block text-sm font-semibold mb-2 md:mb-0 md:mr-5">Archivo Adjunto</label>
                     <input type="file" className="border border-gray-300 p-1 rounded text-sm w-full md:w-auto" />
                 </div>
-
 
                 {/* Botones de acción */}
                 <div className="mt-6 flex justify-between items-center">

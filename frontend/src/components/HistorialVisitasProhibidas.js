@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-const HistorialVisitasProhibidas = () => {
-    const [visitasProhibidas, setVisitasProhibidas] = useState([]);
+const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
     const [nuevaVisita, setNuevaVisita] = useState({
         nombre: '',
         dni: '',
@@ -11,10 +10,7 @@ const HistorialVisitasProhibidas = () => {
         fechaFoto: ''
     });
     const [errors, setErrors] = useState({});
-    const [fotoSeleccionada, setFotoSeleccionada] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [modalPhoto, setModalPhoto] = useState('');
-    const fileInputRef = useRef(null);
+    const [visitasProhibidas, setVisitasProhibidas] = useState([]);
 
     const handleInputChange = (e) => {
         const { id, value } = e.target;
@@ -34,6 +30,30 @@ const HistorialVisitasProhibidas = () => {
         return Object.keys(newErrors).length === 0;
     };
 
+    const handleAddVisita = () => {
+        if (validateForm()) {
+            const nueva = { ...nuevaVisita, id: visitasProhibidas.length + 1 };
+            setVisitasProhibidas(prevState => {
+                const updatedList = [...prevState, nueva];
+                setHistorialVisitasProhibidas(updatedList);  // Pasamos el estado hacia el componente padre
+                return updatedList;
+            });
+            setNuevaVisita({
+                nombre: '',
+                dni: '',
+                relacion: '',
+                motivo: '',
+                foto: '',
+                fechaFoto: ''
+            });
+            setErrors({});
+        }
+    };
+   
+    const [showModal, setShowModal] = useState(false);
+    const [modalPhoto, setModalPhoto] = useState('');
+    const fileInputRef = useRef(null);
+
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -46,24 +66,6 @@ const HistorialVisitasProhibidas = () => {
                 }));
             };
             reader.readAsDataURL(file);
-        }
-    };
-
-    const handleAddVisita = () => {
-        if (validateForm()) {
-            setVisitasProhibidas(prevState => [
-                ...prevState,
-                { ...nuevaVisita, id: prevState.length + 1, desdeHistorial: false }
-            ]);
-            setNuevaVisita({
-                nombre: '',
-                dni: '',
-                relacion: '',
-                motivo: '',
-                foto: '',
-                fechaFoto: ''
-            });
-            setErrors({});
         }
     };
 
@@ -238,7 +240,7 @@ const HistorialVisitasProhibidas = () => {
                                                 </div>
                                             )}
                                             <button
-                                                className="mt-2 bg-blue-500 text-white p-2 rounded-full text-xs hover:bg-blue-600"
+                                                className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500"
                                                 onClick={() => item.foto ? handleViewPhoto(item.foto) : fileInputRefs.current[index].click()}
                                             >
                                                 {item.foto ? 'Ver foto' : 'Subir foto'}

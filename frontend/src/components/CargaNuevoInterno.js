@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
 const CargaNuevoInterno = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState({
@@ -16,10 +15,14 @@ const CargaNuevoInterno = () => {
         remainingSentence: '3 años 2 meses 5 días',
     });
 
-
     // Función para manejar el cambio en el tipo de interno
     const handleTipoInternoChange = (e) => {
         setTipoInterno(e.target.value);
+    };
+
+    // Función para manejar el cambio de delitos
+    const handleDelitoChange = (e) => {
+        setDelito(e.target.value);
     };
 
     // Función para aplicar el estilo de deshabilitado
@@ -31,6 +34,7 @@ const CargaNuevoInterno = () => {
     };
 
     const [egreso, setEgreso] = useState(false);
+    const [motivoEgreso, setMotivoEgreso] = useState('');
     const [egresoDate, setEgresoDate] = useState('');
     const [numOficioEgreso, setNumOficioEgreso] = useState('');
     const [leyMicaela, setLeyMicaela] = useState(false);
@@ -41,8 +45,11 @@ const CargaNuevoInterno = () => {
     const [huella, setHuella] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [oficioEgreso, setOficioEgreso] = useState(null);
+    const [caratulaCausa, setCaratulaCausa] = useState(null);
     const oficioEgresoInputRef = useRef(null);
+    const caratulaCausaInputRef = useRef(null);
     const [tipoInterno, setTipoInterno] = useState('');
+    const [delito, setDelito] = useState('');
 
     const fileInputRef = useRef(null);
     const firmaInputRef = useRef(null);
@@ -75,6 +82,17 @@ const CargaNuevoInterno = () => {
         }
     };
 
+    const handleCaratulaCausaChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCaratulaCausa(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleEgresoChange = () => {
         setEgreso(!egreso);
         if (!egreso) {
@@ -83,7 +101,6 @@ const CargaNuevoInterno = () => {
             setNumOficioEgreso('');
         }
     };
-
 
     const handleFirmaChange = (e) => {
         const file = e.target.files[0];
@@ -212,19 +229,12 @@ const CargaNuevoInterno = () => {
                             onChange={(e) => setUser({ ...user, dni: e.target.value })}
                             className="w-full p-2 border border-gray-300 rounded text-sm"
                         />
-                        <input
-                            type="text"
-                            placeholder="Delito"
-                            value={user.crime}
-                            onChange={(e) => setUser({ ...user, crime: e.target.value })}
-                            className="w-full p-2 border border-gray-300 rounded text-sm"
-                        />
                     </div>
                 </div>
 
                 {/* Checkboxes alineados a la derecha en pantallas grandes y a la izquierda en pantallas pequeñas */}
                 <div className="flex flex-col space-y-2 mt-4 md:mt-0 w-full md:w-auto">
-                    {/* Egreso checkbox y fecha */}
+                    {/* Egreso checkbox, fecha, motivo y oficio de egreso */}
                     <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
                         <div className="flex items-center text-sm mb-2">
                             <input
@@ -246,6 +256,7 @@ const CargaNuevoInterno = () => {
                                     onChange={(e) => setEgresoDate(e.target.value)}
                                     className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
                                 />
+
                                 <label htmlFor="numOficioEgreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
                                 <input
                                     type="text"
@@ -253,11 +264,38 @@ const CargaNuevoInterno = () => {
                                     value={numOficioEgreso}
                                     onChange={(e) => setNumOficioEgreso(e.target.value)}
                                     placeholder="Ingrese N. Oficio Egreso"
-                                    className="w-full p-1 border border-gray-300 rounded text-sm"
+                                    className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
                                 />
+
+                                <label htmlFor="motivoEgreso" className="block text-sm font-semibold mb-1">Motivo de Egreso</label>
+                                <select
+                                    id="motivoEgreso"
+                                    value={motivoEgreso}
+                                    onChange={(e) => setMotivoEgreso(e.target.value)}
+                                    className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
+                                >
+                                    <option value="" disabled>Seleccionar motivo de egreso</option>
+                                    <option value="traslado">Traslado</option>
+                                    <option value="libertad condicional">Libertad Condicional</option>
+                                    <option value="libertad asistida">Libertad Asistida</option>
+                                    <option value="fallecimiento">Fallecimiento</option>
+                                </select>
+
+                                {/* Oficio de Egreso */}
+                                <div className="flex-1 mt-3">
+                                    <label className="block text-gray-700 text-sm font-bold">Oficio de Egreso</label>
+                                    <input
+                                        type="file"
+                                        ref={oficioEgresoInputRef}
+                                        accept=".pdf,.doc,.docx"
+                                        onChange={handleOficioEgresoChange}
+                                        className="block w-full p-1 border border-gray-300 rounded text-sm"
+                                    />
+                                </div>
                             </div>
                         )}
                     </div>
+
                     {/* Otros checkboxes */}
                     <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center text-sm shadow-sm">
                         <input
@@ -307,6 +345,44 @@ const CargaNuevoInterno = () => {
                             <option value="" disabled>Seleccionar tipo de interno</option>
                             <option value="interno">Interno</option>
                             <option value="procesado">Procesado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 text-sm font-bold">Delito</label>
+                        <select
+                            className="w-full p-1 border border-gray-300 rounded text-sm"
+                            value={delito}
+                            onChange={handleDelitoChange} // Cambia el manejador de eventos según sea necesario
+                        >
+                            <option value="" disabled>Seleccionar delito</option>
+                            <option value="A DESHO">A DESHO</option>
+                            <option value="A SEXUAL">A SEXUAL</option>
+                            <option value="AMENAZAS">AMENAZAS</option>
+                            <option value="ABIGEATO">ABIGEATO</option>
+                            <option value="CORRUP. MEN">CORRUP. MEN</option>
+                            <option value="DAÑOS">DAÑOS</option>
+                            <option value="DEFRAUDACIÓN">DEFRAUDACIÓN</option>
+                            <option value="ENCUBRIM">ENCUBRIM</option>
+                            <option value="ESTAFA">ESTAFA</option>
+                            <option value="ESTUPRO">ESTUPRO</option>
+                            <option value="EXTORSIÓN">EXTORSIÓN</option>
+                            <option value="F. TESTIMO">F. TESTIMO</option>
+                            <option value="F/ PROST.">F/ PROST.</option>
+                            <option value="HOMICIDIO">HOMICIDIO</option>
+                            <option value="HURTO">HURTO</option>
+                            <option value="INCENDIO">INCENDIO</option>
+                            <option value="LESIONES">LESIONES</option>
+                            <option value="PRIV.ILEGITI">PRIV.ILEGITI</option>
+                            <option value="A ROBO">A ROBO</option>
+                            <option value="T/ A SEX">T/ A SEX</option>
+                            <option value="T/ HOMICI">T/ HOMICI</option>
+                            <option value="T/ HURTO">T/ HURTO</option>
+                            <option value="TORTURA">TORTURA</option>
+                            <option value="VIOL DOMICI">VIOL DOMICI</option>
+                            <option value="VIOLACION">VIOLACION</option>
+                            <option value="P/ ARMA">P/ ARMA</option>
+                            <option value="VIOL GENERO">VIOL GENERO</option>
+                            <option value="LEY 23737">LEY 23737</option>
                         </select>
                     </div>
                     <div>
@@ -403,16 +479,8 @@ const CargaNuevoInterno = () => {
                         <input type="date" className="w-full p-1 border border-gray-300 rounded text-sm" />
                     </div>
                     <div>
-                        <label className="block text-gray-700 text-sm font-bold">Sección Policial</label>
-                        <input type="text" placeholder="Introduce la sección policial" className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div>
                         <label className="block text-gray-700 text-sm font-bold">Observación</label>
                         <textarea placeholder="Introduce una observación" className="w-full p-1 border border-gray-300 rounded text-sm" rows="2"></textarea>
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold">Núm. Prontuario Policial</label>
-                        <input type="text" placeholder="Introduce el número de prontuario policial" className="w-full p-1 border border-gray-300 rounded text-sm" />
                     </div>
                 </div>
                 <div className="flex items-center mt-4 space-x-4">
@@ -437,18 +505,16 @@ const CargaNuevoInterno = () => {
                         />
                     </div>
                 </div>
-
                 <div className="flex-1 mt-3">
-                    <label className="block text-gray-700 text-sm font-bold">Oficio de Egreso</label>
+                    <label className="block text-gray-700 text-sm font-bold">Caratula de la Causa</label>
                     <input
                         type="file"
-                        ref={oficioEgresoInputRef}
-                        accept=".pdf,.doc,.docx"  // Ajusta los formatos según tus necesidades
-                        onChange={handleOficioEgresoChange}
+                        ref={caratulaCausaInputRef}
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleCaratulaCausaChange}
                         className="block w-full p-1 border border-gray-300 rounded text-sm"
                     />
                 </div>
-
                 <div className="flex justify-between items-center mt-10 space-x-2">
                     <button
                         className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-xs"

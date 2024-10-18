@@ -14,15 +14,16 @@ const InicioAreaJefe = () => {
 
   const data = Array(50).fill({
     name: 'Juan Carlos López',
+    dni: '12345678', // Agrega el campo DNI aquí
     crime: 'Robo',
     sentenceDate: '25/06/2025',
     court: 'T.O.P.LIBRES',
     sentence: '25/06/2025',
     fileNumber: '3544',
     transferDate: '25/06/2025',
-    conditionalDate: '25/06/2025',
     assistanceDate: '25/06/2025',
-    admissionDate: '25/06/2025'
+    admissionDate: '25/06/2025',
+    unidad: `Unidad ${Math.floor(Math.random() * 12) + 1}` // Campo Unidad agregado
   });
 
   const handleLogout = () => {
@@ -79,6 +80,8 @@ const InicioAreaJefe = () => {
                 <tr>
                   <th className="p-2 border">#</th>
                   <th className="p-2 border">Nombre/Apellido</th>
+                  <th className="p-2 border">DNI</th> {/* Agrega esta fila */}
+                  <th className="p-2 border">Unidad</th> {/* Nueva columna Unidad */}
                   <th className="p-2 border">Delitos</th>
                   <th className="p-2 border">Tipo Interno</th>
                   <th className="p-2 border">Juzgado</th>
@@ -87,7 +90,6 @@ const InicioAreaJefe = () => {
                   <th className="p-2 border">Duración Condena</th>
                   <th className="p-2 border">Legajo</th>
                   <th className="p-2 border">Fecha Asistida</th>
-                  <th className="p-2 border">Fecha Conmutación</th>
                   <th className="p-2 border">Acciones</th>
                 </tr>
               </thead>
@@ -96,15 +98,16 @@ const InicioAreaJefe = () => {
                   <tr key={index} className="hover:bg-gray-100">
                     <td className="p-2 border text-xs">{index + 1}</td>
                     <td className="p-2 border text-xs">{item.name}</td>
+                    <td className="p-2 border text-xs">{item.dni}</td> {/* Muestra el DNI aquí */}
+                    <td className="p-2 border text-xs">{item.unidad}</td> {/* Muestra la Unidad aquí */}
                     <td className="p-2 border text-xs">{item.crime}</td>
-                    <td className="p-2 border text-xs">Tipo Interno {index + 1}</td> {/* Ejemplo de valor para "Tipo Interno" */}
+                    <td className="p-2 border text-xs">Tipo Interno {index + 1}</td>
                     <td className="p-2 border text-xs">{item.court}</td>
                     <td className="p-2 border text-xs">{item.admissionDate}</td>
                     <td className="p-2 border text-xs">{item.sentenceDate}</td>
-                    <td className="p-2 border text-xs">Duración Condena {index + 1}</td> {/* Ejemplo de valor para "Duración Condena" */}
+                    <td className="p-2 border text-xs">Duración Condena {index + 1}</td>
                     <td className="p-2 border text-xs">{item.fileNumber}</td>
                     <td className="p-2 border text-xs">{item.assistanceDate}</td>
-                    <td className="p-2 border text-xs">{item.conditionalDate}</td>
                     <td className="p-2 border text-center">
                       <button
                         className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
