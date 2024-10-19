@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoPenitenciaria from '../assets/images/logoPenitenciaria.png';
 
 const InicioAreaJefe = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchDNI, setSearchDNI] = useState('');  // Campo de búsqueda por DNI
+  const [searchLegajo, setSearchLegajo] = useState('');  // Campo de búsqueda por Legajo
   const [selectedUnit, setSelectedUnit] = useState('');
+  const [data, setData] = useState([]);  // Datos que se generarán una sola vez
   const navigate = useNavigate();
 
   const user = {
@@ -12,18 +14,40 @@ const InicioAreaJefe = () => {
     area: 'Jefatura',
   };
 
-  const data = Array(50).fill({
-    name: 'Juan Carlos López',
-    dni: '12345678', // Agrega el campo DNI aquí
-    crime: 'Robo',
-    sentenceDate: '25/06/2025',
-    court: 'T.O.P.LIBRES',
-    sentence: '25/06/2025',
-    fileNumber: '3544',
-    transferDate: '25/06/2025',
-    assistanceDate: '25/06/2025',
-    admissionDate: '25/06/2025',
-    unidad: `Unidad ${Math.floor(Math.random() * 12) + 1}` // Campo Unidad agregado
+  // Solo se genera una vez al montar el componente
+  useEffect(() => {
+    const generatedData = Array(15).fill(null).map((_, index) => ({
+      name: 'Juan Carlos López',
+      dni: Math.floor(10000000 + Math.random() * 90000000), // Genera un DNI aleatorio de 8 dígitos
+      crime: 'Robo',
+      sentenceDate: '25/06/2025',
+      court: 'T.O.P.LIBRES',
+      sentence: '25/06/2025',
+      fileNumber: Math.floor(1000 + Math.random() * 9000), // Genera un número de legajo aleatorio de 4 dígitos
+      transferDate: '25/06/2025',
+      assistanceDate: '25/06/2025',
+      admissionDate: '25/06/2025',
+      unidad: `Unidad ${Math.floor(Math.random() * 12) + 1}`, // Genera una Unidad aleatoria entre 1 y 12
+      internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado',
+    }));
+    setData(generatedData); // Solo se setea una vez
+  }, []);
+
+  // Filtra los datos según el término de búsqueda (DNI o Legajo) y la unidad seleccionada
+  const filteredData = data.filter((item) => {
+
+    // Si el interno es "Condenado", validamos el número de legajo
+    const isValidLegajo = item.internalType === 'Condenado'
+      ? item.fileNumber && item.fileNumber.toString().startsWith(searchLegajo)
+      : false;  // Los "Procesados" no deberían tener legajo
+
+    const matchesDNI = searchDNI === '' || (item.dni && item.dni.toString().startsWith(searchDNI));
+    const matchesLegajo = searchLegajo === '' || isValidLegajo;
+
+    // Filtrado por unidad
+    const matchesUnit = selectedUnit === '' || item.unidad === `Unidad ${selectedUnit}`;
+
+    return matchesDNI && matchesLegajo && matchesUnit;
   });
 
   const handleLogout = () => {
@@ -45,13 +69,25 @@ const InicioAreaJefe = () => {
 
           <div className="flex flex-col md:flex-row md:items-center">
             <div className="flex items-center mb-2 md:mb-0 md:mr-4">
-              <label htmlFor="search" className="mr-3 text-base font-semibold text-sm">Buscar:</label>
+              <label htmlFor="searchDNI" className="text-base font-semibold text-sm">Buscar DNI:</label>
               <input
                 type="text"
-                id="search"
-                placeholder="DNI / Legajo judicial"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                id="searchDNI"
+                placeholder="DNI"
+                value={searchDNI}
+                onChange={(e) => setSearchDNI(e.target.value)}
+                className="w-full p-1 border border-gray-300 rounded text-sm"
+              />
+            </div>
+
+            <div className="flex items-center mb-2 md:mb-0 md:mr-4">
+              <label htmlFor="searchLegajo" className="text-base font-semibold text-sm">Buscar Legajo:</label>
+              <input
+                type="text"
+                id="searchLegajo"
+                placeholder="Legajo"
+                value={searchLegajo}
+                onChange={(e) => setSearchLegajo(e.target.value)}
                 className="w-full p-1 border border-gray-300 rounded text-sm"
               />
             </div>
@@ -80,8 +116,8 @@ const InicioAreaJefe = () => {
                 <tr>
                   <th className="p-2 border">#</th>
                   <th className="p-2 border">Nombre/Apellido</th>
-                  <th className="p-2 border">DNI</th> {/* Agrega esta fila */}
-                  <th className="p-2 border">Unidad</th> {/* Nueva columna Unidad */}
+                  <th className="p-2 border">DNI</th>
+                  <th className="p-2 border">Unidad</th>
                   <th className="p-2 border">Delitos</th>
                   <th className="p-2 border">Tipo Interno</th>
                   <th className="p-2 border">Juzgado</th>
@@ -94,20 +130,28 @@ const InicioAreaJefe = () => {
                 </tr>
               </thead>
               <tbody>
-                {data.slice(0, 16).map((item, index) => (
+                {filteredData.slice(0, 15).map((item, index) => (
                   <tr key={index} className="hover:bg-gray-100">
                     <td className="p-2 border text-xs">{index + 1}</td>
                     <td className="p-2 border text-xs">{item.name}</td>
-                    <td className="p-2 border text-xs">{item.dni}</td> {/* Muestra el DNI aquí */}
-                    <td className="p-2 border text-xs">{item.unidad}</td> {/* Muestra la Unidad aquí */}
+                    <td className="p-2 border text-xs">{item.dni}</td>
+                    <td className="p-2 border text-xs">{item.unidad}</td>
                     <td className="p-2 border text-xs">{item.crime}</td>
-                    <td className="p-2 border text-xs">Tipo Interno {index + 1}</td>
+                    <td className="p-2 border text-xs">{item.internalType}</td>
                     <td className="p-2 border text-xs">{item.court}</td>
                     <td className="p-2 border text-xs">{item.admissionDate}</td>
-                    <td className="p-2 border text-xs">{item.sentenceDate}</td>
-                    <td className="p-2 border text-xs">Duración Condena {index + 1}</td>
-                    <td className="p-2 border text-xs">{item.fileNumber}</td>
-                    <td className="p-2 border text-xs">{item.assistanceDate}</td>
+                    <td className="p-2 border text-xs">
+                      {item.internalType === 'Condenado' ? item.sentenceDate : '-'}
+                    </td>
+                    <td className="p-2 border text-xs">
+                      {item.internalType === 'Condenado' ? item.sentence : '-'}
+                    </td>
+                    <td className="p-2 border text-xs">
+                      {item.internalType === 'Condenado' ? item.fileNumber : '-'}
+                    </td>
+                    <td className="p-2 border text-xs">
+                      {item.internalType === 'Condenado' ? item.assistanceDate : '-'}
+                    </td>
                     <td className="p-2 border text-center">
                       <button
                         className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"

@@ -31,12 +31,12 @@ const CargaAntecendentesPenales = () => {
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             <Header/>
             <div className="bg-white p-4 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Carga de Antecedentes Penales</h1>
-                <div className="grid grid-cols-1 gap-4">
+                <h1 className="text-xl font-bold mb-4">Carga de Antecedentes Penales</h1>
+                <div className="grid grid-cols-1 gap-4 bg-white p-4 rounded-md shadow-md border border-gray-300">
 
                     {/* Antecedentes Penales */}
                     <div className="bg-white p-4 rounded-md shadow-md">
-                        <h2 className="block text-sm font-medium mb-1">Antecedentes Penales</h2>
+                        <h2 className="block text-sm font-bold mb-1">Antecedentes Penales</h2>
                         <textarea
                             value={antecedentesPenales}
                             onChange={(e) => setAntecedentesPenales(e.target.value)}
@@ -59,7 +59,7 @@ const CargaAntecendentesPenales = () => {
                             </button>
                         </div>
 
-                        <div className="bg-white p-4 rounded-md shadow-md mb-4 mt-5">
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
                             <h1 className="text-sm font-bold mt-4">Historial de Carga</h1>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                                 {historialAntecedentes.length > 0 ? (

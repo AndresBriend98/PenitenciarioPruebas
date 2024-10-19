@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoPenitenciaria from '../assets/images/logoPenitenciaria.png';
 
 const InicioAreaAdministrador = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const [searchDNI, setSearchDNI] = useState('');  // Campo de búsqueda por DNI
+  const [searchLegajo, setSearchLegajo] = useState('');  // Campo de búsqueda por Legajo
+  const [data, setData] = useState([]);  // Datos que se generarán una sola vez
 
   const user = {
     name: 'Uriel Umeres',
@@ -12,18 +15,37 @@ const InicioAreaAdministrador = () => {
     unit: '2',
   };
 
-  const data = Array.from({ length: 50 }, (_, index) => ({
-    name: `Juan Carlos López ${index + 1}`,
-    crime: 'Robo',
-    internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado', // Añadir tipo de interno
-    court: 'T.O.P.LIBRES',
-    admissionDate: '25/06/2025',
-    sentenceDate: '25/06/2025',
-    sentence: '25/06/2025',
-    fileNumber: '3544',
-    assistanceDate: '25/06/2025',
-    transferDate: '25/06/2025',
-  }));
+
+  // Solo se genera una vez al montar el componente
+  useEffect(() => {
+    const generatedData = Array(15).fill(null).map((_, index) => ({
+      name: 'Juan Carlos López',
+      crime: 'Robo',
+      sentenceDate: '25/06/2025',
+      court: 'T.O.P.LIBRES',
+      sentence: '25/06/2025',
+      fileNumber: Math.floor(1000 + Math.random() * 9000), // Genera un número de legajo aleatorio de 4 dígitos
+      transferDate: '25/06/2025',
+      assistanceDate: '25/06/2025',
+      admissionDate: '25/06/2025',
+      internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado',
+      dni: Math.floor(10000000 + Math.random() * 90000000) // DNI aleatorio de 8 dígitos
+    }));
+    setData(generatedData); // Solo se setea una vez
+  }, []);
+
+  const filteredData = data.filter((item) => {
+    // Si el interno es "Procesado", no tiene legajo
+    const isValidLegajo = item.internalType === 'Condenado'
+      ? (item.fileNumber && item.fileNumber.toString().startsWith(searchLegajo))
+      : false;  // Procesados no tienen legajo, por lo que siempre será false
+
+    const matchesDNI = searchDNI === '' || (item.dni && item.dni.toString().startsWith(searchDNI));
+    const matchesLegajo = searchLegajo === '' || isValidLegajo;
+
+    // Solo mostrar internos que sean válidos (condenados con legajo o procesados sin legajo)
+    return matchesDNI && matchesLegajo;
+  });
 
   return (
     <div className="bg-general bg-cover bg-center min-h-screen flex flex-col p-4">
@@ -49,16 +71,30 @@ const InicioAreaAdministrador = () => {
           </div>
         </div>
 
-        <div className="flex items-center mb-4">
-          <label htmlFor="search" className="mr-3 text-base font-semibold text-sm">Buscar:</label>
-          <input
-            type="text"
-            id="search"
-            placeholder="DNI / Legajo judicial"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full md:w-64 p-1 border border-gray-300 rounded text-sm"
-          />
+        <div className="flex flex-col md:flex-row md:items-center mb-5">
+          <div className="flex items-center mb-2 md:mb-0 md:mr-4">
+            <label htmlFor="searchDNI" className="text-base font-semibold text-sm">Buscar DNI:</label>
+            <input
+              type="text"
+              id="searchDNI"
+              placeholder="DNI"
+              value={searchDNI}
+              onChange={(e) => setSearchDNI(e.target.value)}
+              className="w-full p-1 border border-gray-300 rounded text-sm"
+            />
+          </div>
+
+          <div className="flex items-center mb-2 md:mb-0 md:mr-4">
+            <label htmlFor="searchLegajo" className="text-base font-semibold text-sm">Buscar Legajo:</label>
+            <input
+              type="text"
+              id="searchLegajo"
+              placeholder="Legajo"
+              value={searchLegajo}
+              onChange={(e) => setSearchLegajo(e.target.value)}
+              className="w-full p-1 border border-gray-300 rounded text-sm"
+            />
+          </div>
         </div>
 
         <div className="flex-1 overflow-x-auto">
@@ -68,8 +104,9 @@ const InicioAreaAdministrador = () => {
                 <tr>
                   <th className="p-2 border">#</th>
                   <th className="p-2 border">Nombre/Apellido</th>
+                  <th className="p-2 border">DNI</th> {/* Nueva columna de DNI */}
                   <th className="p-2 border">Delitos</th>
-                  <th className="p-2 border">Tipo Interno</th> {/* Añadido */}
+                  <th className="p-2 border">Tipo Interno</th>
                   <th className="p-2 border">Juzgado</th>
                   <th className="p-2 border">Fecha Ingreso</th>
                   <th className="p-2 border">Cumple Condena</th>
@@ -80,12 +117,13 @@ const InicioAreaAdministrador = () => {
                 </tr>
               </thead>
               <tbody>
-                {data.slice(0, 16).map((item, index) => (
+                {filteredData.slice(0, 15).map((item, index) => (
                   <tr key={index} className="hover:bg-gray-100">
                     <td className="p-2 border text-xs">{index + 1}</td>
                     <td className="p-2 border text-xs">{item.name}</td>
+                    <td className="p-2 border text-xs">{item.dni}</td> {/* Mostrar DNI */}
                     <td className="p-2 border text-xs">{item.crime}</td>
-                    <td className="p-2 border text-xs">{item.internalType}</td> {/* Añadido */}
+                    <td className="p-2 border text-xs">{item.internalType}</td>
                     <td className="p-2 border text-xs">{item.court}</td>
                     <td className="p-2 border text-xs">{item.admissionDate}</td>
                     <td className="p-2 border text-xs">
@@ -101,10 +139,8 @@ const InicioAreaAdministrador = () => {
                       {item.internalType === 'Condenado' ? item.assistanceDate : '-'}
                     </td>
                     <td className="p-2 border text-center">
-                      <button 
-                        className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
-                        onClick={() => navigate('/fichaingreso')}
-                      >
+                      <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
+                        onClick={() => navigate('/fichaingreso')}>
                         Ver
                       </button>
                     </td>

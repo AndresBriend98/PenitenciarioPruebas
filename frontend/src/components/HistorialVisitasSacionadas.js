@@ -126,8 +126,8 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
     return (
         <div>
             <div className="flex space-x-4">
-                <div className="flex-1 bg-white p-4 rounded-md shadow-md">
-                    <h2 className="text-lg font-bold mb-4">Carga Visita Sancionada</h2>
+                <div className="flex-1 bg-white p-4 rounded-md shadow-md border border-gray-300 ">
+                    <h2 className="text-l font-bold mb-4">Carga Visita Sancionada</h2>
 
                     {/* Foto de la visita sancionada */}
                     <div className="flex flex-col items-center mb-4">
@@ -255,7 +255,7 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
 
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 bg-white p-4 rounded-md shadow-md border border-gray-300">
                 <h2 className="text-sm font-bold mb-4">Historial de Visitas Sancionadas</h2>
                 <div className="bg-white p-4 rounded-md shadow-md">
                     <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">

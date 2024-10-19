@@ -133,11 +133,11 @@ const CargaAlojamientoYMovimiento = () => {
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             <Header />
             <div className='bg-white p-4 rounded-md shadow-md'>
-                <h1 className="text-2xl font-bold mb-4">Carga de Alojamiento y Movimiento</h1>
+                <h1 className="text-xl font-bold mb-4">Carga de Alojamiento y Movimiento</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     {/* Realojamiento */}
-                    <div className="bg-white p-4 rounded-md shadow-md">
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 ">
 
                         <label className="block text-sm font-semibold mt-2 mb-2">Sector</label>
                         <input
@@ -214,7 +214,7 @@ const CargaAlojamientoYMovimiento = () => {
 
 
                     {/* Historial de Realojamientos */}
-                    <div className="bg-white p-4 rounded-md shadow-md">
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <h3 className="text-sm font-bold mt-4">Historial de Alojamientos y Movimientos</h3>
                         <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-96 overflow-y-auto">
                             {realojamientos.length > 0 ? (

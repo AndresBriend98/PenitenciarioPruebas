@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 
@@ -278,10 +278,10 @@ const CargaConducConcepFases = () => {
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             <Header />
             <div className="bg-white p-4 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Carga de Conducta-Concepto-Fases</h1>
+                <h1 className="text-xl font-bold mb-4">Carga de Conducta-Concepto-Fases</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white p-4 rounded-md shadow-md">
-                        <h2 className="text-lg font-bold mb-4">Conducta y Concepto</h2>
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                        <h2 className="text-l font-bold mb-4">Conducta y Concepto</h2>
 
                         <div className="mb-4">
                             <label className="block text-sm font-semibold mb-1">Trimestre:</label>
@@ -431,16 +431,16 @@ const CargaConducConcepFases = () => {
                     </div>
 
                     {/* Sección de Fase Actual */}
-                    <div className="bg-white p-4 rounded-md shadow-md">
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <h2 className="text-md font-bold mb-4 flex items-center">
-                            <span className="font-bold mr-2">Fase Actual:</span>
+                            <span className="font-bold text-l mr-2">Fase Actual:</span>
                             <span className="text-sm border border-gray-300 bg-gray-100 p-2 rounded">{faseActual}</span>
                         </h2>
 
                         {/* Sección de Periodo de Observación */}
                         <div className="bg-white p-4 rounded-md shadow-md mt-4">
                             <h2 className="text-md font-bold mb-4 flex items-center">
-                                <span className="font-bold mr-2">Periodo de Observación:</span>
+                                <span className="font-bold text-sm mr-2">Periodo de Observación:</span>
                             </h2>
                             <table className="min-w-full table-auto border-collapse border border-gray-300 overflow-x-auto overflow-y-auto block md:table md:overflow-visible">
                                 <thead>
@@ -479,7 +479,7 @@ const CargaConducConcepFases = () => {
                         {/* Sección de Fase de Tratamiento */}
                         <div className="bg-white p-4 rounded-md shadow-md mt-4">
                             <h2 className="text-md font-bold mb-4 flex items-center">
-                                <span className="font-bold mr-2">Fase de Tratamiento:</span>
+                                <span className="font-bold mr-2 text-sm">Fase de Tratamiento:</span>
                             </h2>
                             <table className="min-w-full table-auto border-collapse border border-gray-300 overflow-x-auto overflow-y-auto block md:table md:overflow-visible">
                                 <thead>
@@ -520,7 +520,7 @@ const CargaConducConcepFases = () => {
                         {/* Sección de Fase de Prueba */}
                         <div className="bg-white p-4 rounded-md shadow-md mt-4">
                             <h2 className="text-md font-bold mb-4 flex items-center">
-                                <span className="font-bold mr-2">Fase de Prueba:</span>
+                                <span className="font-bold mr-2 text-sm">Fase de Prueba:</span>
                             </h2>
                             <table className="min-w-full table-auto border-collapse border border-gray-300 overflow-x-auto overflow-y-auto block md:table md:overflow-visible">
                                 <thead>
@@ -557,9 +557,9 @@ const CargaConducConcepFases = () => {
                         </div>
                     </div>
                     {/* Sección de Evolución */}
-                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mt-5">
-                        <h2 className="text-lg font-bold">Evolución</h2>
-                        <label className="block text-sm font-semibold mt-2">Descripción</label>
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                        <h2 className="text-l font-bold">Evolución</h2>
+                        <label className="block text-sm font-semibold mt-5">Descripción</label>
                         <textarea
                             value={evolucion}
                             onChange={(e) => setEvolucion(e.target.value)}
@@ -582,33 +582,34 @@ const CargaConducConcepFases = () => {
                                 Cargar
                             </button>
                         </div>
-                        <h3 className="text-sm font-bold mt-4">Historial de Carga</h3>
-                        <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-96 overflow-y-auto">
-                            {historialEvolucion.length > 0 ? (
-                                <ul className="mt-2">
-                                    {historialEvolucion.map((item, index) => (
-                                        <li key={index} className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm">
-                                            <p className='text-sm'><strong>Descripción:</strong> {item.descripcion}</p>
-                                            <p className='text-sm'><strong>Fecha:</strong> {item.fecha}</p>
-                                            <div>
-                                                <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-sm text-gray-500 text-center">
-                                    No hay historial de evolución registrado aún.
-                                </p>
-                            )}
+                        <div className='bg-white p-4 rounded-md shadow-md border border-gray-300 mt-5'>
+                            <h3 className="text-sm font-bold">Historial de Carga</h3>
+                            <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-96 overflow-y-auto">
+                                {historialEvolucion.length > 0 ? (
+                                    <ul className="mt-2">
+                                        {historialEvolucion.map((item, index) => (
+                                            <li key={index} className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm">
+                                                <p className='text-sm'><strong>Descripción:</strong> {item.descripcion}</p>
+                                                <p className='text-sm'><strong>Fecha:</strong> {item.fecha}</p>
+                                                <div>
+                                                    <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-sm text-gray-500 text-center">
+                                        No hay historial de evolución registrado aún.
+                                    </p>
+                                )}
+                            </div>
                         </div>
-
                     </div>
 
                     {/* Sección de Correctivo Disciplinario */}
-                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mt-4">
-                        <h2 className="text-lg font-bold">Correctivo Disciplinario</h2>
-                        <label className="block text-sm font-semibold mt-2">Descripción</label>
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                        <h2 className="text-l font-bold">Correctivo Disciplinario</h2>
+                        <label className="block text-sm font-semibold mt-5">Descripción</label>
                         <textarea
                             value={correctivo}
                             onChange={(e) => setCorrectivo(e.target.value)}
@@ -658,8 +659,8 @@ const CargaConducConcepFases = () => {
                         </div>
 
                         {/* Historial de Carga */}
-                        <div className="bg-white p-4 rounded-md shadow-md">
-                            <h3 className="text-sm font-bold mt-4">Historial de Carga</h3>
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mt-5">
+                            <h3 className="text-sm font-bold">Historial de Carga</h3>
                             <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-96 overflow-y-auto">
                                 {historialCorrectivo.length > 0 ? (
                                     <ul className="mt-2">

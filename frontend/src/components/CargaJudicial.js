@@ -320,8 +320,8 @@ const CargaJudicial = () => {
             <Header />
             <div className="bg-white p-6 rounded-md shadow-md flex flex-col">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-bold mb-4">Área Judicial</h1>
-                    <div className='bg-white p-4 rounded-md shadow-md'>
+                    <h1 className="text-xl font-bold mb-4">Área Judicial</h1>
+                    <div className='bg-white p-4 rounded-md shadow-md border border-gray-300'>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className="block text-sm font-semibold mb-1">Nombre del Juzgado</label>
@@ -450,7 +450,7 @@ const CargaJudicial = () => {
                                 onClick={() => setIsModalOpen(true)}
                                 className="bg-blue-800 text-white p-2 rounded hover:bg-blue-900 text-xs"
                             >
-                                Ver Historial de Cambios
+                                Ver historial de cambios
                             </button>
                         </div>
 
@@ -598,8 +598,8 @@ const CargaJudicial = () => {
                 </div>
 
                 <div className="flex flex-col md:flex-row">
-                    <div className="w-full md:w-1/2 pr-0 md:pr-4 mb-6 md:mb-0">
-                        <h2 className="text-xl font-bold mb-4">Información del Abogado</h2>
+                    <div className="w-full md:w-1/2 pr-0 md:pr-4 mb-6 md:mb-0 bg-white p-4 rounded-md shadow-md border border-gray-300">
+                        <h2 className="text-l font-bold mb-4">Información del Abogado</h2>
                         <form className="bg-white p-4 rounded-md shadow-md">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
@@ -645,32 +645,34 @@ const CargaJudicial = () => {
                                     Cargar
                                 </button>
                             </div>
-                            <h3 className="text-sm font-bold mt-4">Historial de Abogados</h3>
-                            <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
-                                {abogados.length > 0 ? (
-                                    <ul className="mt-2">
-                                        {abogados.map((item, index) => (
-                                            <li key={index} className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm">
-                                                <p className='text-sm'><strong>Nombre y Apellido:</strong> {item.nombreApellido}</p>
-                                                <p className='text-sm'><strong>Matrícula:</strong> {item.matricula}</p>
-                                                <p className='text-sm'><strong>Poderes:</strong> {item.poderes}</p>
-                                                <div>
-                                                    <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-sm text-gray-500 text-center">
-                                        No hay historial de abogados registrado aún.
-                                    </p>
-                                )}
+                            <div className='bg-white p-4 rounded-md shadow-md border border-gray-300'>
+                                <h3 className="text-sm font-bold">Historial de Abogados</h3>
+                                <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
+                                    {abogados.length > 0 ? (
+                                        <ul className="mt-2">
+                                            {abogados.map((item, index) => (
+                                                <li key={index} className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm">
+                                                    <p className='text-sm'><strong>Nombre y Apellido:</strong> {item.nombreApellido}</p>
+                                                    <p className='text-sm'><strong>Matrícula:</strong> {item.matricula}</p>
+                                                    <p className='text-sm'><strong>Poderes:</strong> {item.poderes}</p>
+                                                    <div>
+                                                        <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 text-center">
+                                            No hay historial de abogados registrado aún.
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </form>
                     </div>
 
-                    <div className="w-full md:w-1/2 pl-0 md:pl-4">
-                        <h2 className="text-xl font-bold mb-4">Carga de Víctima</h2>
+                    <div className="w-full md:w-1/2 pl-0 md:pl-4 bg-white p-4 rounded-md shadow-md border border-gray-300">
+                        <h2 className="text-l font-bold mb-4">Carga de Víctima</h2>
                         <form className="bg-white p-4 rounded-md shadow-md">
                             <div className="flex flex-col items-center mb-4">
                                 <div className="relative flex justify-center items-center">
@@ -730,55 +732,56 @@ const CargaJudicial = () => {
                                     Cargar
                                 </button>
                             </div>
+                            <div className='bg-white p-4 rounded-md shadow-md border border-gray-300'>
+                                <h3 className="text-sm font-bold">Historial de Víctimas</h3>
+                                <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
+                                    {victimas.length > 0 ? (
+                                        <ul className="mt-2">
+                                            {victimas.map((item, index) => (
+                                                <li key={item.id} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
+                                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                                                        <div className="flex-grow">
+                                                            <p className="text-sm"><strong>Nombres:</strong> {item.nombres}</p>
+                                                            <p className="text-sm"><strong>DNI:</strong> {item.dni}</p>
+                                                            <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
+                                                        </div>
+                                                        <div className="mt-4 md:mt-0 md:ml-4 flex flex-col items-center">
+                                                            {verFoto(item.foto)}
 
-                            <h3 className="text-sm font-bold mt-4">Historial de Víctimas</h3>
-                            <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
-                                {victimas.length > 0 ? (
-                                    <ul className="mt-2">
-                                        {victimas.map((item, index) => (
-                                            <li key={item.id} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
-                                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-                                                    <div className="flex-grow">
-                                                        <p className="text-sm"><strong>Nombres:</strong> {item.nombres}</p>
-                                                        <p className="text-sm"><strong>DNI:</strong> {item.dni}</p>
-                                                        <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
-                                                    </div>
-                                                    <div className="mt-4 md:mt-0 md:ml-4 flex flex-col items-center">
-                                                        {verFoto(item.foto)}
-
-                                                        {item.foto ? (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => openModal(item.foto)}
-                                                                className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs"
-                                                            >
-                                                                Ver Foto
-                                                            </button>
-                                                        ) : (
-                                                            <>
-                                                                <input
-                                                                    id={`foto-historial-${item.id}`}
-                                                                    type="file"
-                                                                    accept="image/*"
-                                                                    onChange={(e) => handleFotoHistorialChange(e, index)}
-                                                                    className="hidden"
-                                                                />
-                                                                <label
-                                                                    htmlFor={`foto-historial-${item.id}`}
-                                                                    className="mt-2 bg-blue-400 text-white p-2 rounded-full cursor-pointer text-xs"
+                                                            {item.foto ? (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => openModal(item.foto)}
+                                                                    className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs"
                                                                 >
-                                                                    Subir Foto
-                                                                </label>
-                                                            </>
-                                                        )}
+                                                                    Ver Foto
+                                                                </button>
+                                                            ) : (
+                                                                <>
+                                                                    <input
+                                                                        id={`foto-historial-${item.id}`}
+                                                                        type="file"
+                                                                        accept="image/*"
+                                                                        onChange={(e) => handleFotoHistorialChange(e, index)}
+                                                                        className="hidden"
+                                                                    />
+                                                                    <label
+                                                                        htmlFor={`foto-historial-${item.id}`}
+                                                                        className="mt-2 bg-blue-400 text-white p-2 rounded-full cursor-pointer text-xs"
+                                                                    >
+                                                                        Subir Foto
+                                                                    </label>
+                                                                </>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-sm text-gray-500 text-center">No hay víctimas cargadas aún.</p>
-                                )}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 text-center">No hay víctimas cargadas aún.</p>
+                                    )}
+                                </div>
                             </div>
                         </form>
 

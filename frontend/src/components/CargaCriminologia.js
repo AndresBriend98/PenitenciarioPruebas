@@ -200,12 +200,12 @@ const CargaCriminologia = () => {
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col z-10">
             <Header/>
             {/* Contenedor principal con grid layout */}
-            <div className='bg-white p-4 rounded-md shadow-md mb-4 mt-5'>
-                <h1 className="text-2xl font-bold mb-4">Area Criminológica</h1>
+            <div className='bg-white p-4 rounded-md shadow-md mb-4 mt-5 '>
+                <h1 className="text-xl font-bold mb-4">Area Criminológica</h1>
 
                 {/* Solo muestra esta sección si el tipo de interno es "Procesado" */}
                 {user.typeofintern === 'Procesado' && (
-                    <div className="bg-white p-4 rounded-md shadow-md mb-4">
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <label className="block text-sm font-semibold mb-2 mt-2">
                             <input
                                 type="checkbox"
@@ -219,6 +219,7 @@ const CargaCriminologia = () => {
 
                         {estaAdheridoRegimen && (
                             <>
+                            
                                 <label className="block text-sm font-semibold mb-2 mt-4">Adhesión al régimen</label>
                                 <input
                                     type="file"
@@ -293,10 +294,10 @@ const CargaCriminologia = () => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
                     {/* Formulario de Carga Criminológica */}
-                    <div className="bg-white p-4 rounded-md shadow-md mb-4">
-                        <h1 className="text-2xl font-bold mb-4">Carga Criminológica</h1>
+                    <div className="bg-white p-4 rounded-md shadow-md mb-4 border border-gray-300 rounded mt-2 bg-gray-50 mb-4">
+                        <h1 className="text-l font-bold mb-4">Carga Criminológica</h1>
                         {/* Si hay un error, muestra el mensaje */}
                         {hasErrorCriminologico && (
                             <p className="text-red-500 text-sm mb-5">Por favor, complete al menos un campo para poder realizar una carga.</p>
@@ -363,7 +364,7 @@ const CargaCriminologia = () => {
 
 
                         {/* Historial Criminológico */}
-                        <div className="bg-white p-4 rounded-md shadow-md mb-4 mt-5">
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
                             <h1 className="text-sm font-bold mt-4">Historial de Carga</h1>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                                 {/* Filtrar las entradas del historial que tienen al menos un campo cargado */}
@@ -486,8 +487,8 @@ const CargaCriminologia = () => {
 
 
                     {/* Formulario de Carga Beneficio */}
-                    <div className="bg-white p-4 rounded-md shadow-md mb-4">
-                        <h1 className="text-2xl font-bold mb-4">Carga Beneficio</h1>
+                    <div className="bg-white p-4 rounded-md shadow-md mb-4 border border-gray-300 rounded mt-2 bg-gray-50 mb-4">
+                        <h1 className="text-l font-bold mb-4">Carga Beneficio</h1>
                         {hasErrorBeneficio && (
                             <p className="text-red-500 text-sm mb-5">Por favor, complete al menos un campo para poder realizar una carga.</p>
                         )}
@@ -539,7 +540,7 @@ const CargaCriminologia = () => {
                             </div>
                         </div>
                         {/* Historial de Beneficio */}
-                        <div className="bg-white p-4 rounded-md shadow-md mb-4 mt-5">
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
                             <h1 className="text-sm font-bold mt-4">Historial de Carga</h1>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                                 {historialBeneficio.length > 0 ? (

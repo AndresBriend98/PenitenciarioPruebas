@@ -124,10 +124,10 @@ const CargaTrabajo = () => {
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">\
             <Header/>
             <div className="bg-white p-6 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Carga Trabajo</h1>
-                <div className="flex flex-col md:flex-row gap-4">
+                <h1 className="text-xl font-bold mb-4">Carga Trabajo</h1>
+                <div className="flex flex-col md:flex-row gap-4 ">
                     {/* Formulario de entrada de datos */}
-                    <div className="flex flex-col w-full md:w-1/2 p-4 bg-white-100 shadow-md rounded-md">
+                    <div className="flex flex-col w-full md:w-1/2 p-4 bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <label className="font-medium text-sm mb-2">Tipo de Capacitación</label>
                         <input
                             type="text"
@@ -204,7 +204,7 @@ const CargaTrabajo = () => {
                         </div>
                     </div>
                     {/* Mostrar historial de cargas */}
-                    <div className="flex flex-col w-full md:w-1/2 p-4 bg-white rounded-md shadow-md">
+                    <div className="flex flex-col w-full md:w-1/2 bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <h2 className="text-sm font-bold mt-4">Historial de Carga</h2>
                         <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-96 overflow-y-auto"> {/* Limita la altura y agrega scroll */}
                             {historial.length === 0 ? (

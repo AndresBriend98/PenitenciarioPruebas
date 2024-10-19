@@ -118,10 +118,32 @@ const CargaVisitas = () => {
     const [historialVisitasProhibidas, setHistorialVisitasProhibidas] = useState([]);
     const [historialVisitasSancionadas, setHistorialVisitasSancionadas] = useState([]);  // Historial de visitas sancionadas
     const photoInputRef = useRef(null);  // Referencia para subir fotos
+
     // Función para verificar si el DNI está en el historial
     const isDniAlreadyInHistory = (dni) => {
         return historialVisitasProhibidas.some(visita => visita.dni === dni);
     };
+
+    const handleInputChangeNuevaVisita = (e) => {
+        const { id, value, type, checked } = e.target;
+
+        setNuevaVisita(prevState => {
+            // Si el campo que se está modificando es comportamiento o observación
+            if (id === 'comportamiento' || id === 'observacion') {
+                return {
+                    ...prevState,
+                    [id]: type === 'checkbox' ? checked : value,
+                    // Asignar la fecha de carga solo si no está definida
+                    [`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`]: prevState[id] !== value ? prevState[`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`] || new Date().toLocaleString() : prevState[`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`]
+                };
+            }
+            return {
+                ...prevState,
+                [id]: type === 'checkbox' ? checked : value
+            };
+        });
+    };
+
 
     // Función para verificar si el DNI estuvo sancionado y ya cumplió la sanción
     const checkDniSancionadoCumplido = (dni) => {
@@ -159,6 +181,21 @@ const CargaVisitas = () => {
         comportamiento: '',
         observacion: ''
     });
+
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setNuevaVisita((prev) => ({
+                    ...prev,
+                    foto: reader.result,  // Actualizar el estado con la nueva imagen
+                }));
+            };
+            reader.readAsDataURL(file); // Leer la imagen como base64
+        }
+    };
+
     const [editIndex, setEditIndex] = useState(null);  // Para editar visitas
     const [errors, setErrors] = useState({});  // Para manejar errores de validación
     // Estado para almacenar el filtro por DNI
@@ -187,6 +224,24 @@ const CargaVisitas = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
+    const handleSaveComportamientoObservacion = () => {
+        const updatedHistorial = historialVisitas.map((item) =>
+            item.id === selectedItemId
+                ? {
+                    ...item,
+                    [comportamientoObservacion.tipo]: comportamientoObservacion.texto,
+                    // Si no existe la fecha de carga, asignarla. Si ya existe, no la sobreescribimos.
+                    [`fecha${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]: item[`fecha${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`] || new Date().toLocaleString(),
+                    // Solo actualizamos la fecha de modificación si estamos editando el campo correspondiente
+                    [`fechaUltimaModificacion${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]: isEditing ? new Date().toLocaleString() : item[`fechaUltimaModificacion${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]
+                }
+                : item
+        );
+        setHistorialVisitas(updatedHistorial);
+        setShowComportamientoObservacionModal(false);
+    };
+
     // y si aún está dentro del tiempo de sanción
     const checkDniInSancionadas = (dni) => {
         const visitaSancionada = historialVisitasSancionadas.find(visita => visita.dni === dni);
@@ -207,44 +262,55 @@ const CargaVisitas = () => {
         return { isStillSanctioned: false, hasFulfilledSanction: false }; // No está sancionado
     };
 
-    // Modificación de la función handleAddVisita para incluir la verificación del estado de sanción
     const handleAddVisita = () => {
         if (!validateFields()) {
             return;  // Si hay errores de validación, no continuar
         }
 
-
         if (isDniAlreadyInHistory(nuevaVisita.dni)) {
             setModalMessage('El DNI ingresado se encuentra en el historial de visitas prohibidas.');
             setShowModalAlert(true);
             return;
-          }
-      
-          const { isStillSanctioned, hasFulfilledSanction } = checkDniInSancionadas(nuevaVisita.dni);
-      
-          if (isStillSanctioned) {
+        }
+
+        const { isStillSanctioned, hasFulfilledSanction } = checkDniInSancionadas(nuevaVisita.dni);
+
+        if (isStillSanctioned) {
             setModalMessage('El DNI ingresado se encuentra en el historial de visitas sancionadas y la sanción aún no ha sido cumplida.');
             setShowModalAlert(true);
             return;
-          }
-      
-          if (hasFulfilledSanction) {
+        }
+
+        if (hasFulfilledSanction) {
             setModalMessage('El DNI está registrado en el historial de visitas sancionadas, pero ya ha cumplido su sanción. Carga completada.');
             setShowModalAlert(true);
-          }
+        }
 
-        // Usar la relación correcta (si es "Otro", usar 'otraRelacion')
         const nuevaRelacion = nuevaVisita.relacion === "Otro" ? nuevaVisita.otraRelacion : nuevaVisita.relacion;
+
+        // Definir fecha de carga de la nueva visita
+        const nuevaVisitaConFecha = {
+            ...nuevaVisita,
+            relacion: nuevaRelacion,
+            fechaCarga: new Date().toLocaleString(),  // Asignar la fecha de carga en el momento de la creación
+            fechaUltimaModificacion: '',  // No modificar aún la fecha de modificación
+        };
 
         if (editIndex !== null) {
             // Editar una visita existente
             const updatedHistorial = [...historialVisitas];
-            updatedHistorial[editIndex] = { ...nuevaVisita, relacion: nuevaRelacion, fechaCarga: new Date().toLocaleString() };
+            updatedHistorial[editIndex] = {
+                ...nuevaVisitaConFecha,
+                fechaUltimaModificacion: new Date().toLocaleString(),
+            };
             setHistorialVisitas(updatedHistorial);
             setEditIndex(null);
         } else {
             // Agregar una nueva visita
-            setHistorialVisitas(prev => [...prev, { ...nuevaVisita, relacion: nuevaRelacion, fechaCarga: new Date().toLocaleString() }]);
+            setHistorialVisitas(prev => [
+                ...prev,
+                nuevaVisitaConFecha
+            ]);
         }
 
         // Resetear el formulario después de agregar la visita
@@ -255,7 +321,7 @@ const CargaVisitas = () => {
             nombre: '',
             dni: '',
             relacion: '',
-            otraRelacion: '',  // Limpiar 'otraRelacion'
+            otraRelacion: '',
             tipoVisita: '',
             motivoVisita: '',
             fechaVisita: '',
@@ -264,15 +330,6 @@ const CargaVisitas = () => {
             observacion: ''
         });
         setErrors({});
-    };
-
-    // Otros manejadores de eventos...
-    const handleInputChangeNuevaVisita = (e) => {
-        const { id, value, type, checked } = e.target;
-        setNuevaVisita(prevState => ({
-            ...prevState,
-            [id]: type === 'checkbox' ? checked : value
-        }));
     };
 
     useEffect(() => {
@@ -287,43 +344,13 @@ const CargaVisitas = () => {
                 const updatedHistorial = [...historialVisitas];
                 updatedHistorial[index] = {
                     ...updatedHistorial[index],
-                    foto: reader.result,
+                    foto: reader.result,  // Actualizar la foto en el historial de visitas
                 };
                 setHistorialVisitas(updatedHistorial);
             };
             reader.readAsDataURL(file);
         }
     };
-
-
-    const handlePhotoChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setNuevaVisita((prev) => ({
-                    ...prev,
-                    foto: reader.result,
-                }));
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleSaveComportamientoObservacion = () => {
-        const updatedHistorial = historialVisitas.map((item) =>
-            item.id === selectedItemId
-                ? {
-                    ...item,
-                    [comportamientoObservacion.tipo]: comportamientoObservacion.texto,
-                    [`fecha${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]: new Date().toLocaleString(), // Actualizar la fecha de carga al momento de la edición
-                }
-                : item
-        );
-        setHistorialVisitas(updatedHistorial);
-        setShowComportamientoObservacionModal(false);
-    };
-
 
     const handleViewPhoto = (photoUrl) => {
         setModalPhoto(photoUrl);
@@ -350,38 +377,44 @@ const CargaVisitas = () => {
 
     const closeModalAlert = () => {
         setShowModalAlert(false);
-      };
+    };
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             <Header />
             <Modal isOpen={showModalAlert} message={modalMessage} onClose={closeModalAlert} />
-            <div className="bg-white p-6 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Carga de Visitas</h1>
+            <div className="bg-white bg-white p-4 rounded-md shadow-md border border-gray-300">
+                <h1 className="text-xl font-bold mb-4">Carga de Visitas</h1>
 
-                <div className="flex flex-col items-center mb-3">
+                <div className="flex flex-col items-center mb-3 ">
                     <div className="relative flex justify-center items-center">
-                        <div className="relative w-28 h-28 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
-                            {nuevaVisita.foto ? (
-                                <img src={nuevaVisita.foto} alt="Foto Visita" className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="text-white text-xs">Foto</span>
-                            )}
+                        <div className="relative flex justify-center items-center">
+                            <div className="relative w-28 h-28 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
+                                {nuevaVisita.foto ? (
+                                    <img src={nuevaVisita.foto} alt="Foto Visita" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-white text-xs">Foto</span>
+                                )}
+                            </div>
+
+                            {/* Input de archivo que se mantiene oculto */}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handlePhotoChange}  // Manejador de cambio de foto
+                                className="hidden"
+                                ref={photoInputRef}  // Referencia a input de foto
+                            />
+
+                            {/* Botón para activar el input */}
+                            <label
+                                htmlFor="fotoInput"
+                                className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer"
+                                onClick={() => photoInputRef.current.click()}  // Abrir selector de archivo al hacer clic
+                            >
+                                +
+                            </label>
                         </div>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handlePhotoChange}
-                            className="hidden"
-                            ref={photoInputRef}
-                        />
-                        <label
-                            htmlFor="fotoInput"
-                            className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer"
-                            onClick={() => photoInputRef.current.click()}
-                        >
-                            +
-                        </label>
                     </div>
                 </div>
 
@@ -600,7 +633,7 @@ const CargaVisitas = () => {
                                         const sancionadoInfo = checkDniSancionadoCumplido(item.dni); // Verificar si estuvo sancionado
 
                                         return (
-                                            <li key={index} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
+                                            <li key={item.id} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
                                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
                                                     <div className="flex-grow">
                                                         {/* Checkboxes */}
@@ -631,14 +664,17 @@ const CargaVisitas = () => {
                                                         <p className='text-sm'><strong>Fecha de la Visita:</strong> {item.fechaVisita}</p>
                                                         <p className='text-sm'><strong>Hora de la Visita:</strong> {item.horaVisita}</p>
 
-                                                        {/* Comportamiento y observaciones */}
-                                                        {/* Comportamiento y observaciones */}
                                                         {item.comportamiento && (
                                                             <p className='text-sm'>
                                                                 <strong>Comportamiento:</strong> {item.comportamiento}
                                                                 {item.fechaComportamiento && (
                                                                     <span className="text-gray-500">
                                                                         {` Fecha de carga: ${item.fechaComportamiento} `}
+                                                                    </span>
+                                                                )}
+                                                                {item.fechaUltimaModificacionComportamiento && item.fechaComportamiento !== item.fechaUltimaModificacionComportamiento && (
+                                                                    <span className="text-gray-500">
+                                                                        {` (Última modificación: ${item.fechaUltimaModificacionComportamiento})`}
                                                                     </span>
                                                                 )}
                                                             </p>
@@ -652,9 +688,13 @@ const CargaVisitas = () => {
                                                                         {` Fecha de carga: ${item.fechaObservacion} `}
                                                                     </span>
                                                                 )}
+                                                                {item.fechaUltimaModificacionObservacion && item.fechaObservacion !== item.fechaUltimaModificacionObservacion && (
+                                                                    <span className="text-gray-500">
+                                                                        {` (Última modificación: ${item.fechaUltimaModificacionObservacion})`}
+                                                                    </span>
+                                                                )}
                                                             </p>
                                                         )}
-
 
                                                         <p className="text-sm text-gray-500 mt-2 mb-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
 
@@ -717,8 +757,8 @@ const CargaVisitas = () => {
                                 </ul>
                             )
                         )}
-
                     </div>
+
 
                     <div className="flex justify-end mt-4">
                         <button
@@ -750,25 +790,26 @@ const CargaVisitas = () => {
                 {showComportamientoObservacionModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                         <div className="bg-white p-4 rounded-md w-80">
-                            <h2 className="text-lg font-bold mb-4">
+                            <h2 className="text-l font-bold mb-4">
                                 {isEditing ? 'Editar' : 'Agregar'} {comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}
                             </h2>
                             <textarea
                                 value={comportamientoObservacion.texto}
                                 onChange={(e) => setComportamientoObservacion({ ...comportamientoObservacion, texto: e.target.value })}
-                                className="w-full h-32 border border-gray-300 p-2 rounded-md mb-4"
+                                className="w-full h-32 border border-gray-300 p-2 rounded-md  text-sm mb-4"
+                                placeholder={comportamientoObservacion.tipo === 'comportamiento' ? 'Ingrese algún comportamiento...' : 'Ingrese alguna observación...'}
                             />
                             <div className="flex justify-end">
                                 <button
                                     onClick={handleSaveComportamientoObservacion}
                                     disabled={!comportamientoObservacion.texto.trim()}
-                                    className={`bg-blue-500 text-white p-2 rounded-full mr-2 ${!comportamientoObservacion.texto.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
+                                    className={`bg-green-500 text-white p-2 text-xs rounded mr-2 ${!comportamientoObservacion.texto.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'}`}
                                 >
                                     Guardar
                                 </button>
                                 <button
                                     onClick={() => setShowComportamientoObservacionModal(false)}
-                                    className="bg-gray-500 text-white p-2 rounded-full"
+                                    className="bg-gray-500 text-white p-2 text-xs rounded"
                                 >
                                     Cancelar
                                 </button>

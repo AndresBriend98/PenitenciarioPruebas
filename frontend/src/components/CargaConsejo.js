@@ -31,7 +31,7 @@ const CargaConsejo = () => {
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             <Header />
             <div className="bg-white p-4 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Carga Consejo (Esta en desarrollo)</h1>
+                <h1 className="text-xl font-bold mb-4">Carga Consejo (Esta en desarrollo)</h1>
                 <div className="grid grid-cols-1 gap-4">
 
                     {/* Cargar Archivo */}

@@ -1,4 +1,4 @@
-import React, { useState,} from 'react';
+import React, { useState, } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Modal from './ModalChanges';
@@ -178,8 +178,8 @@ const CargaFisionomia = () => {
             <Header />
             {/* Formulario de Detalles */}
             <div className="bg-white p-4 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Carga de Fisionomia</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <h1 className="text-l font-bold mb-4">Carga de Fisionomia</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-4 rounded-md shadow-md border border-gray-300">
                     {/* Estatura */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Estatura</label>
@@ -413,29 +413,29 @@ const CargaFisionomia = () => {
                             className="border rounded p-2 w-full text-sm"
                         />
                     </div>
-                </div>
-                {/* Tatuajes/Marcas Distintivas */}
-                <div className='mt-2'>
-                    <label className="block text-sm font-semibold mb-2">Tatuajes/Marcas Distintivas</label>
-                    <input
-                        type="file"
-                        className="border rounded p-2 w-full text-sm"
-                        onChange={(e) => handleInputChange(e, 'imagen')}
-                        disabled={!isEditable}
-                    />
+                    {/* Tatuajes/Marcas Distintivas */}
+                    <div className='mt-2'>
+                        <label className="block text-sm font-semibold mb-2">Tatuajes/Marcas Distintivas</label>
+                        <input
+                            type="file"
+                            className="border rounded p-2 w-full text-sm"
+                            onChange={(e) => handleInputChange(e, 'imagen')}
+                            disabled={!isEditable}
+                        />
 
-                    {/* Mostrar el enlace para descargar el archivo subido */}
-                    {datosFisionomicos.imagenNombre && (
-                        <div className="mt-2">
-                            <a
-                                href={datosFisionomicos.imagen} // La URL del archivo en memoria
-                                download={datosFisionomicos.imagenNombre} // Usar el nombre original del archivo
-                                className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
-                            >
-                                Descargar Tatuajes/Marcas Distintivas
-                            </a>
-                        </div>
-                    )}
+                        {/* Mostrar el enlace para descargar el archivo subido */}
+                        {datosFisionomicos.imagenNombre && (
+                            <div className="mt-2">
+                                <a
+                                    href={datosFisionomicos.imagen} // La URL del archivo en memoria
+                                    download={datosFisionomicos.imagenNombre} // Usar el nombre original del archivo
+                                    className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                >
+                                    Descargar Tatuajes/Marcas Distintivas
+                                </a>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex justify-between mt-10">

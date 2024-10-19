@@ -31,8 +31,6 @@ const ValidacionUsuarios = () => {
         handleCloseModal();
     };
 
-
-
     const handleOpenConfirmationModal = (user, action) => {
         setSelectedUser(user);
         setConfirmationAction(action);

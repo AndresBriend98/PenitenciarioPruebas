@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 
@@ -64,14 +64,14 @@ const CargaRealojamiento = () => {
 
         // Validación de nombre y DNI del encargado
         if (!nuevoEncargado.nombrecompleto) {
-            newErrors.encargado.nombrecompleto = 'Nombre del encargado es requerido';
+            newErrors.encargado.nombrecompleto = 'Nombre y Apellido de la custodia es requerido';
             isValid = false;
         } else {
             newErrors.encargado.nombrecompleto = '';
         }
 
         if (!nuevoEncargado.dni) {
-            newErrors.encargado.dni = 'DNI del encargado es requerido';
+            newErrors.encargado.dni = 'DNI de la custodia es requerido';
             isValid = false;
         } else {
             newErrors.encargado.dni = '';
@@ -146,8 +146,8 @@ const CargaRealojamiento = () => {
 
         // Validar encargados (debe haber al menos uno)
         if (RealojamientoData.encargados.length === 0) {
-            newErrors.encargado.nombrecompleto = 'Nombre del encargado es requerido';
-            newErrors.encargado.dni = 'DNI del encargado es requerido';
+            newErrors.encargado.nombrecompleto = 'Nombre de la custodia es requerido';
+            newErrors.encargado.dni = 'DNI de la custodia es requerido';
             isValid = false;
         }
 
@@ -258,7 +258,7 @@ const CargaRealojamiento = () => {
     };
     const handleConfirmDeleteActa = () => {
         const newHistorial = [...historialRealojamientos];
-    
+
         // Solo eliminamos los archivos pero mantenemos la fecha de carga y edición
         newHistorial[actaToDelete] = {
             ...newHistorial[actaToDelete],
@@ -266,11 +266,11 @@ const CargaRealojamiento = () => {
             nombreActaArchivo: null,  // Eliminar el nombre del archivo
             fechaEliminacionActa: new Date().toLocaleString(),  // Actualizar fecha de eliminación
         };
-    
+
         setHistorialRealojamientos(newHistorial); // Actualiza el historial
         setConfirmDeleteActaModal(false);  // Cierra el modal
     };
-    
+
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             {confirmDeleteActaModal && (
@@ -298,11 +298,11 @@ const CargaRealojamiento = () => {
 
             <Header />
             <div className="bg-white p-6 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Carga de Realojamiento</h1>
+                <h1 className="text-xl font-bold mb-4">Carga de Realojamiento</h1>
                 <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">
                     {/* Campos para agregar encargados */}
                     <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">
-                        <h2 className="text-lg font-bold mb-2">Encargado del Realojamiento</h2>
+                        <h2 className="text-l font-bold mb-2">Custodia del Realojamiento</h2>
 
                         <div className="mb-2">
                             <label className="block text-sm font-semibold mb-1">Nombre/s y Apellido/s</label>
@@ -323,7 +323,7 @@ const CargaRealojamiento = () => {
                         <div className="mb-2">
                             <label className="block text-sm font-semibold mb-1">DNI</label>
                             <input
-                                type="text"
+                                type="number"
                                 name="dni"
                                 value={nuevoEncargado.dni}
                                 onChange={handleNuevoEncargadoChange}
@@ -341,14 +341,14 @@ const CargaRealojamiento = () => {
                                 onClick={handleAgregarEncargado}
                                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                             >
-                                Agregar Encargado
+                                Agregar Custodia
                             </button>
                         </div>
 
                         {/* Mostrar encargados agregados */}
                         {RealojamientoData.encargados.length > 0 && (
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50">
-                                <h3 className="text-l font-bold mb-2">Encargados Agregados</h3>
+                                <h3 className="text-sm font-bold mb-2">Custodias Agregados</h3>
                                 <ul className="space-y-2">
                                     {RealojamientoData.encargados.map((encargado, index) => (
                                         <li key={index} className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 flex flex-col items-start space-y-2">
@@ -364,7 +364,7 @@ const CargaRealojamiento = () => {
                                             <div className="flex justify-start w-full">
                                                 <button
                                                     onClick={() => handleEliminarEncargado(index)}
-                                                    className="bg-red-400 text-white px-2 py-1 rounded text-xs sm:text-sm hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                                                    className="bg-red-400 text-white px-2 py-1 rounded text-xs sm:text-xs hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                                                 >
                                                     Eliminar
                                                 </button>
@@ -375,144 +375,144 @@ const CargaRealojamiento = () => {
                             </div>
                         )}
                     </div>
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">
+                        <h2 className="text-l font-bold mb-2">Chofer</h2>
 
-                </div>
-
-
-                <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">
-                    <h2 className="text-lg font-bold mb-2">Chofer</h2>
-
-                    <label className="block text-sm font-semibold mb-2">Nombre/s y Apellido/s</label>
-                    <input
-                        type="text"
-                        id="choferNombre"
-                        name="nombrecompleto"
-                        value={RealojamientoData.chofer ? RealojamientoData.chofer.nombrecompleto : ''} // Verifica si chofer está definido
-                        onChange={handleChoferChange}
-                        className="w-full p-1 border border-gray-300 rounded text-sm"
-                    />{errors.chofer.nombrecompleto && (
-                        <p className="text-red-500 text-sm">{errors.chofer.nombrecompleto}</p>
-                    )}
-
-
-                    <label className="block text-sm font-semibold mt-2 mb-2">DNI</label>
-                    <input
-                        type="text"
-                        id="choferDNI"
-                        name="dni"
-                        value={RealojamientoData.chofer ? RealojamientoData.chofer.dni : ''} // Verifica si chofer está definido
-                        onChange={handleChoferChange}
-                        className="w-full p-1 border border-gray-300 rounded text-sm"
-                    />
-                    {errors.chofer.dni && (
-                        <p className="text-red-500 text-sm">{errors.chofer.dni}</p>
-                    )}
-                </div>
-
-                {/* Información del Realojamiento */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
-                        <label className="block text-sm font-semibold mb-2">Fecha de Realojamiento</label>
-                        <input
-                            type="date"
-                            name="fechaRealojamiento"
-                            value={RealojamientoData.fechaRealojamiento}
-                            onChange={handleChange}
-                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.fechaRealojamiento ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
-                        />
-                        {errors.fechaRealojamiento && <p className="text-red-500 text-sm">{errors.fechaRealojamiento}</p>}
-                    </div>
-
-                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
-                        <label className="block text-sm font-semibold mb-2">Horario del Realojamiento</label>
-                        <input
-                            type="time"
-                            name="horarioRealojamiento"
-                            value={RealojamientoData.horarioRealojamiento}
-                            onChange={handleChange}
-                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.horarioRealojamiento ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
-                        />
-                        {errors.horarioRealojamiento && <p className="text-red-500 text-sm">{errors.horarioRealojamiento}</p>}
-                    </div>
-                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
-                        <label className="block text-sm font-semibold mb-2">Número de Acta</label>
+                        <label className="block text-sm font-semibold mb-2">Nombre/s y Apellido/s</label>
                         <input
                             type="text"
-                            name="numeroActa"
-                            value={RealojamientoData.numeroActa}
-                            onChange={handleChange}
-                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.numeroActa ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
-                            placeholder="Número de acta"
-                        />
-                        {errors.numeroActa && <p className="text-red-500 text-sm">{errors.numeroActa}</p>}
-                    </div>
+                            id="choferNombre"
+                            name="nombrecompleto"
+                            value={RealojamientoData.chofer ? RealojamientoData.chofer.nombrecompleto : ''} // Verifica si chofer está definido
+                            onChange={handleChoferChange}
+                            className="w-full p-1 border border-gray-300 rounded text-sm"
+                        />{errors.chofer.nombrecompleto && (
+                            <p className="text-red-500 text-sm">{errors.chofer.nombrecompleto}</p>
+                        )}
 
-                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
-                        <label className="block text-sm font-semibold mb-2">Patente del Móvil Utilizado</label>
+
+                        <label className="block text-sm font-semibold mt-2 mb-2">DNI</label>
                         <input
-                            type="text"
-                            name="patenteMovil"
-                            value={RealojamientoData.patenteMovil}
-                            onChange={handleChange}
-                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.patenteMovil ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
-                            placeholder="Patente del móvil"
+                            type="number"
+                            id="choferDNI"
+                            name="dni"
+                            value={RealojamientoData.chofer ? RealojamientoData.chofer.dni : ''} // Verifica si chofer está definido
+                            onChange={handleChoferChange}
+                            className="w-full p-1 border border-gray-300 rounded text-sm"
                         />
-                        {errors.patenteMovil && <p className="text-red-500 text-sm">{errors.patenteMovil}</p>}
+                        {errors.chofer.dni && (
+                            <p className="text-red-500 text-sm">{errors.chofer.dni}</p>
+                        )}
                     </div>
 
-                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
-                        <label className="block text-sm font-semibold">Lugar al Cual se Traslada</label>
-                        <select
-                            name="lugarDestino"
-                            value={RealojamientoData.lugarDestino}
-                            onChange={handleChange}
-                            className={`w-full p-1 border border-gray-300 rounded text-sm mt-3 ${errors.lugarDestino ? 'border-red-500' : 'border-gray-300'}`}
+                    {/* Información del Realojamiento */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                            <label className="block text-sm font-semibold mb-2">Fecha de Realojamiento</label>
+                            <input
+                                type="date"
+                                name="fechaRealojamiento"
+                                value={RealojamientoData.fechaRealojamiento}
+                                onChange={handleChange}
+                                className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.fechaRealojamiento ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                            />
+                            {errors.fechaRealojamiento && <p className="text-red-500 text-sm">{errors.fechaRealojamiento}</p>}
+                        </div>
+
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                            <label className="block text-sm font-semibold mb-2">Horario del Realojamiento</label>
+                            <input
+                                type="time"
+                                name="horarioRealojamiento"
+                                value={RealojamientoData.horarioRealojamiento}
+                                onChange={handleChange}
+                                className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.horarioRealojamiento ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                            />
+                            {errors.horarioRealojamiento && <p className="text-red-500 text-sm">{errors.horarioRealojamiento}</p>}
+                        </div>
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                            <label className="block text-sm font-semibold mb-2">Número de Acta</label>
+                            <input
+                                type="text"
+                                name="numeroActa"
+                                value={RealojamientoData.numeroActa}
+                                onChange={handleChange}
+                                className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.numeroActa ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                                placeholder="Número de acta"
+                            />
+                            {errors.numeroActa && <p className="text-red-500 text-sm">{errors.numeroActa}</p>}
+                        </div>
+
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                            <label className="block text-sm font-semibold mb-2">Patente del Móvil Utilizado</label>
+                            <input
+                                type="text"
+                                name="patenteMovil"
+                                value={RealojamientoData.patenteMovil}
+                                onChange={handleChange}
+                                className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.patenteMovil ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                                placeholder="Patente del móvil"
+                            />
+                            {errors.patenteMovil && <p className="text-red-500 text-sm">{errors.patenteMovil}</p>}
+                        </div>
+
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                            <label className="block text-sm font-semibold">Lugar al Cual se Traslada</label>
+                            <select
+                                name="lugarDestino"
+                                value={RealojamientoData.lugarDestino}
+                                onChange={handleChange}
+                                className={`w-full p-1 border border-gray-300 rounded text-sm mt-3 ${errors.lugarDestino ? 'border-red-500' : 'border-gray-300'}`}
+                            >
+                                <option value="" disabled>Seleccionar unidad de destino</option>
+                                {/* Opciones de Unidades */}
+                                {[...Array(12)].map((_, index) => (
+                                    <option key={index} value={`Unidad ${index + 1}`}>
+                                        Unidad {index + 1}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.lugarDestino && <p className="text-red-500 text-sm">{errors.lugarDestino}</p>}
+                        </div>
+
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                            <label className="block text-sm font-semibold mb-2">Motivo de Realojamiento</label>
+                            <textarea
+                                name="motivoRealojamiento"
+                                value={RealojamientoData.motivoRealojamiento}
+                                onChange={handleChange}
+                                className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.motivoRealojamiento ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
+                                rows="2"
+                                placeholder="Motivo del Realojamiento"
+                            />
+                            {errors.motivoRealojamiento && <p className="text-red-500 text-sm">{errors.motivoRealojamiento}</p>}
+                        </div>
+                    </div>
+                    <div className="mt-4 bg-white flex flex-col md:flex-row md:items-start md:justify-start bg-white p-4 rounded-md shadow-md border border-gray-300">
+                        <label className="block text-sm font-semibold mb-2 md:mb-0 md:mr-5">Subir Ácta / Oficio</label>
+                        <input
+                            type="file"
+                            onChange={handleFileChange}
+                            accept=".pdf,.doc,.docx"
+                            className="mt-1 mb-2 text-sm border border-gray-300 rounded p-1 w-full"
+                        />
+
+                    </div>
+                    <div className="flex justify-center mt-4">
+                        <button
+                            onClick={handleAgregarRealojamiento}
+                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                         >
-                            <option value="" disabled>Seleccionar unidad de destino</option>
-                            {/* Opciones de Unidades */}
-                            {[...Array(12)].map((_, index) => (
-                                <option key={index} value={`Unidad ${index + 1}`}>
-                                    Unidad {index + 1}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.lugarDestino && <p className="text-red-500 text-sm">{errors.lugarDestino}</p>}
+                            Cargar
+                        </button>
                     </div>
 
-                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
-                        <label className="block text-sm font-semibold mb-2">Motivo de Realojamiento</label>
-                        <textarea
-                            name="motivoRealojamiento"
-                            value={RealojamientoData.motivoRealojamiento}
-                            onChange={handleChange}
-                            className={`w-full p-1 border border-gray-300 rounded text-sm ${errors.motivoRealojamiento ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
-                            rows="2"
-                            placeholder="Motivo del Realojamiento"
-                        />
-                        {errors.motivoRealojamiento && <p className="text-red-500 text-sm">{errors.motivoRealojamiento}</p>}
-                    </div>
                 </div>
-                <div className="mt-4 bg-white flex flex-col md:flex-row md:items-start md:justify-start p-4 bg-white p-4 rounded-md shadow-md">
-                    <label className="block text-sm font-semibold mb-2 md:mb-0 md:mr-5">Subir Ácta / Oficio</label>
-                    <input
-                        type="file"
-                        onChange={handleFileChange}
-                        accept=".pdf,.doc,.docx"
-                        className="mt-1 mb-2 text-sm border border-gray-300 rounded p-1 w-full"
-                    />
 
-                </div>
-                <div className="flex justify-center mt-4">
-                    <button
-                        onClick={handleAgregarRealojamiento}
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
-                    >
-                        Cargar
-                    </button>
-                </div>
+
 
                 {/* Historial de Realojamientos */}
-                <div className="bg-white p-4 rounded-md shadow-md">
+                <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
                     <h3 className="text-sm font-bold mt-4">Historial de Realojamientos</h3>
                     <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                         {historialRealojamientos.length > 0 ? (
@@ -523,7 +523,7 @@ const CargaRealojamiento = () => {
                                             {/* Renderización dinámica de encargados */}
                                             {Realojamiento.encargados.length === 1 ? (
                                                 <div>
-                                                    <strong className="text-sm">Encargado:</strong>  <strong>Nombre/s y Apellido/s: </strong>{Realojamiento.encargados[0].nombrecompleto} - <strong>DNI:</strong>  {Realojamiento.encargados[0].dni}
+                                                    <strong className="text-sm">Custodia:</strong>  <strong>Nombre/s y Apellido/s: </strong>{Realojamiento.encargados[0].nombrecompleto} - <strong>DNI:</strong>  {Realojamiento.encargados[0].dni}
                                                 </div>
                                             ) : (
                                                 <div>

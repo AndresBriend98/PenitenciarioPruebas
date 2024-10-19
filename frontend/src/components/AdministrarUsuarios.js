@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { useNavigate } from 'react-router-dom';
 
 Modal.setAppElement('#root');
 
 const AdministrarUsuarios = () => {
+    const [searchDNI, setSearchDNI] = useState('');  // Campo de búsqueda por DNI
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedArea, setSelectedArea] = useState('');
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -13,14 +14,31 @@ const AdministrarUsuarios = () => {
     const navigate = useNavigate();
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
+    const [data, setData] = useState([]);  // Datos que se generarán una sola vez
 
-    const data = Array(50).fill({
-        name: 'Juan Carlos López',
-        dni: '18273984',
-        area: 'Psicologia',
-        unidad: '4',
-        usuario: 'juancarloslopez',
+    const areas = ["Salud", "Trabajo", "Judicial", "Social", "Criminología", "Psicología"];
+
+    useEffect(() => {
+        const generateRandomData = () => {
+            return Array.from({ length: 10 }, () => ({
+                name: `Juan Carlos López`,
+                dni: Math.floor(Math.random() * 100000000),  // Genera un DNI aleatorio
+                area: areas[Math.floor(Math.random() * areas.length)],  // Selección aleatoria de área
+                unidad: Math.floor(Math.random() * 10) + 1,  // Genera una unidad aleatoria
+                usuario: `usuario`,
+            }));
+        };
+
+        setData(generateRandomData());
+    }, []);
+
+    // Filtramos los datos antes de mapearlos
+    const filteredData = data.filter((item) => {
+        const matchesDNI = searchDNI === '' || (item.dni && item.dni.toString().startsWith(searchDNI));
+        const matchesArea = selectedArea ? item.area === selectedArea : true;
+        return matchesDNI && matchesArea;
     });
+
 
     const handleOpenModal = (user) => {
         setSelectedUser(user);
@@ -60,7 +78,7 @@ const AdministrarUsuarios = () => {
         console.log('Usuario eliminado:', selectedUser);
         handleCloseConfirmationModal();
         setShowDeleteSuccessModal(true);
-        setTimeout(() => setShowDeleteSuccessModal(false), 3000); 
+        setTimeout(() => setShowDeleteSuccessModal(false), 3000);
     };
 
 
@@ -85,15 +103,18 @@ const AdministrarUsuarios = () => {
             )}
 
             <div className="bg-gray-100 flex-1 p-4 rounded-md flex flex-col">
+                <div className="text-left text-base mb-4 md:mb-0">
+                    <p className='text-l mb-5'><strong>Administrar Usuarios</strong></p>
+                </div>
                 <div className="flex items-center mb-4 space-x-4">
-                    <div className="flex items-center">
-                        <label htmlFor="search" className="mr-3 text-base font-semibold text-sm">Buscar:</label>
+                    <div className="flex items-center mb-2 md:mb-0 md:mr-4">
+                        <label htmlFor="searchDNI" className="text-base font-semibold text-sm">Buscar DNI:</label>
                         <input
                             type="text"
-                            id="search"
+                            id="searchDNI"
                             placeholder="DNI"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            value={searchDNI}
+                            onChange={(e) => setSearchDNI(e.target.value)}
                             className="w-full p-1 border border-gray-300 rounded text-sm"
                         />
                     </div>
@@ -106,9 +127,12 @@ const AdministrarUsuarios = () => {
                             className="w-full p-1 border border-gray-300 rounded text-sm text-gray-400"
                         >
                             <option value="">Seleccione un área</option>
-                            {Array.from({ length: 12 }, (_, i) => (
-                                <option key={i + 1} value={i + 1}>Área {i + 1}</option>
-                            ))}
+                            <option value="Salud">Salud</option>
+                            <option value="Trabajo">Trabajo</option>
+                            <option value="Judicial">Judicial</option>
+                            <option value="Social">Social</option>
+                            <option value="Criminología">Criminología</option>
+                            <option value="Psicología">Psicología</option>
                         </select>
                     </div>
                 </div>
@@ -128,7 +152,7 @@ const AdministrarUsuarios = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.slice(0, 30).map((item, index) => (
+                                {filteredData.slice(0, 10).map((item, index) => (
                                     <tr key={index} className="hover:bg-gray-100">
                                         <td className="p-2 border text-xs">{index + 1}</td>
                                         <td className="p-2 border text-xs">{item.name}</td>
@@ -161,6 +185,7 @@ const AdministrarUsuarios = () => {
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
                     </div>
                 </div>

@@ -39,7 +39,7 @@ const CargaSalidas = () => {
         ventanaImpresion.document.close();
         ventanaImpresion.print(); // Imprimir el reporte
     };
-
+    const [encargados, setEncargados] = useState([]); // Lista de encargados (custodia)
     // Función para imprimir el registro
     const handlePrintRegistro = (index) => {
         const registro = historialAnulados[index];
@@ -134,39 +134,22 @@ const CargaSalidas = () => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Validación para los nuevos campos
-    const validateForm = () => {
-        const errors = {};
-        if (!formData.motivoSalida) errors.motivoSalida = 'Motivo de la salida es obligatorio.';
-        if (!formData.acompananteInterno) errors.acompananteInterno = 'Acompañante del interno es obligatorio.';
-        if (!formData.fechaSalida) errors.fechaSalida = 'Fecha de salida es obligatoria.';
-        if (!formData.horaSalida) errors.horaSalida = 'Hora de salida es obligatoria.';
-        if (!formData.fechaEntrada) errors.fechaEntrada = 'Fecha de entrada es obligatoria.';
-        if (!formData.horaEntrada) errors.horaEntrada = 'Hora de entrada es obligatoria.';
-        if (!formData.matriculaMovil) errors.matriculaMovil = 'Matrícula del móvil es obligatoria.';  // Nuevo campo
-        if (!formData.nombreCustodia) errors.nombreCustodia = 'Nombre del personal de custodia es obligatorio.'; // Nuevo campo
-        if (!formData.dniCustodia) errors.dniCustodia = 'DNI del personal de custodia es obligatorio.'; // Nuevo campo
-        if (!formData.nombreChofer) errors.nombreChofer = 'Nombre del chofer es obligatorio.';  // Nuevo campo
-        if (!formData.dniChofer) errors.dniChofer = 'DNI del chofer es obligatorio.';  // Nuevo campo
-
-        setErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
-    // Envío del formulario actualizado con los nuevos campos
+    // Función para manejar el submit del formulario
     const handleSubmit = () => {
         if (validateForm()) {
             const now = new Date();
-            const fechaCarga = now.toLocaleString();
+            const fechaCarga = now.toLocaleString(); // Fecha de carga de la observación
             const fechaSalida = formData.fechaSalida;
             const fechaEntrada = formData.fechaEntrada;
 
+            // Determinar el estado de la visita con las fechas de salida y entrada
             const estadoVisita = getEstadoVisita(fechaSalida, fechaEntrada);
 
             const newHistorial = {
                 ...formData,
-                fechaCarga,
-                estadoVisita
+                fechaCarga, // Asignamos la fecha de carga al nuevo historial
+                estadoVisita, // Agregamos el estado de la visita
+                encargados,  // Agregamos los encargados (custodias)
             };
 
             setHistorial((prev) => [...prev, newHistorial]);
@@ -189,6 +172,14 @@ const CargaSalidas = () => {
             setErrors({});
         }
     };
+
+
+    // Función para eliminar un encargado
+    const handleEliminarEncargado = (index) => {
+        const nuevosEncargados = encargados.filter((_, i) => i !== index);
+        setEncargados(nuevosEncargados);
+    };
+
     const navigate = useNavigate();
 
     const [errors, setErrors] = useState({});
@@ -211,16 +202,91 @@ const CargaSalidas = () => {
 
     const handleSave = () => {
         const updatedHistorial = [...historial];
+
         if (modalType === 'observacion') {
+            const fechaActual = new Date().toLocaleString();
+
             updatedHistorial[selectedIndex] = {
                 ...updatedHistorial[selectedIndex],
                 observacion: inputValue,
-                fechaCargaObservacion: new Date().toLocaleString()
+                // Si no hay fecha de carga de observación, asignamos la fecha de carga.
+                fechaCargaObservacion: updatedHistorial[selectedIndex].fechaCargaObservacion
+                    ? updatedHistorial[selectedIndex].fechaCargaObservacion
+                    : fechaActual,  // Solo asigna la fecha de carga si no existe
+                // Si ya existe una observación, solo actualizamos la fecha de modificación.
+                fechaModificacionObservacion: fechaActual,
             };
         }
+
         setHistorial(updatedHistorial);
         setModalOpen(false);
     };
+
+    // Función para validar el formulario
+    const validateForm = () => {
+        const errors = {};
+
+        // Validación de otros campos
+        if (!formData.motivoSalida) errors.motivoSalida = 'Motivo de la salida es obligatorio.';
+        if (!formData.acompananteInterno) errors.acompananteInterno = 'Acompañante del interno es obligatorio.';
+        if (!formData.fechaSalida) errors.fechaSalida = 'Fecha de salida es obligatoria.';
+        if (!formData.horaSalida) errors.horaSalida = 'Hora de salida es obligatoria.';
+        if (!formData.fechaEntrada) errors.fechaEntrada = 'Fecha de entrada es obligatoria.';
+        if (!formData.horaEntrada) errors.horaEntrada = 'Hora de entrada es obligatoria.';
+        if (!formData.matriculaMovil) errors.matriculaMovil = 'Matrícula del móvil es obligatoria.';
+        if (!formData.nombreChofer) errors.nombreChofer = 'Nombre del chofer es obligatorio.';
+        if (!formData.dniChofer) errors.dniChofer = 'DNI del chofer es obligatorio.';
+
+        // Validación de nombre y DNI de custodia solo si no hay encargados
+        if (encargados.length === 0) {
+            if (!formData.nombreCustodia) {
+                errors.nombreCustodia = 'Nombre del personal de custodia es obligatorio.';
+            }
+            if (!formData.dniCustodia) {
+                errors.dniCustodia = 'DNI del personal de custodia es obligatorio.';
+            }
+        }
+
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+    // Función para agregar un encargado (custodia)
+    const handleAgregarEncargado = () => {
+        const newErrors = { ...errors };
+        let isValid = true;
+
+        // Validación de nombre y DNI del encargado
+        if (!formData.nombreCustodia) {
+            newErrors.nombreCustodia = 'Nombre del personal de custodia es requerido';
+            isValid = false;
+        } else {
+            newErrors.nombreCustodia = '';
+        }
+
+        if (!formData.dniCustodia) {
+            newErrors.dniCustodia = 'DNI del personal de custodia es requerido';
+            isValid = false;
+        } else {
+            newErrors.dniCustodia = '';
+        }
+
+        setErrors(newErrors); // Actualizar los errores
+
+        if (isValid) {
+            setEncargados([
+                ...encargados,
+                { nombre: formData.nombreCustodia, dni: formData.dniCustodia }
+            ]);
+
+            // Limpiar campos de custodia después de agregar
+            setFormData({
+                ...formData,
+                nombreCustodia: '',
+                dniCustodia: ''
+            });
+        }
+    };
+
 
     const handleAnularVisita = (index) => {
         setSelectedIndex(index);
@@ -241,185 +307,220 @@ const CargaSalidas = () => {
                 <div className="bg-white rounded-md shadow-md mb-4 p-3">
                     <h2 className="text-xl font-bold mb-3">Carga de Salidas</h2>
                     <div className="space-y-3">
-                        {/* Campo Motivo de la salida */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1" htmlFor="motivoSalida">Motivo de la salida:</label>
-                            <input
-                                type="text"
-                                id="motivoSalida"
-                                name="motivoSalida"
-                                value={formData.motivoSalida}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                placeholder="Ingrese el motivo de la salida"
-                            />
-                            {errors.motivoSalida && <p className="text-red-500 text-xs mt-1">{errors.motivoSalida}</p>}
-                        </div>
-
-                        {/* Campo Acompañante del interno */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1" htmlFor="acompananteInterno">Acompañante del interno:</label>
-                            <input
-                                type="text"
-                                id="acompananteInterno"
-                                name="acompananteInterno"
-                                value={formData.acompananteInterno}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                placeholder="Ingrese el acompañante del interno"
-                            />
-                            {errors.acompananteInterno && <p className="text-red-500 text-xs mt-1">{errors.acompananteInterno}</p>}
-                        </div>
-
-                        {/* Campo Matrícula del móvil */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1" htmlFor="matriculaMovil">Matrícula del móvil:</label>
-                            <input
-                                type="numer"
-                                id="matriculaMovil"
-                                name="matriculaMovil"
-                                value={formData.matriculaMovil}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                placeholder="Ingrese la matrícula del móvil"
-                            />
-                            {errors.matriculaMovil && <p className="text-red-500 text-xs mt-1">{errors.matriculaMovil}</p>}
-                        </div>
-
-                        {/* Campos de fecha y hora de salida */}
-                        <div className="grid grid-cols-2 gap-2">
-                            {/* Fecha de salida */}
-                            <div>
-                                <label className="block text-sm font-medium mb-1" htmlFor="fechaSalida">Fecha de salida:</label>
-                                <input
-                                    type="date"
-                                    id="fechaSalida"
-                                    name="fechaSalida"
-                                    value={formData.fechaSalida}
-                                    onChange={handleInputChange}
-                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                />
-                                {errors.fechaSalida && <p className="text-red-500 text-xs mt-1">{errors.fechaSalida}</p>}
-                            </div>
-                            {/* Hora de salida */}
-                            <div>
-                                <label className="block text-sm font-medium mb-1" htmlFor="horaSalida">Hora de salida:</label>
-                                <input
-                                    type="time"
-                                    id="horaSalida"
-                                    name="horaSalida"
-                                    value={formData.horaSalida}
-                                    onChange={handleInputChange}
-                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                />
-                                {errors.horaSalida && <p className="text-red-500 text-xs mt-1">{errors.horaSalida}</p>}
-                            </div>
-
-                            {/* Fecha de entrada */}
-                            <div>
-                                <label className="block text-sm font-medium mb-1" htmlFor="fechaEntrada">Fecha de entrada:</label>
-                                <input
-                                    type="date"
-                                    id="fechaEntrada"
-                                    name="fechaEntrada"
-                                    value={formData.fechaEntrada}
-                                    onChange={handleInputChange}
-                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                />
-                                {errors.fechaEntrada && <p className="text-red-500 text-xs mt-1">{errors.fechaEntrada}</p>}
-                            </div>
-                            {/* Hora de entrada */}
-                            <div>
-                                <label className="block text-sm font-medium mb-1" htmlFor="horaEntrada">Hora de entrada:</label>
-                                <input
-                                    type="time"
-                                    id="horaEntrada"
-                                    name="horaEntrada"
-                                    value={formData.horaEntrada}
-                                    onChange={handleInputChange}
-                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                />
-                                {errors.horaEntrada && <p className="text-red-500 text-xs mt-1">{errors.horaEntrada}</p>}
-                            </div>
-                        </div>
-
-                        {/* Campos de Nombre y DNI del personal de custodia y chofer */}
-                        <div className="grid grid-cols-2 gap-2">
-                            {/* Nombre del personal de custodia */}
-                            <div>
+                        <div className='"bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">'>
+                            {/* Campos para el personal de custodia */}
+                            <div className="mb-2 ">
                                 <label className="block text-sm font-medium mb-1" htmlFor="nombreCustodia">Nombre/s y Apellido/s (custodia):</label>
                                 <input
                                     type="text"
                                     id="nombreCustodia"
                                     name="nombreCustodia"
                                     value={formData.nombreCustodia}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => setFormData({ ...formData, nombreCustodia: e.target.value })}
                                     className="w-full p-2 border border-gray-300 rounded-md text-sm"
                                     placeholder="Ingrese el nombre del personal de custodia"
                                 />
                                 {errors.nombreCustodia && <p className="text-red-500 text-xs mt-1">{errors.nombreCustodia}</p>}
                             </div>
 
-                            {/* DNI del personal de custodia */}
-                            <div>
+                            <div className="mb-2">
                                 <label className="block text-sm font-medium mb-1" htmlFor="dniCustodia">DNI (custodia):</label>
                                 <input
                                     type="number"
                                     id="dniCustodia"
                                     name="dniCustodia"
                                     value={formData.dniCustodia}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => setFormData({ ...formData, dniCustodia: e.target.value })}
                                     className="w-full p-2 border border-gray-300 rounded-md text-sm"
                                     placeholder="Ingrese el DNI del personal de custodia"
                                 />
                                 {errors.dniCustodia && <p className="text-red-500 text-xs mt-1">{errors.dniCustodia}</p>}
                             </div>
 
-                            {/* Nombre del chofer */}
+                            {/* Botón para agregar encargado (custodia) */}
+                            <div className="flex justify-center mt-4">
+                                <button
+                                    onClick={handleAgregarEncargado}
+                                    type="button"
+                                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                                >
+                                    Agregar Custodia
+                                </button>
+                            </div>
+                            {/* Mostrar encargados (custodias) agregados */}
+                            {encargados.length > 0 && (
+                                <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50">
+                                    <h3 className="text-sm font-bold mb-2">Encargados de Custodia</h3>
+                                    <ul className="space-y-2">
+                                        {encargados.map((encargado, index) => (
+                                            <li key={index} className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 flex justify-between items-center">
+                                                <span className="text-sm">
+                                                    <strong>Nombre: </strong>{encargado.nombre} - <strong>DNI: </strong>{encargado.dni}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleEliminarEncargado(index)}
+                                                    className="bg-red-400 text-white px-2 py-1 rounded text-xs sm:text-xs hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">
+                            {/* Campos de Nombre y DNI del personal de custodia y chofer */}
+                            <div className="grid grid-cols-2 gap-2">
+
+                                {/* Nombre del chofer */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1" htmlFor="nombreChofer">Nombre/s y Apellido/s (chofer)</label>
+                                    <input
+                                        type="text"
+                                        id="nombreChofer"
+                                        name="nombreChofer"
+                                        value={formData.nombreChofer}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                        placeholder="Ingrese el nombre del chofer"
+                                    />
+                                    {errors.nombreChofer && <p className="text-red-500 text-xs mt-1">{errors.nombreChofer}</p>}
+                                </div>
+
+                                {/* DNI del chofer */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1" htmlFor="dniChofer">DNI (chofer):</label>
+                                    <input
+                                        type="number"
+                                        id="dniChofer"
+                                        name="dniChofer"
+                                        value={formData.dniChofer}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                        placeholder="Ingrese el DNI del chofer"
+                                    />
+                                    {errors.dniChofer && <p className="text-red-500 text-xs mt-1">{errors.dniChofer}</p>}
+                                </div>
+
+                                {/* Campo Matrícula del móvil */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1" htmlFor="matriculaMovil">Patente del móvil:</label>
+                                    <input
+                                        type="numer"
+                                        id="matriculaMovil"
+                                        name="matriculaMovil"
+                                        value={formData.matriculaMovil}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                        placeholder="Ingrese la matrícula del móvil"
+                                    />
+                                    {errors.matriculaMovil && <p className="text-red-500 text-xs mt-1">{errors.matriculaMovil}</p>}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">
+                            {/* Campo Motivo de la salida */}
                             <div>
-                                <label className="block text-sm font-medium mb-1" htmlFor="nombreChofer">Nombre/s y Apellido/s (chofer)</label>
+                                <label className="block text-sm font-medium mb-1" htmlFor="motivoSalida">Motivo de la salida:</label>
                                 <input
                                     type="text"
-                                    id="nombreChofer"
-                                    name="nombreChofer"
-                                    value={formData.nombreChofer}
+                                    id="motivoSalida"
+                                    name="motivoSalida"
+                                    value={formData.motivoSalida}
                                     onChange={handleInputChange}
                                     className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                    placeholder="Ingrese el nombre del chofer"
+                                    placeholder="Ingrese el motivo de la salida"
                                 />
-                                {errors.nombreChofer && <p className="text-red-500 text-xs mt-1">{errors.nombreChofer}</p>}
+                                {errors.motivoSalida && <p className="text-red-500 text-xs mt-1">{errors.motivoSalida}</p>}
                             </div>
 
-                            {/* DNI del chofer */}
+                            {/* Campo Acompañante del interno */}
                             <div>
-                                <label className="block text-sm font-medium mb-1" htmlFor="dniChofer">DNI (chofer):</label>
+                                <label className="block text-sm font-medium mb-1 mt-2" htmlFor="acompananteInterno">Acompañante del interno:</label>
                                 <input
-                                    type="number"
-                                    id="dniChofer"
-                                    name="dniChofer"
-                                    value={formData.dniChofer}
+                                    type="text"
+                                    id="acompananteInterno"
+                                    name="acompananteInterno"
+                                    value={formData.acompananteInterno}
                                     onChange={handleInputChange}
                                     className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                    placeholder="Ingrese el DNI del chofer"
+                                    placeholder="Ingrese el acompañante del interno"
                                 />
-                                {errors.dniChofer && <p className="text-red-500 text-xs mt-1">{errors.dniChofer}</p>}
+                                {errors.acompananteInterno && <p className="text-red-500 text-xs mt-1">{errors.acompananteInterno}</p>}
+                            </div>
+
+                            {/* Campos de fecha y hora de salida */}
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                {/* Fecha de salida */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1" htmlFor="fechaSalida">Fecha de salida:</label>
+                                    <input
+                                        type="date"
+                                        id="fechaSalida"
+                                        name="fechaSalida"
+                                        value={formData.fechaSalida}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                    />
+                                    {errors.fechaSalida && <p className="text-red-500 text-xs mt-1">{errors.fechaSalida}</p>}
+                                </div>
+                                {/* Hora de salida */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1" htmlFor="horaSalida">Hora de salida:</label>
+                                    <input
+                                        type="time"
+                                        id="horaSalida"
+                                        name="horaSalida"
+                                        value={formData.horaSalida}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                    />
+                                    {errors.horaSalida && <p className="text-red-500 text-xs mt-1">{errors.horaSalida}</p>}
+                                </div>
+
+                                {/* Fecha de entrada */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1" htmlFor="fechaEntrada">Fecha de entrada:</label>
+                                    <input
+                                        type="date"
+                                        id="fechaEntrada"
+                                        name="fechaEntrada"
+                                        value={formData.fechaEntrada}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                    />
+                                    {errors.fechaEntrada && <p className="text-red-500 text-xs mt-1">{errors.fechaEntrada}</p>}
+                                </div>
+                                {/* Hora de entrada */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1" htmlFor="horaEntrada">Hora de entrada:</label>
+                                    <input
+                                        type="time"
+                                        id="horaEntrada"
+                                        name="horaEntrada"
+                                        value={formData.horaEntrada}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                    />
+                                    {errors.horaEntrada && <p className="text-red-500 text-xs mt-1">{errors.horaEntrada}</p>}
+                                </div>
+                            </div>
+
+                            {/* Observación */}
+                            <div>
+                                <label className="block text-sm font-medium mb-1 mt-2" htmlFor="observacion">Observación:</label>
+                                <textarea
+                                    id="observacion"
+                                    name="observacion"
+                                    value={formData.observacion}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                    placeholder="Ingrese alguna observación aquí"
+                                    rows="3"
+                                />
                             </div>
                         </div>
-
-                        {/* Observación */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1" htmlFor="observacion">Observación:</label>
-                            <textarea
-                                id="observacion"
-                                name="observacion"
-                                value={formData.observacion}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                placeholder="Ingrese alguna observación aquí"
-                                rows="3"
-                            />
-                        </div>
-
                         {/* Botón de envío */}
                         <div className="flex justify-center mt-2">
                             <button
@@ -435,8 +536,7 @@ const CargaSalidas = () => {
 
                 {/* Dividir Historiales */}
                 <div className="flex flex-col md:flex-row gap-4">
-                    {/* Historial de Carga */}
-                    <div className="flex-1 bg-white p-4 rounded-md shadow-md mb-4 mt-5">
+                    <div className="flex-1 bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
                         <h2 className="text-sm font-bold mt-4">Historial de Carga</h2>
                         <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-96 overflow-y-auto">
                             {historial.length === 0 ? (
@@ -478,26 +578,51 @@ const CargaSalidas = () => {
 
                                         return (
                                             <li key={index} className="border border-gray-300 p-2 rounded mt-2 bg-gray-50">
-                                                <p className='text-sm'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
+                                                <div className="text-sm mt-2">
+                                                    {registro.encargados.length === 1 ? (
+                                                        <div>
+                                                            <strong className="text-sm">Custodia: </strong>
+                                                            <strong>Nombre/s y Apellido/s:</strong> {registro.encargados[0].nombre || "No disponible"} -
+                                                            <strong>DNI:</strong> {registro.encargados[0].dni || "No disponible"}
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            {registro.encargados.map((encargado, encargadoIndex) => (
+                                                                <div key={encargadoIndex}>
+                                                                    <strong className="text-sm">Custodia {encargadoIndex + 1}: </strong>
+                                                                    <strong>Nombre/s y Apellido/s:</strong> {encargado.nombre || "No disponible"} -
+                                                                    <strong>DNI:</strong> {encargado.dni || "No disponible"}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Nuevos campos */}
+                                                <p className='text-sm mt-2'><strong>Nombre del chofer:</strong> {registro.nombreChofer}</p>
+                                                <p className='text-sm'><strong>DNI del chofer:</strong> {registro.dniChofer}</p>
+                                                <p className='text-sm'><strong>Patente del móvil:</strong> {registro.matriculaMovil}</p>
+
+                                                <p className='text-sm mt-2'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
                                                 <p className='text-sm'><strong>Acompañante del interno:</strong> {registro.acompananteInterno}</p>
                                                 <p className='text-sm'><strong>Fecha de salida:</strong> {registro.fechaSalida}</p>
                                                 <p className='text-sm'><strong>Hora de salida:</strong> {registro.horaSalida}</p>
                                                 <p className='text-sm'><strong>Fecha de entrada:</strong> {registro.fechaEntrada}</p>
                                                 <p className='text-sm'><strong>Hora de entrada:</strong> {registro.horaEntrada}</p>
 
-                                                {/* Nuevos campos */}
-                                                <p className='text-sm'><strong>Matrícula del móvil:</strong> {registro.matriculaMovil}</p>
-                                                <p className='text-sm'><strong>Nombre del personal de custodia:</strong> {registro.nombreCustodia}</p>
-                                                <p className='text-sm'><strong>DNI del personal de custodia:</strong> {registro.dniCustodia}</p>
-                                                <p className='text-sm'><strong>Nombre del chofer:</strong> {registro.nombreChofer}</p>
-                                                <p className='text-sm'><strong>DNI del chofer:</strong> {registro.dniChofer}</p>
 
+                                                {/* Observación y fecha de carga */}
                                                 {registro.observacion && (
-                                                    <p className='text-sm'>
+                                                    <p className="text-sm">
                                                         <strong>Observación:</strong> {registro.observacion}
-                                                        {registro.fechaCargaObservacion && (
-                                                            <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga observación:</strong> {registro.fechaCargaObservacion}</p>
-                                                        )}
+                                                        <div className="mt-2 text-sm text-gray-500">
+                                                            <p>
+                                                                <strong>Fecha de carga observación:</strong> {registro.fechaCargaObservacion}
+                                                                {registro.fechaModificacionObservacion && (
+                                                                    <span className="ml-2"><strong>(Última modificación:</strong> {registro.fechaModificacionObservacion})</span>
+                                                                )}
+                                                            </p>
+                                                        </div>
                                                     </p>
                                                 )}
 
@@ -513,7 +638,6 @@ const CargaSalidas = () => {
 
                                                 {/* Botones para agregar observación y anular visita */}
                                                 <div className="flex space-x-2 mt-2">
-                                                    {/* Cambiar el color del botón en función de si ya existe una observación */}
                                                     <button
                                                         onClick={() => handleOpenModal('observacion', index)}
                                                         className={`p-1 rounded-md text-xs ${registro.observacion ? 'bg-orange-400 hover:bg-orange-500' : 'bg-blue-400 hover:bg-blue-500'} text-white`}
@@ -524,7 +648,7 @@ const CargaSalidas = () => {
                                                         onClick={() => handleAnularVisita(index)}
                                                         className="bg-red-400 text-white p-1 rounded-md hover:bg-red-500 text-xs"
                                                     >
-                                                        Anular Visita
+                                                        Anular Salida
                                                     </button>
 
                                                     {/* Nuevo botón "Generar Reporte" */}
@@ -543,8 +667,9 @@ const CargaSalidas = () => {
                         </div>
                     </div>
 
+
                     {/* Historial de Salidas Anuladas */}
-                    <div className="flex-1 bg-white p-4 rounded-md shadow-md mb-4 mt-5">
+                    <div className="flex-1 bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
                         <h2 className="text-sm font-bold mt-4">Historial de Salidas Anuladas</h2>
                         <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-96 overflow-y-auto">
                             {historialAnulados.length === 0 ? (
@@ -577,14 +702,34 @@ const CargaSalidas = () => {
                                                 )}
                                             </div>
 
-                                            {/* Mostrar detalles de la salida anulada */}
-                                            <p className='text-sm'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
-                                            <p className='text-sm'><strong>Acompañante del interno:</strong> {registro.acompananteInterno}</p>
-                                            <p className='text-sm'><strong>Nombre/s y Apellido/s (custodia):</strong> {registro.nombreCustodia}</p>
-                                            <p className='text-sm'><strong>DNI (custodia):</strong> {registro.dniCustodia}</p>
-                                            <p className='text-sm'><strong>Nombre/s y Apellido/s (chofer):</strong> {registro.nombreChofer}</p>
+                                            {/* Mostrar información de los encargados */}
+                                            <div className="text-sm mt-2">
+                                                {registro.encargados.length === 1 ? (
+                                                    <div>
+                                                        <strong className="text-sm">Custodia: </strong>
+                                                        <strong>Nombre/s y Apellido/s:</strong> {registro.encargados[0].nombre || "No disponible"} -
+                                                        <strong>DNI:</strong> {registro.encargados[0].dni || "No disponible"}
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        {registro.encargados.map((encargado, encargadoIndex) => (
+                                                            <div key={encargadoIndex}>
+                                                                <strong className="text-sm">Custodia {encargadoIndex + 1}: </strong>
+                                                                <strong>Nombre/s y Apellido/s:</strong> {encargado.nombre || "No disponible"} -
+                                                                <strong>DNI:</strong> {encargado.dni || "No disponible"}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <p className='text-sm mt-2'><strong>Nombre/s y Apellido/s (chofer):</strong> {registro.nombreChofer}</p>
                                             <p className='text-sm'><strong>DNI (chofer):</strong> {registro.dniChofer}</p>
-                                            <p className='text-sm'><strong>Matrícula del móvil:</strong> {registro.matriculaMovil}</p>
+                                            <p className='text-sm'><strong>Patente del móvil:</strong> {registro.matriculaMovil}</p>
+
+                                            {/* Mostrar detalles de la salida anulada */}
+                                            <p className='text-sm mt-2'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
+                                            <p className='text-sm'><strong>Acompañante del interno:</strong> {registro.acompananteInterno}</p>
                                             <p className='text-sm'><strong>Fecha de salida:</strong> {registro.fechaSalida}</p>
                                             <p className='text-sm'><strong>Hora de salida:</strong> {registro.horaSalida}</p>
                                             <p className='text-sm'><strong>Fecha de entrada:</strong> {registro.fechaEntrada}</p>
@@ -594,9 +739,18 @@ const CargaSalidas = () => {
                                             {registro.observacion && (
                                                 <p className='text-sm'>
                                                     <strong>Observación:</strong> {registro.observacion}
-                                                    {registro.fechaCargaObservacion && (
-                                                        <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga observación:</strong> {registro.fechaCargaObservacion}</p>
-                                                    )}
+                                                    <div className="mt-2 text-sm text-gray-500">
+                                                        {registro.fechaCargaObservacion && (
+                                                            <span>
+                                                                <strong>Fecha de carga observación:</strong> {registro.fechaCargaObservacion}
+                                                                {registro.fechaModificacionObservacion && (
+                                                                    <span className="ml-2">
+                                                                        <strong>(Última modificación:</strong> {registro.fechaModificacionObservacion})
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </p>
                                             )}
 
@@ -624,29 +778,28 @@ const CargaSalidas = () => {
 
                 {/* Modal para observaciones */}
                 {modalOpen && (
-                    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
-                        <div className="bg-white p-4 rounded-md shadow-lg w-80">
-                            <h3 className="text-sm font-bold mb-3">
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                        <div className="bg-white p-4 rounded-md w-80">
+                            <h2 className="text-l font-bold mb-4">
                                 {modalType === 'observacion' ? 'Agregar/Editar Observación' : 'Agregar/Editar Otro Campo'}
-                            </h3>
+                            </h2>
                             <textarea
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                rows="4"
-                                placeholder='Ingrese la oservación aqui...'
+                                className="w-full h-32 border border-gray-300 p-2 rounded-md text-sm mb-4"
+                                placeholder="Ingrese la observación aquí..."
                             />
-                            <div className="mt-3 flex justify-end space-x-2">
+                            <div className="flex justify-end">
                                 <button
                                     onClick={handleSave}
-                                    className={`bg-green-500 text-white p-2 rounded-md hover:bg-green-600 text-xs ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    disabled={!inputValue.trim()}  // Deshabilitar si está vacío
+                                    disabled={!inputValue.trim()}
+                                    className={`bg-green-500 text-white p-2 text-xs rounded mr-2 ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'}`}
                                 >
                                     Guardar
                                 </button>
                                 <button
                                     onClick={() => setModalOpen(false)}
-                                    className="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600 text-xs"
+                                    className="bg-gray-500 text-white p-2 text-xs rounded"
                                 >
                                     Cancelar
                                 </button>
@@ -654,6 +807,7 @@ const CargaSalidas = () => {
                         </div>
                     </div>
                 )}
+
 
                 {/* Modal para anulación */}
                 {anularModalOpen && (

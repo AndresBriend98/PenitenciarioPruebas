@@ -206,8 +206,8 @@ const CargaDatosPersonales = () => {
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             <Header />
             <div className="bg-white p-4 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-6">Carga de Datos Personales</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <h1 className="text-xl font-bold mb-6">Carga de Datos Personales</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-white p-4 rounded-md shadow-md border border-gray-300">
                     {/* Fecha de nacimiento */}
                     <div>
                         <label className="block text-sm font-semibold mb-1">Fecha de nacimiento</label>

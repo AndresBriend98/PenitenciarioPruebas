@@ -7,6 +7,58 @@ const CargaEducacion = () => {
     const [sabeEscribir, setSabeEscribir] = useState(false);
     const [documentacion, setDocumentacion] = useState(false);
     const [nivelEducativo, setNivelEducativo] = useState("");
+    const [archivosAdjuntos, setArchivosAdjuntos] = useState([]); // Estado para los archivos adjuntos
+    const [archivoSeleccionado, setArchivoSeleccionado] = useState(null); // Estado para el archivo seleccionado
+    const [isModalOpenArchivo, setIsModalOpenArchivo] = useState(false); // Estado para controlar la visibilidad del modal
+    const archivoInputRef = useRef(null); // Referencia al input de archivo
+
+    const handleArchivoSeleccionado = (e) => {
+        const archivo = e.target.files[0]; // Obtener el primer archivo seleccionado
+        setArchivoSeleccionado(archivo);  // Establecer el archivo seleccionado
+    };
+
+    const handleCargarArchivo = () => {
+        if (archivoSeleccionado) {
+            const nuevoArchivo = {
+                archivoAdjunto: archivoSeleccionado,
+                fechaArchivoAdjunto: new Date().toLocaleString(),
+            };
+            // Añadir el archivo al estado de archivos adjuntos
+            setArchivosAdjuntos((prevArchivos) => [...prevArchivos, nuevoArchivo]);
+
+            // Restablecer el input de archivo
+            archivoInputRef.current.value = null; // Limpiar la selección de archivo en el input
+            setArchivoSeleccionado(null); // Restablecer el estado de archivo seleccionado
+        }
+    };
+
+    const handleDownloadArchivo = (index) => {
+        const archivo = archivosAdjuntos[index].archivoAdjunto;
+        const url = URL.createObjectURL(archivo);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = archivo.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url); // Liberar el objeto URL
+    };
+
+    // Función para cargar el archivo
+    const handleArchivoAdjunto = () => {
+        if (archivoSeleccionado) {
+            const nuevoArchivo = {
+                archivoAdjunto: archivoSeleccionado,
+                fechaArchivoAdjunto: new Date().toLocaleString(), // Fecha de carga
+            };
+            // Añadir el archivo al historial
+            setArchivosAdjuntos((prevArchivos) => [...prevArchivos, nuevoArchivo]);
+
+            // Restablecer el input de archivo
+            archivoInputRef.current.value = null; // Limpiar la selección de archivo en el input
+            setArchivoSeleccionado(null); // Restablecer el estado de archivo seleccionado
+        }
+    };
 
     // Esta función se llamará para actualizar el estado de los checkboxes y el nivel educativo en la base de datos
     const actualizarDatosEnBase = async () => {
@@ -55,20 +107,11 @@ const CargaEducacion = () => {
     const [editingCursoIndex, setEditingCursoIndex] = useState(null);
     const [editedFechaFinPlan, setEditedFechaFinPlan] = useState('');
     const [editedFechaFinCurso, setEditedFechaFinCurso] = useState('');
-    const archivoInputRef = useRef(); // Ref para el input de archivo
-    const handleArchivoAdjunto = (e, index) => {
-        const archivo = e.target.files[0];
-        if (archivo) {
-            const nuevaLista = [...historialCurso];
-            nuevaLista[index].archivoAdjunto = archivo;  // Guardamos el archivo como un objeto File
-            nuevaLista[index].fechaArchivoAdjunto = new Date().toLocaleString();  // Guardamos la fecha de carga
-            setHistorialCurso(nuevaLista);
-        }
-    };
 
     const [errors, setErrors] = useState({
         nivelEducativo: ''
     });
+
     const [archivoAnulacion, setArchivoAnulacion] = useState(null);  // Define el estado
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [motivoAnulacion, setMotivoAnulacion] = useState("");
@@ -237,15 +280,17 @@ const CargaEducacion = () => {
 
     };
 
+    const [archivoAdjunto, setArchivoAdjunto] = useState(null); // O usar el historial de cursos para acceder al archivo
+
     const handleVolver = () => {
         navigate('/general');
     };
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
-            <Header/>
+            <Header />
             <div className="bg-white p-6 rounded-md shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Carga Educación</h1>
+                <h1 className="text-xl font-bold mb-4">Carga Educación</h1>
 
                 {/* Checkboxes */}
                 <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 bg-white rounded-md shadow-md flex flex-col sm:flex-row sm:gap-4 mb-4">
@@ -302,12 +347,101 @@ const CargaEducacion = () => {
                         <option value="Universitario Incompleto">Universitario Incompleto</option>
                     </select>
                 </div>
-            
+
+                <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                    <h1 className="block text-sm font-semibold mb-2">Carga de Archivos Adjuntos</h1>
+
+                    {/* Input para seleccionar archivo */}
+                    <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.jpg,.png"
+                        ref={archivoInputRef}
+                        onChange={handleArchivoSeleccionado}  // Ejecuta la función al seleccionar archivo
+                        className={`w-full p-1 border rounded text-sm mb-2`}
+                    />
+
+                    {/* Mostrar el botón "Cargar archivo adjunto" solo si hay un archivo seleccionado */}
+                    {archivoSeleccionado && (
+                        <div className="flex justify-center mb-4">
+                            <button
+                                onClick={handleCargarArchivo}  // Cambié el nombre de la función aquí
+                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
+                                disabled={!archivoSeleccionado}  // Deshabilitar si no hay archivo seleccionado
+                            >
+                                Cargar archivo adjunto
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Ver archivos cargados, alineado a la derecha en pantallas grandes y centrado en móviles */}
+                    {archivosAdjuntos.length > 0 && (
+                        <div className="flex justify-center md:justify-end mt-4">
+                            <button
+                                onClick={() => setIsModalOpenArchivo(true)}
+                                className="bg-blue-800 text-white p-2 rounded hover:bg-blue-900 text-xs"
+                            >
+                                Ver archivos cargados
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Modal para mostrar los archivos adjuntos */}
+                    {isModalOpenArchivo && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+                            <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-[90%] md:max-w-lg mx-auto">
+                                <button
+                                    onClick={() => setIsModalOpenArchivo(false)}
+                                    className="absolute top-2 right-2 bg-gray-400 text-white p-2 rounded-full shadow-lg hover:bg-gray-500 focus:outline-none"
+                                    aria-label="Cerrar modal"
+                                >
+                                    <svg
+                                        className="w-4 h-4"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+
+                                <h3 className="text-lg font-bold text-center">Archivos cargados</h3>
+
+                                <div className="mt-4 max-h-64 md:max-h-96 overflow-y-auto">
+                                    <ul className="space-y-2">
+                                        {archivosAdjuntos.map((item, index) => (
+                                            <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
+                                                <div>
+                                                    <span className="text-sm"><strong>Archivo:</strong></span>
+                                                    <a
+                                                        href={URL.createObjectURL(item.archivoAdjunto)}
+                                                        download={item.archivoAdjunto.name}
+                                                        className="ml-2 bg-blue-500 text-white p-2 rounded-full text-xs hover:bg-blue-600"
+                                                    >
+                                                        {item.archivoAdjunto.name}
+                                                    </a>
+                                                </div>
+                                                <div className="text-sm text-gray-500 mt-2">
+                                                    <strong className="text-xs">Fecha de Carga:</strong> {item.fechaArchivoAdjunto}
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+
+
                 {/* Dividir pantalla en dos */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1 bg-white p-4 rounded-md shadow-md">
+                <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                    <div className="flex-1 bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <h2 className="text-lg font-bold mb-4">Cargar Registro de un Plan</h2>
-                        {/* Registro de un Plan */}
                         {/* Registro de un Plan */}
                         <div className="space-y-4">
                             <div>
@@ -349,7 +483,7 @@ const CargaEducacion = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white p-4 rounded-md shadow-md mb-4">
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
                             <h3 className="block text-sm font-semibold mb-2 mt-4">Historial de Carga</h3>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                                 {historialPlan.length === 0 ? (
@@ -404,7 +538,7 @@ const CargaEducacion = () => {
                     </div>
 
                     {/* Derecha: Cargar Registro de un Curso */}
-                    <div className="flex-1 bg-white p-4 rounded-md shadow-md">
+                    <div className="flex-1 bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <h2 className="text-lg font-bold mb-4">Cargar Registro de un Curso</h2>
                         {/* Registro de un Curso */}
                         <div className="space-y-4">
@@ -460,7 +594,7 @@ const CargaEducacion = () => {
 
                         </div>
 
-                        <div className="bg-white p-4 rounded-md shadow-md mb-4">
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
                             <h3 className="block text-sm font-semibold mb-2 mt-4">Historial de Carga</h3>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                                 {historialCurso.length === 0 ? (
@@ -601,29 +735,28 @@ const CargaEducacion = () => {
                                     />
 
                                     {/* Botones de acción */}
-                                    <div className="flex justify-between">
-                                        <button
-                                            onClick={() => setIsModalOpen(false)}
-                                            className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 text-xs w-1/2 mr-2"
-                                        >
-                                            Cancelar
-                                        </button>
-
-                                        {/* Botón habilitado solo si ambos campos están completos */}
+                                    <div className="mt-3 flex justify-end space-x-2">
                                         <button
                                             onClick={handleAnularCursoConMotivo}
-                                            className={`bg-red-500 text-white px-4 py-2 rounded text-xs w-1/2 ${(!motivoAnulacion.trim() || !archivoAnulacion) ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600"}`}
-                                            disabled={!motivoAnulacion.trim() || !archivoAnulacion}
+                                            className={`bg-red-500 text-white p-2 rounded-md hover:bg-red-600 text-xs ${!motivoAnulacion.trim() || !archivoAnulacion ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            disabled={!motivoAnulacion.trim() || !archivoAnulacion}  // Deshabilitar si los campos están vacíos
                                         >
                                             Anular Curso
                                         </button>
+                                        <button
+                                            onClick={() => setIsModalOpen(false)}
+                                            className="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600 text-xs"
+                                        >
+                                            Cancelar
+                                        </button>
                                     </div>
+
                                 </div>
                             </div>
                         )}
 
 
-                        <div className="bg-white p-4 rounded-md shadow-md mb-4">
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">
                             <h3 className="block text-sm font-semibold mb-2 mt-4">Historial de Cursos Anulados</h3>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                                 {historialCursoAnulado.length === 0 ? (
@@ -696,13 +829,6 @@ const CargaEducacion = () => {
 
                     </div>
                 </div>
-
-                {/* Archivo Adjunto */}
-                <div className="mt-4 bg-white flex flex-col md:flex-row md:items-start md:justify-start p-4 bg-white p-4 rounded-md shadow-md">
-                    <label className="block text-sm font-semibold mb-2 md:mb-0 md:mr-5">Archivo Adjunto</label>
-                    <input type="file" className="border border-gray-300 p-1 rounded text-sm w-full md:w-auto" />
-                </div>
-
                 {/* Botones de acción */}
                 <div className="mt-6 flex justify-between items-center">
                     <button

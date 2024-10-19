@@ -103,8 +103,8 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
     return (
         <div>
             <div className="flex space-x-4">
-                <div className="flex-1 bg-white p-4 rounded-md shadow-md">
-                    <h2 className="text-lg font-bold mb-4">Carga Visita Prohibida</h2>
+                <div className="flex-1 bg-white p-4 rounded-md shadow-md border border-gray-300">
+                    <h2 className="text-l font-bold mb-4">Carga Visita Prohibida</h2>
 
                     {/* Foto de la visita */}
                     <div className="flex flex-col items-center mb-4">
@@ -210,7 +210,7 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
             </div>
 
             {/* Sección del Historial */}
-            <div className="bg-white p-4 rounded-md shadow-md mt-6">
+            <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mt-6">
                 <h3 className="text-sm font-bold">Historial de Visitas Prohibidas</h3>
                 <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                     {visitasProhibidas.length > 0 ? (
