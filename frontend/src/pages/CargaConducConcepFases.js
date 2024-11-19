@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaConducConcepFases = () => {
     const navigate = useNavigate();
-    const [faseActual, setFaseActual] = useState('Ninguna'); // Inicialmente "Ninguna"
+    const [faseActual, setFaseActual] = useState('Ninguna');
     const [fechas, setFechas] = useState({
         Socializacion: { inicio: '', fin: '' },
         Consolidacion: { inicio: '', fin: '' },
@@ -12,7 +12,7 @@ const CargaConducConcepFases = () => {
         PeriodoObservacion: { inicio: '', fin: '' },
         FasePrueba: { inicio: '', fin: '' }
     });
-    // Función para determinar la fase actual en base a las fechas ingresadas
+
     const determinarFaseActual = () => {
         if (fechas['PeriodoObservacion'].inicio && !fechas['PeriodoObservacion'].fin) {
             return 'Periodo de Observación';
@@ -28,10 +28,9 @@ const CargaConducConcepFases = () => {
         return 'Ninguna';
     };
 
-    // Función para determinar si se puede habilitar la fecha de inicio de la fase actual
     const puedeHabilitarInicio = (fase) => {
         if (fase === 'PeriodoObservacion') {
-            return true;  // El campo de fecha de inicio de "Periodo de Observación" siempre está habilitado
+            return true;
         } else if (fase === 'Socializacion') {
             return fechas['PeriodoObservacion']?.fin !== '';
         } else if (fase === 'Consolidacion') {
@@ -44,7 +43,6 @@ const CargaConducConcepFases = () => {
         return false;
     };
 
-    // Función para determinar si se puede habilitar la fecha de fin de la fase actual
     const puedeHabilitarFin = (fase) => {
         if (fechas[fase]?.inicio !== '') {
             return true;
@@ -60,12 +58,10 @@ const CargaConducConcepFases = () => {
             }
         });
 
-        // Actualizar la fase actual después de ingresar una fecha de inicio o fin
         if (tipo === 'inicio' || tipo === 'fin') {
             setFaseActual(determinarFaseActual());
         }
 
-        // Si es la fecha de fin, avanzar a la siguiente fase
         if (tipo === 'fin' && date) {
             if (fase === 'Socializacion' && fechas['Socializacion'].fin) {
                 setFaseActual('Fase de Tratamiento (Consolidacion)');
@@ -99,7 +95,7 @@ const CargaConducConcepFases = () => {
             return;
         }
 
-        const fechaCarga = new Date().toLocaleString(); // Obtener la fecha de carga actual
+        const fechaCarga = new Date().toLocaleString();
 
         setHistorialEvolucion([...historialEvolucion, { descripcion: evolucion, fecha: fechaEvolucion, fechaCarga }]);
         setEvolucion('');
@@ -113,32 +109,29 @@ const CargaConducConcepFases = () => {
     const handleEliminarArchivo = () => {
         if (selectedItemIndex !== null) {
             const newHistorial = [...historialCorrectivo];
-            const newDate = new Date().toLocaleString(); // Obtiene la fecha actual
+            const newDate = new Date().toLocaleString();
 
-            // Verificamos si la propiedad `fechasDeEliminacion` existe, si no, la inicializamos como arreglo
             if (!newHistorial[selectedItemIndex].fechasDeEliminacion) {
                 newHistorial[selectedItemIndex].fechasDeEliminacion = [];
             }
 
-            // Se agrega la nueva fecha de eliminación al arreglo de fechasDeEliminacion
             newHistorial[selectedItemIndex].fechasDeEliminacion.push(newDate);
 
-            // Se elimina el archivo adjunto y se mantiene el registro de fechas
-            newHistorial[selectedItemIndex].disposicion = null;  // Elimina el archivo
-            setHistorialCorrectivo(newHistorial);  // Actualiza el estado con la nueva fecha y archivo eliminado
+            newHistorial[selectedItemIndex].disposicion = null;
+            setHistorialCorrectivo(newHistorial);
         }
 
-        setConfirmDeleteArchivoModal(false); // Cierra el modal
-        setSelectedItemIndex(null); // Resetea el índice
+        setConfirmDeleteArchivoModal(false);
+        setSelectedItemIndex(null);
     };
 
     const handleCloseDeleteArchivoModal = () => {
-        setConfirmDeleteArchivoModal(false); // Cierra el modal sin eliminar
-        setSelectedItemIndex(null); // Resetea el índice
+        setConfirmDeleteArchivoModal(false);
+        setSelectedItemIndex(null);
     };
 
 
-    const [disposicion, setDisposicion] = useState(null); // Estado para manejar el archivo de disposición
+    const [disposicion, setDisposicion] = useState(null);
     const [historialCorrectivo, setHistorialCorrectivo] = useState([]);
     const [fechaEvolucion, setFechaEvolucion] = useState('');
     const [historialEvolucion, setHistorialEvolucion] = useState([]);
@@ -153,12 +146,11 @@ const CargaConducConcepFases = () => {
     const [concepto, setConcepto] = useState('');
     const [correctivo, setCorrectivo] = useState('');
 
-    const [nombreDisposicion, setNombreDisposicion] = useState(''); // Estado para almacenar el nombre del archivo
+    const [nombreDisposicion, setNombreDisposicion] = useState('');
 
     const handleAgregarCorrectivo = () => {
-        const newErrors = {}; // Crear un objeto de errores
+        const newErrors = {};
 
-        // Validaciones
         if (correctivo.trim() === '') {
             newErrors.correctivo = 'La descripción es obligatoria.';
         }
@@ -171,45 +163,38 @@ const CargaConducConcepFases = () => {
             newErrors.fechaFinCorrectivo = 'La fecha de fin es obligatoria.';
         }
 
-        // Si hay errores, actualiza el estado de errores y no agregues el correctivo
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
 
-        const fechaCarga = new Date().toLocaleString(); // Obtener la fecha de carga actual
+        const fechaCarga = new Date().toLocaleString();
 
-        // Crear un objeto para el nuevo historial de correctivos
         const nuevoCorrectivo = {
             descripcion: correctivo,
             fechaInicio: fechaInicioCorrectivo,
             fechaFin: fechaFinCorrectivo,
             fechaCarga,
-            disposicion, // Incluir el archivo de disposición
+            disposicion,
         };
 
-        // Verificar si hay archivo de disposición y si es así, registrar la fecha de carga de disposición
         if (disposicion) {
-            const fechaDisposicion = new Date().toLocaleString(); // Fecha de carga de disposición
+            const fechaDisposicion = new Date().toLocaleString();
 
-            // Si no existe `fechasDeCargaDisposicion`, inicializarlo como un arreglo
             if (!nuevoCorrectivo.fechasDeCargaDisposicion) {
                 nuevoCorrectivo.fechasDeCargaDisposicion = [];
             }
-
-            // Registrar la fecha de carga de disposición
             nuevoCorrectivo.fechasDeCargaDisposicion.push(fechaDisposicion);
         }
 
-        // Agregar el nuevo correctivo al historial
         setHistorialCorrectivo([...historialCorrectivo, nuevoCorrectivo]);
 
         // Limpiar campos
         setCorrectivo('');
         setFechaInicioCorrectivo('');
         setFechaFinCorrectivo('');
-        setDisposicion(null); // Limpiar el archivo de disposición
-        setErrors({}); // Limpiar errores
+        setDisposicion(null);
+        setErrors({});
     };
 
     const handleAddItem = () => {
@@ -254,7 +239,7 @@ const CargaConducConcepFases = () => {
                 ...newErrors
             }));
         } else {
-            const fechaCarga = new Date().toLocaleString(); // Obtener la fecha de carga actual
+            const fechaCarga = new Date().toLocaleString();
 
             setItems([...items, { trimestre, ano, conducta, puntajeCond, concepto, puntajeConc, fechaCarga }]);
             setTrimestre('');
@@ -292,7 +277,6 @@ const CargaConducConcepFases = () => {
                                 placeholder='Seleccione un trimestre'
                             >
                                 <option value="" disabled>Seleccione un trimestre</option>
-                                {/* Opciones de trimestres */}
                                 <option value="1">Trimestre 1</option>
                                 <option value="2">Trimestre 2</option>
                                 <option value="3">Trimestre 3</option>
@@ -328,7 +312,6 @@ const CargaConducConcepFases = () => {
                                 className={`border rounded p-2 w-full text-sm ${errors.conducta ? 'border-red-500' : 'border-gray-300'}`}
                             >
                                 <option value="" disabled>Seleccione una conducta</option>
-                                {/* Opciones de conducta */}
                                 <option value="Excelente">Excelente</option>
                                 <option value="Muy Buena">Muy buena</option>
                                 <option value="Buena">Buena</option>
@@ -365,7 +348,6 @@ const CargaConducConcepFases = () => {
                                 className={`border rounded p-2 w-full text-sm ${errors.concepto ? 'border-red-500' : 'border-gray-300'}`}
                             >
                                 <option value="" disabled>Seleccione un concepto</option>
-                                {/* Opciones de concepto */}
                                 <option value="Excelente">Excelente</option>
                                 <option value="Muy Buena">Muy buena</option>
                                 <option value="Buena">Buena</option>
@@ -459,7 +441,7 @@ const CargaConducConcepFases = () => {
                                                 value={fechas['PeriodoObservacion']?.inicio || ''}
                                                 onChange={(e) => handleDateChange('PeriodoObservacion', 'inicio', e.target.value)}
                                                 className={`border p-1 w-full text-sm rounded ${fechas['PeriodoObservacion']?.inicio ? 'border-gray-300' : 'border-gray-300'}`}
-                                                disabled={false}  // Siempre habilitado para el Periodo de Observación
+                                                disabled={false}
                                             />
                                         </td>
                                         <td className="px-4 py-2 border border-gray-300 text-left text-sm">
@@ -642,8 +624,8 @@ const CargaConducConcepFases = () => {
                             type="file"
                             onChange={(e) => {
                                 const file = e.target.files[0];
-                                setDisposicion(file); // Asigna el archivo al estado
-                                setNombreDisposicion(file ? file.name : ''); // Almacena el nombre del archivo
+                                setDisposicion(file);
+                                setNombreDisposicion(file ? file.name : ''); 
                             }}
                             accept=".pdf,.doc,.docx"
                             className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
@@ -678,32 +660,26 @@ const CargaConducConcepFases = () => {
                                                         type="file"
                                                         onChange={(e) => {
                                                             const newHistorial = [...historialCorrectivo];
-                                                            const newDate = new Date().toLocaleString(); // Obtiene la fecha actual
+                                                            const newDate = new Date().toLocaleString();
 
-                                                            // Si no existe la fecha de carga, asignamos la fecha de carga solo una vez
                                                             if (!newHistorial[index].fechaCarga) {
-                                                                newHistorial[index].fechaCarga = newDate; // Asigna la fecha de carga
+                                                                newHistorial[index].fechaCarga = newDate;
                                                             }
 
-                                                            // Si no existe la fecha de carga de disposición, la asignamos ahora
                                                             if (!newHistorial[index].fechasDeCargaDisposicion) {
-                                                                newHistorial[index].fechasDeCargaDisposicion = []; // Inicializa el arreglo si no existe
+                                                                newHistorial[index].fechasDeCargaDisposicion = [];
                                                             }
-
-                                                            // Registra la fecha de carga de disposición solo si el archivo se carga por primera vez
                                                             newHistorial[index].fechasDeCargaDisposicion.push(newDate);
 
-                                                            // Asigna el archivo a la entrada correspondiente
                                                             newHistorial[index].disposicion = e.target.files[0];
 
-                                                            setHistorialCorrectivo(newHistorial); // Actualiza el estado
+                                                            setHistorialCorrectivo(newHistorial);
                                                         }}
                                                         accept=".pdf,.doc,.docx"
                                                         className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
                                                     />
                                                 ) : (
                                                     <>
-                                                        {/* Enlace para descargar el archivo */}
                                                         <a
                                                             href={URL.createObjectURL(item.disposicion)}
                                                             download={item.disposicion.name}
@@ -712,7 +688,6 @@ const CargaConducConcepFases = () => {
                                                             Descargar disposición
                                                         </a>
 
-                                                        {/* Botón de Editar */}
                                                         <button
                                                             onClick={() => {
                                                                 const input = document.createElement("input");
@@ -723,23 +698,19 @@ const CargaConducConcepFases = () => {
                                                                     const file = e.target.files[0];
                                                                     if (file) {
                                                                         const newHistorial = [...historialCorrectivo];
-                                                                        const newDate = new Date().toLocaleString(); // Fecha de edición
+                                                                        const newDate = new Date().toLocaleString();
 
-                                                                        // Si no existe el campo `fechasDeEdicion`, lo inicializamos como un arreglo
                                                                         if (!newHistorial[index].fechasDeEdicion) {
                                                                             newHistorial[index].fechasDeEdicion = [];
                                                                         }
-
-                                                                        // Agregamos la nueva fecha de edición
                                                                         newHistorial[index].fechasDeEdicion.push(newDate);
 
-                                                                        // Reemplaza el archivo con el nuevo
                                                                         newHistorial[index].disposicion = file;
                                                                         setHistorialCorrectivo(newHistorial);
                                                                     }
                                                                 };
 
-                                                                input.click(); // Abre el selector de archivos
+                                                                input.click();
                                                             }}
                                                             className="mt-2 ml-2 bg-yellow-400 text-white p-2 rounded-full text-xs hover:bg-yellow-500"
                                                         >
@@ -749,9 +720,8 @@ const CargaConducConcepFases = () => {
                                                         {/* Botón de Eliminar */}
                                                         <button
                                                             onClick={() => {
-                                                                // Abrimos el modal de confirmación de eliminación
-                                                                setSelectedItemIndex(index);  // Guardamos el índice del archivo
-                                                                setConfirmDeleteArchivoModal(true);  // Abrimos el modal
+                                                                setSelectedItemIndex(index);
+                                                                setConfirmDeleteArchivoModal(true);
                                                             }}
                                                             className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
                                                         >

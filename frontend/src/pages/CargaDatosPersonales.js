@@ -1,13 +1,12 @@
 import React, { useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
-import Modal from './ModalChanges';
+import Header from '../components/Header';
+import Modal from '../components/ModalChanges';
 
 const CargaDatosPersonales = () => {
     const [historialCambios, setHistorialCambios] = useState({});
-    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
-    // Declaración de estados
     const [datosPersonales, setDatosPersonales] = useState({
         telefono: '',
         fechaNacimiento: '',
@@ -49,7 +48,6 @@ const CargaDatosPersonales = () => {
         lugaresTrabajosYDirecciones: "Lugares de trabajo y direcciones"
     };
 
-    // Guardamos el valor inicial al cargar los datos
     const [initialDatosPersonales, setInitialDatosPersonales] = useState({
         telefono: '',
         fechaNacimiento: '',
@@ -74,69 +72,64 @@ const CargaDatosPersonales = () => {
         const value = e.target.value;
         const currentDate = new Date().toLocaleString();
 
-        // Verifica si el campo cambió
         if (value !== initialDatosPersonales[field]) {
-            setIsDataModified(true); // Marca como modificado
+            setIsDataModified(true);
             setHistorialCambios(prev => ({
                 ...prev,
                 [field]: {
                     ...prev[field],
-                    // Si no tiene fecha de carga, se agrega la fecha de carga
                     fechaCarga: prev[field]?.fechaCarga || currentDate,
-                    ultimaModificacion: currentDate, // Siempre actualiza la fecha de modificación
+                    ultimaModificacion: currentDate,
                 }
             }));
         } else {
-            setIsDataModified(false); // Si el valor no cambió, desmarca como modificado
+            setIsDataModified(false);
         }
 
         setDatosPersonales({ ...datosPersonales, [field]: value });
     };
     
-    const [isEditable, setIsEditable] = useState(true); // Los campos inician habilitados
-    const [buttonText, setButtonText] = useState('Cargar'); // Inicia con "Cargar"
-    const [isDataModified, setIsDataModified] = useState(false); // Controla si los datos fueron modificado
+    const [isEditable, setIsEditable] = useState(true);
+    const [buttonText, setButtonText] = useState('Cargar');
+    const [isDataModified, setIsDataModified] = useState(false);
     const handleCargarActualizar = () => {
         const currentDate = new Date().toLocaleString();
 
         if (buttonText === 'Cargar') {
             const isAnyFieldFilled = Object.values(datosPersonales).some(value => value.trim() !== '');
-            if (!isAnyFieldFilled) return; // No hacer nada si ningún campo está lleno
+            if (!isAnyFieldFilled) return;
 
-            // Guardamos los datos iniciales (fechas de carga y modificación)
             setInitialDatosPersonales(datosPersonales);
 
-            // Actualizar historial con fecha de carga
             setHistorialCambios(prev => {
                 const newHistorial = {};
                 Object.keys(datosPersonales).forEach(field => {
                     if (datosPersonales[field].trim() !== '') {
                         newHistorial[field] = {
-                            fechaCarga: currentDate, // Establece la fecha de carga
-                            ultimaModificacion: currentDate, // Establece la fecha de modificación
+                            fechaCarga: currentDate,
+                            ultimaModificacion: currentDate,
                         };
                     }
                 });
                 return { ...prev, ...newHistorial };
             });
 
-            setIsEditable(false); // No se puede editar después de cargar
-            setButtonText('Actualizar'); // Cambia el botón a 'Actualizar'
+            setIsEditable(false);
+            setButtonText('Actualizar');
 
         } else if (buttonText === 'Actualizar') {
-            setIsEditable(true); // Permite la edición
-            setButtonText('Guardar Cambios'); // Cambia el texto del botón
-            setIsDataModified(false); // Resetear el estado de modificación
+            setIsEditable(true);
+            setButtonText('Guardar Cambios');
+            setIsDataModified(false);
 
         } else if (buttonText === 'Guardar Cambios') {
-            // Verifica si realmente hay cambios antes de guardarlos
             const hasChanges = Object.keys(datosPersonales).some(key => datosPersonales[key] !== initialDatosPersonales[key]);
-            if (!hasChanges) return; // No hace nada si no hay cambios
+            if (!hasChanges) return;
 
             console.log('Datos guardados');
-            setIsEditable(false); // Deshabilitar la edición
-            setButtonText('Actualizar'); // Cambia el texto del botón
-            setIsDataModified(false); // Resetear el estado de modificación
+            setIsEditable(false);
+            setButtonText('Actualizar');
+            setIsDataModified(false);
         }
     };
 
@@ -165,7 +158,6 @@ const CargaDatosPersonales = () => {
         'India'
     ];
 
-    // Lista de estados civiles
     const estadosCiviles = [
         'Soltero/a',
         'Casado/a',
@@ -174,13 +166,12 @@ const CargaDatosPersonales = () => {
         'Separado/a'
     ];
 
-    // Lista de provincias
     const provincias = [
         'Buenos Aires',
         'Catamarca',
         'Chaco',
         'Chubut',
-        'CABA', // Ciudad Autónoma de Buenos Aires
+        'CABA',
         'Córdoba',
         'Corrientes',
         'Entre Ríos',
@@ -441,8 +432,8 @@ const CargaDatosPersonales = () => {
                     <button
                         onClick={handleCargarActualizar}
                         className={`text-white px-4 py-2 rounded-md text-xs ${buttonText === 'Guardar Cambios' && !isDataModified
-                            ? 'bg-blue-300 cursor-not-allowed' // Deshabilitado si no hay cambios
-                            : 'bg-blue-500' // Habilitado si hay cambios
+                            ? 'bg-blue-300 cursor-not-allowed'
+                            : 'bg-blue-500'
                             }`}
                         disabled={buttonText === 'Guardar Cambios' && !isDataModified || buttonText === 'Cargar' && !Object.values(datosPersonales).some(value => value.trim() !== '')}
                     >

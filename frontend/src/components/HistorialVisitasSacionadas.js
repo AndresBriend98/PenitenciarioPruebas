@@ -61,7 +61,7 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
                 setNuevaVisitaSancionada(prevState => ({
                     ...prevState,
                     foto: reader.result,
-                    fechaFoto: '' // No mostrar la fecha de carga de foto desde el formulario
+                    fechaFoto: ''
                 }));
             };
             reader.readAsDataURL(file);
@@ -70,11 +70,11 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
 
     const handleAddVisita = () => {
         if (validateForm()) {
-            calcularTiempoSancionado();  // Calcular tiempo sancionado antes de agregar
+            calcularTiempoSancionado(); 
             const nueva = { ...nuevaVisitaSancionada, id: visitasSancionadas.length + 1 };
             setVisitasSancionadas(prevState => {
                 const updatedList = [...prevState, nueva];
-                setHistorialVisitasSancionadas(updatedList);  // Pasar el estado hacia el componente padre
+                setHistorialVisitasSancionadas(updatedList);
                 return updatedList;
             });
             setNuevaVisitaSancionada({
@@ -101,7 +101,6 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
         setShowModal(false);
     };
 
-    // HistorialVisitasSancionadas
     const handleUploadPhotoDesdeHistorialSancionadas = (index) => {
         const file = fileInputRefs.current[index].files[0];
         if (file) {
@@ -121,7 +120,6 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
             reader.readAsDataURL(file);
         }
     };
-
 
     return (
         <div>
@@ -191,7 +189,6 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
                                 className={`w-full p-2 border ${errors.relacion ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                             >
                                 <option value="" disabled>Seleccionar relación</option>
-                                {/* Opciones relacionadas con el ámbito familiar */}
                                 <option value="Madre">Madre</option>
                                 <option value="Padre">Padre</option>
                                 <option value="Hermano/a">Hermano/a</option>
@@ -265,7 +262,7 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
                                     const sancionDate = new Date(item.fechaSancion);
                                     const cumplimientoDate = new Date(item.fechaCumplimiento);
                                     const diffTime = Math.abs(cumplimientoDate - sancionDate);
-                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));  // Calcular la diferencia en días
+                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                                     return (
                                         <li key={item.id} className="border border-gray-300 p-2 rounded mt-2 bg-gray-50">
                                             <div className="flex flex-col md:flex-row items-center">
@@ -317,9 +314,6 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
                     </div>
                 </div>
             </div>
-
-
-
             {/* Modal para ver foto */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">

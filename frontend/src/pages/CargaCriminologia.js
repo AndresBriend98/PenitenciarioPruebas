@@ -1,6 +1,6 @@
-import React, { useState} from 'react';
+import React, { useState,useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaCriminologia = () => {
     const navigate = useNavigate();
@@ -25,8 +25,35 @@ const CargaCriminologia = () => {
             setHistorialRegimen([...historialRegimen, nuevaEntrada]);
             setArchivoRegimen(null);
             setNombreArchivoRegimen('');
-            setIsRegimenCargado(true); // Indicar que ya se ha hecho una carga
+            setIsRegimenCargado(true);
         }
+    };
+
+    const [confirmDeleteHistorialModal, setConfirmDeleteHistorialModal] = useState(false);
+    const [selectedHistorialIndex, setSelectedHistorialIndex] = useState(null);
+
+    const handleCloseDeleteHistorialModal = () => {
+        setConfirmDeleteHistorialModal(false);
+        setSelectedHistorialIndex(null);
+    };
+    const handleEliminarActaArchivo = () => {
+        if (selectedHistorialIndex !== null) {
+            const newHistorial = [...historial];
+            const newDate = new Date().toLocaleString();
+
+            if (!newHistorial[selectedHistorialIndex].fechasDeEliminacion) {
+                newHistorial[selectedHistorialIndex].fechasDeEliminacion = [];
+            }
+
+            newHistorial[selectedHistorialIndex].fechasDeEliminacion.push(newDate);
+
+            newHistorial[selectedHistorialIndex].actasArchivo = null;
+            newHistorial[selectedHistorialIndex].nombreActaArchivo = '';
+
+            setHistorial(newHistorial);
+        }
+        setConfirmDeleteHistorialModal(false);
+        setSelectedHistorialIndex(null);
     };
 
     const [nombreArchivoRegimen, setNombreArchivoRegimen] = useState('');
@@ -38,42 +65,40 @@ const CargaCriminologia = () => {
         setEditObservacionBeneficio(entrada.observacion || '');
         setEditIndexBeneficio(index);
 
-        // Guardar los valores originales
         setOriginalBeneficio(entrada.beneficio);
         setOriginalDescripcion(entrada.descripcion);
         setOriginalObservacion(entrada.observacion || '');
-        setIsBeneficioModified(false); // Resetea el estado de modificaciones al entrar en modo edición
+        setIsBeneficioModified(false);
     };
 
     const handleInputChangeBeneficio = (setValue, value, originalValue) => {
         setValue(value);
-        setIsBeneficioModified(value !== originalValue); // Marca como modificado si el nuevo valor es diferente al original
+        setIsBeneficioModified(value !== originalValue);
     };
 
     const handleEdit = (index) => {
         const entrada = historial[index];
-        setEditIndex(index); // Establece el índice de la entrada que se está editando
-        setTituloEditado(entrada.titulo); // Carga el título en el campo de edición
-        setInformeEditado(entrada.informe); // Carga el informe en el campo de edición
-        setObservacionEditada(entrada.observacion || ''); // Carga la observación (si existe)
+        setEditIndex(index);
+        setTituloEditado(entrada.titulo);
+        setInformeEditado(entrada.informe);
+        setObservacionEditada(entrada.observacion || '');
 
-        // Guarda los valores originales
         setOriginalTitulo(entrada.titulo);
         setOriginalInforme(entrada.informe);
         setOriginalObservacion(entrada.observacion || '');
-        setIsModified(false); // Resetea el estado de modificaciones al entrar en modo edición
+        setIsModified(false);
     };
 
     const handleInputChange = (setValue, value, originalValue) => {
         setValue(value);
-        setIsModified(value !== originalValue); // Marca como modificado si el nuevo valor es diferente al original
+        setIsModified(value !== originalValue);
     };
-    // Estado para almacenar el archivo y su nombre
+
     const [informeCriminologicoArchivo, setInformeCriminologicoArchivo] = useState(null);
     const [nombreArchivo, setNombreArchivo] = useState('');
-    const [tituloEditado, setTituloEditado] = useState(''); // Campo para el título en edición
-    const [informeEditado, setInformeEditado] = useState(''); // Campo para el informe en edición
-    const [observacionEditada, setObservacionEditada] = useState(''); // Campo para la observación en edición
+    const [tituloEditado, setTituloEditado] = useState('');
+    const [informeEditado, setInformeEditado] = useState('');
+    const [observacionEditada, setObservacionEditada] = useState('');
 
     const handleSaveBeneficio = () => {
         const nuevoHistorialBeneficio = [...historialBeneficio];
@@ -82,13 +107,13 @@ const CargaCriminologia = () => {
             beneficio: editBeneficio,
             descripcion: editDescripcionBeneficio,
             observacion: editObservacionBeneficio,
-            fechaModificacion: new Date().toLocaleString(), // Añadir la fecha actual
+            fechaModificacion: new Date().toLocaleString(),
         };
-        setHistorialBeneficio(nuevoHistorialBeneficio); // Actualiza el historial
-        setEditIndexBeneficio(null); // Salir del modo de edición
-        setEditBeneficio(''); // Limpiar los campos de edición
-        setEditDescripcionBeneficio(''); // Limpiar los campos de edición
-        setEditObservacionBeneficio(''); // Limpiar los campos de edición
+        setHistorialBeneficio(nuevoHistorialBeneficio);
+        setEditIndexBeneficio(null); 
+        setEditBeneficio('');
+        setEditDescripcionBeneficio('');
+        setEditObservacionBeneficio('');
     };
 
     const handleSaveEdit = () => {
@@ -98,80 +123,79 @@ const CargaCriminologia = () => {
             titulo: tituloEditado,
             informe: informeEditado,
             observacion: observacionEditada,
-            fechaModificacion: new Date().toLocaleString(), // Añade la fecha actual
+            fechaModificacion: new Date().toLocaleString(),
         };
-        setHistorial(historialActualizado); // Actualiza el historial
-        setEditIndex(null); // Resetea el índice de edición
-        setTituloEditado(''); // Limpia los campos de edición
-        setInformeEditado(''); // Limpia los campos de edición
-        setObservacionEditada(''); // Limpia los campos de edición
+        setHistorial(historialActualizado);
+        setEditIndex(null);
+        setTituloEditado('');
+        setInformeEditado('');
+        setObservacionEditada('');
     };
 
     const handleCancelEdit = () => {
-        setEditIndex(null); // Cancela la edición
-        setTituloEditado(''); // Limpia los campos de edición
-        setInformeEditado(''); // Limpia los campos de edición
-        setObservacionEditada(''); // Limpia los campos de edición
+        setEditIndex(null);
+        setTituloEditado('');
+        setInformeEditado('');
+        setObservacionEditada('');
     };
 
+    const [actasArchivo, setActasArchivo] = useState(null);
+    const [nombreActaArchivo, setNombreActaArchivo] = useState('');
     const handleCargarBeneficio = () => {
-        // Validar que al menos uno de los campos esté lleno
         if (!beneficio && !descripcionBeneficio && !observacionBeneficio) {
-            setHasErrorBeneficio(true); // Mostrar error si todos los campos están vacíos
+            setHasErrorBeneficio(true);
             return;
         }
 
-        setHasErrorBeneficio(false); // Resetea el estado de error si hay algo cargado
+        setHasErrorBeneficio(false); 
 
-        // Crear una nueva entrada con los valores actuales
         const nuevaEntrada = {
-            beneficio: beneficio || '',               // El beneficio es opcional
-            descripcion: descripcionBeneficio || '',   // La descripción es opcional
-            observacion: observacionBeneficio || '',   // La observación es opcional
+            beneficio: beneficio || '',
+            descripcion: descripcionBeneficio || '',
+            observacion: observacionBeneficio || '',
             fecha: new Date().toLocaleString(),
         };
 
-        // Añadir la nueva entrada al historial de beneficios
         setHistorialBeneficio([...historialBeneficio, nuevaEntrada]);
 
-        // Restablecer estados después de la carga
+        setActasArchivo(null);
+        setNombreActaArchivo('');
         setBeneficio('');
         setDescripcionBeneficio('');
         setObservacionBeneficio('');
     };
 
-    // Estados de error
-    const [hasErrorCriminologico, setHasErrorCriminologico] = useState(false); // Error para Criminología
-    const [hasErrorBeneficio, setHasErrorBeneficio] = useState(false);         // Error para Beneficio
-
+    const [hasErrorCriminologico, setHasErrorCriminologico] = useState(false); 
+    const [hasErrorBeneficio, setHasErrorBeneficio] = useState(false);
+    const fileInputRef = useRef(null);
     const handleCargarCriminologico = () => {
-        // Validar que al menos uno de los campos esté lleno
+
         if (!tituloInforme && !informeCriminologico && !informeCriminologicoArchivo && !observacion) {
-            setHasErrorCriminologico(true); // Mostrar error si todos los campos están vacíos
+            setHasErrorCriminologico(true);
             return;
         }
 
-        setHasErrorCriminologico(false); // Resetea el estado de error si hay algo cargado
+        setHasErrorCriminologico(false);
 
-        // Crear una nueva entrada con los valores actuales
         const nuevaEntrada = {
-            titulo: tituloInforme || '',              // El título es opcional
-            informe: informeCriminologico || '',      // El informe es opcional
-            observacion: observacion || '',           // La observación es opcional
-            archivo: informeCriminologicoArchivo || null, // El archivo es opcional
-            nombreArchivo: nombreArchivo || '',       // El nombre del archivo es opcional
+            titulo: tituloInforme || '',
+            informe: informeCriminologico || '',
+            observacion: observacion || '',
+            actasArchivo,
+            nombreActaArchivo,
+            fechaCargaActa: actasArchivo ? new Date().toLocaleString() : null,
+            fechasDeCargaActa: actasArchivo ? [new Date().toLocaleString()] : [],
             fecha: new Date().toLocaleString(),
         };
 
-        // Añadir la nueva entrada al historial
         setHistorial([...historial, nuevaEntrada]);
 
-        // Restablecer estados después de la carga
         setTituloInforme('');
         setInformeCriminologico('');
         setObservacion('');
         setInformeCriminologicoArchivo(null);
         setNombreArchivo('');
+        fileInputRef.current.value = ''; 
     };
 
     const [beneficio, setBeneficio] = useState('');
@@ -187,7 +211,7 @@ const CargaCriminologia = () => {
     const [observacion, setObservacion] = useState('');
     const [historial, setHistorial] = useState([]);
     const [editIndex, setEditIndex] = useState(null);
-    
+
     const [user, setUser] = useState({
         typeofintern: 'Procesado',
     });
@@ -198,8 +222,7 @@ const CargaCriminologia = () => {
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col z-10">
-            <Header/>
-            {/* Contenedor principal con grid layout */}
+            <Header />
             <div className='bg-white p-4 rounded-md shadow-md mb-4 mt-5 '>
                 <h1 className="text-xl font-bold mb-4">Area Criminológica</h1>
 
@@ -219,7 +242,7 @@ const CargaCriminologia = () => {
 
                         {estaAdheridoRegimen && (
                             <>
-                            
+
                                 <label className="block text-sm font-semibold mb-2 mt-4">Adhesión al régimen</label>
                                 <input
                                     type="file"
@@ -298,7 +321,6 @@ const CargaCriminologia = () => {
                     {/* Formulario de Carga Criminológica */}
                     <div className="bg-white p-4 rounded-md shadow-md mb-4 border border-gray-300 rounded mt-2 bg-gray-50 mb-4">
                         <h1 className="text-l font-bold mb-4">Carga Criminológica</h1>
-                        {/* Si hay un error, muestra el mensaje */}
                         {hasErrorCriminologico && (
                             <p className="text-red-500 text-sm mb-5">Por favor, complete al menos un campo para poder realizar una carga.</p>
                         )}
@@ -339,17 +361,18 @@ const CargaCriminologia = () => {
                                 ></textarea>
                             </div>
 
-                            {/* Input para archivo de Informe Criminológico */}
-                            <label className="block text-sm font-semibold mt-2">Informe Criminológico</label>
+                            <label className="block text-sm font-bold mt-2 mb-2">Subir informe</label>
+                        
                             <input
                                 type="file"
+                                ref={fileInputRef}
                                 onChange={(e) => {
                                     const file = e.target.files[0];
-                                    setInformeCriminologicoArchivo(file); // Asigna el archivo al estado
-                                    setNombreArchivo(file ? file.name : ''); // Almacena el nombre del archivo si existe
+                                    setActasArchivo(file);
+                                    setNombreActaArchivo(file.name);
                                 }}
                                 accept=".pdf,.doc,.docx"
-                                className="mb-2 text-sm w-full border border-gray-300 rounded p-1"
+                                className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
                             />
 
                             <div className="flex justify-center mt-2">
@@ -367,11 +390,10 @@ const CargaCriminologia = () => {
                         <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
                             <h1 className="text-sm font-bold mt-4">Historial de Carga</h1>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
-                                {/* Filtrar las entradas del historial que tienen al menos un campo cargado */}
                                 {historial.filter(entrada => entrada.titulo || entrada.informe || entrada.observacion || entrada.archivo).length > 0 ? (
                                     <ul className="space-y-2">
                                         {historial.filter((entrada, index) =>
-                                            entrada.titulo || entrada.informe || entrada.observacion || entrada.archivo // Filtramos solo las entradas que tienen algún campo cargado
+                                            entrada.titulo || entrada.informe || entrada.observacion || entrada.archivo
                                         ).map((entrada, index) => (
                                             <li key={index} className="border-b border-gray-300 pb-2">
                                                 {editIndex === index ? (
@@ -383,7 +405,7 @@ const CargaCriminologia = () => {
                                                                     className="border p-1 rounded text-sm w-full"
                                                                     type="text"
                                                                     value={tituloEditado}
-                                                                    onChange={(e) => handleInputChange(setTituloEditado, e.target.value, originalTitulo)} // Cambia esta línea
+                                                                    onChange={(e) => handleInputChange(setTituloEditado, e.target.value, originalTitulo)}
                                                                 />
                                                             </div>
                                                             <div>
@@ -392,7 +414,7 @@ const CargaCriminologia = () => {
                                                                     className="border p-1 rounded text-sm w-full"
                                                                     type="text"
                                                                     value={informeEditado}
-                                                                    onChange={(e) => handleInputChange(setInformeEditado, e.target.value, originalInforme)} // Cambia esta línea
+                                                                    onChange={(e) => handleInputChange(setInformeEditado, e.target.value, originalInforme)}
                                                                 />
                                                             </div>
                                                             <div>
@@ -401,13 +423,13 @@ const CargaCriminologia = () => {
                                                                     className="border p-1 rounded text-sm w-full"
                                                                     type="text"
                                                                     value={observacionEditada}
-                                                                    onChange={(e) => handleInputChange(setObservacionEditada, e.target.value, originalObservacion)} // Cambia esta línea
+                                                                    onChange={(e) => handleInputChange(setObservacionEditada, e.target.value, originalObservacion)}
                                                                 />
                                                             </div>
                                                             <div className="flex justify-center space-x-2 mt-2">
                                                                 <button
                                                                     onClick={handleSaveEdit}
-                                                                    disabled={!isModified} // Deshabilita el botón si no ha habido modificaciones
+                                                                    disabled={!isModified}
                                                                     className={`bg-green-500 text-white px-4 py-1 rounded text-xs hover:bg-green-600 ${!isModified ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                                 >
                                                                     Guardar
@@ -435,37 +457,153 @@ const CargaCriminologia = () => {
                                                         {entrada.observacion && (
                                                             <p className="text-sm"><strong>Observación:</strong> {entrada.observacion}</p>
                                                         )}
-                                                        {/* Solo mostramos el archivo si existe */}
-                                                        {entrada.archivo ? (
-                                                            <div>
-                                                                <p className="text-sm"><strong>Informe Criminológico:</strong></p>
-                                                                <a
-                                                                    href={URL.createObjectURL(entrada.archivo)} // Crea un enlace para el archivo
-                                                                    download={entrada.nombreArchivo} // Usa el nombre original del archivo
-                                                                    className="mt-2 ml-2 bg-blue-500 text-white p-2 rounded-full text-xs hover:bg-blue-600 inline-block" // Estilo del botón
-                                                                >
-                                                                    Descargar Informe Criminológico
-                                                                </a>
-                                                            </div>
+
+                                                        {/* Acta */}
+                                                        <span className="text-sm max-w-full break-words">
+                                                            <strong>Informe:</strong>
+                                                        </span>
+                                                        {/* Si no hay archivo cargado */}
+                                                        {!entrada.actasArchivo ? (
+                                                            <input
+                                                                type="file"
+                                                                onChange={(e) => {
+                                                                    const newHistorial = [...historial];
+                                                                    const newDate = new Date().toLocaleString(); 
+
+                                                                    newHistorial[index].actasArchivo = e.target.files[0];
+
+                                                                    if (!newHistorial[index].fechaCarga) {
+                                                                        newHistorial[index].fechaCarga = newDate;
+                                                                    }
+
+
+                                                                    if (!newHistorial[index].fechasDeCargaActa) {
+                                                                        newHistorial[index].fechasDeCargaActa = [];
+                                                                    }
+
+                                                                    newHistorial[index].fechasDeCargaActa.push(newDate);
+
+                                                                    setHistorial(newHistorial);
+                                                                }}
+                                                                accept=".pdf,.doc,.docx"
+                                                                className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
+                                                            />
                                                         ) : (
-                                                            <div>
-                                                                <span className="text-sm"><strong>Informe Criminológico:</strong></span>
-                                                                <input
-                                                                    type="file"
-                                                                    onChange={(e) => {
-                                                                        const newHistorial = [...historial];
-                                                                        newHistorial[index].archivo = e.target.files[0]; // Asigna el archivo a la entrada correspondiente
-                                                                        newHistorial[index].nombreArchivo = e.target.files[0].name; // Almacena el nombre del archivo
-                                                                        setHistorial(newHistorial); // Actualiza el historial
+                                                            <>
+                                                                <a
+                                                                    href={URL.createObjectURL(entrada.actasArchivo)}
+                                                                    download={entrada.actasArchivo.name}
+                                                                    className="mt-2 ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                                >
+                                                                    Descargar Informe
+                                                                </a>
+
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const input = document.createElement("input");
+                                                                        input.type = "file";
+                                                                        input.accept = ".pdf,.doc,.docx";
+
+                                                                        input.onchange = (e) => {
+                                                                            const file = e.target.files[0];
+                                                                            if (file) {
+                                                                                const newHistorial = [...historial];
+                                                                                const newDate = new Date().toLocaleString();
+
+                                                                                if (!newHistorial[index].fechasDeEdicion) {
+                                                                                    newHistorial[index].fechasDeEdicion = [];
+                                                                                }
+
+                                                                                newHistorial[index].fechasDeEdicion.push(newDate);
+
+                                                                                newHistorial[index].actasArchivo = file;
+                                                                                setHistorial(newHistorial);
+                                                                            }
+                                                                        };
+
+                                                                        input.click();
                                                                     }}
-                                                                    accept=".pdf,.doc,.docx"
-                                                                    className="mt-1 mb-2 text-sm border border-gray-300 rounded p-1 w-full"
-                                                                />
-                                                            </div>
+                                                                    className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
+                                                                >
+                                                                    Editar Informe
+                                                                </button>
+
+                                                                {/* Botón de Eliminar */}
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedHistorialIndex(index);
+                                                                        setConfirmDeleteHistorialModal(true);
+                                                                    }}
+                                                                    className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
+                                                                >
+                                                                    Eliminar Informe
+                                                                </button>
+                                                            </>
                                                         )}
+
+                                                        <div>
+
+                                                            {/* Mostrar la fecha de carga de acta solo si existe */}
+                                                            {entrada.fechasDeCargaActa && (
+                                                                <div className="mt-2">
+                                                                    <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                        <strong>Fecha de carga informe:</strong>
+                                                                    </p>
+                                                                    <ul className="list-disc list-inside">
+                                                                        {entrada.fechasDeCargaActa.map((fecha, index) => (
+                                                                            <li
+                                                                                key={index}
+                                                                                className="text-sm text-gray-500 max-w-full break-words"
+                                                                            >
+                                                                                {fecha}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Mostrar las fechas de edición solo si hay al menos una */}
+                                                            {entrada.fechasDeEdicion && entrada.fechasDeEdicion.length > 0 && (
+                                                                <div className="mt-2">
+                                                                    <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                        <strong>Fecha de edición informe:</strong>
+                                                                    </p>
+                                                                    <ul className="list-disc list-inside">
+                                                                        {entrada.fechasDeEdicion.map((fecha, index) => (
+                                                                            <li
+                                                                                key={index}
+                                                                                className="text-sm text-gray-500 max-w-full break-words"
+                                                                            >
+                                                                                {fecha}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Mostrar las fechas de eliminación solo si hay al menos una */}
+                                                            {entrada.fechasDeEliminacion &&
+                                                                entrada.fechasDeEliminacion.length > 0 && (
+                                                                    <div className="mt-2">
+                                                                        <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                            <strong>Fecha de eliminación informe:</strong>
+                                                                        </p>
+                                                                        <ul className="list-disc list-inside">
+                                                                            {entrada.fechasDeEliminacion.map((fecha, index) => (
+                                                                                <li
+                                                                                    key={index}
+                                                                                    className="text-sm text-gray-500 max-w-full break-words"
+                                                                                >
+                                                                                    {fecha}
+                                                                                </li>
+                                                                            ))}
+                                                                        </ul>
+                                                                    </div>
+                                                                )}
+                                                        </div>
                                                         <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {entrada.fecha}</p>
                                                         {entrada.fechaModificacion && (
-                                                            <p className="text-sm text-gray-500"><strong>Fecha de modificación:</strong> {entrada.fechaModificacion}</p>
+                                                            <p className="text-sm text-gray-500"><strong>Fecha de modificación (beneficio/descripción/observación):</strong> {entrada.fechaModificacion}</p>
                                                         )}
                                                         <div className="flex justify-center mt-2">
                                                             <button onClick={() => handleEdit(index)} className="bg-orange-400 text-white p-2 rounded-md hover:bg-orange-500 text-xs">
@@ -482,7 +620,29 @@ const CargaCriminologia = () => {
                                 )}
                             </div>
                         </div>
-
+                        {/* Modal de confirmación de eliminación */}
+                        {confirmDeleteHistorialModal && (
+                            <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
+                                <div className="bg-white p-6 rounded-md shadow-lg text-center w-full max-w-md mx-4 md:mx-0 max-h-screen overflow-auto">
+                                    <h2 className="text-lg font-bold mb-4 text-red-600">Confirmar Eliminación</h2>
+                                    <p>¿Estás seguro de que deseas eliminar este archivo? Esta acción no se puede deshacer.</p>
+                                    <div className="mt-4 flex justify-center">
+                                        <button
+                                            onClick={handleEliminarActaArchivo}
+                                            className="bg-red-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-red-600"
+                                        >
+                                            Eliminar
+                                        </button>
+                                        <button
+                                            onClick={handleCloseDeleteHistorialModal}
+                                            className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
 
@@ -624,7 +784,6 @@ const CargaCriminologia = () => {
                                 )}
                             </div>
                         </div>
-
 
                     </div>
                 </div>

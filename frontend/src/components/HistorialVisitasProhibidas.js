@@ -35,7 +35,7 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
             const nueva = { ...nuevaVisita, id: visitasProhibidas.length + 1 };
             setVisitasProhibidas(prevState => {
                 const updatedList = [...prevState, nueva];
-                setHistorialVisitasProhibidas(updatedList);  // Pasamos el estado hacia el componente padre
+                setHistorialVisitasProhibidas(updatedList);
                 return updatedList;
             });
             setNuevaVisita({
@@ -62,7 +62,7 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
                 setNuevaVisita(prevState => ({
                     ...prevState,
                     foto: reader.result,
-                    fechaFoto: '' // No mostrar la fecha de carga de foto desde el formulario
+                    fechaFoto: ''
                 }));
             };
             reader.readAsDataURL(file);
@@ -80,7 +80,6 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
 
     const fileInputRefs = useRef([]);
 
-    // HistorialVisitasProhibidas
     const handleUploadPhotoDesdeHistorialProhibidas = (index) => {
         const file = fileInputRefs.current[index].files[0];
         if (file) {
@@ -196,7 +195,6 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
                         </div>
                     </div>
 
-                    {/* Botón de agregar */}
                     <div className="flex justify-center mt-4">
                         <button
                             onClick={handleAddVisita}
@@ -227,7 +225,6 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
                                             {item.desdeHistorial && item.fechaFoto && (
                                                 <p className="text-sm text-gray-500"><strong>Fecha de carga de foto:</strong> {item.fechaFoto}</p>
                                             )}
-                                            {/* Aquí puedes agregar otros detalles si es necesario */}
                                         </div>
                                         <div className="mt-4 md:mt-0 md:ml-4 flex flex-col items-center">
                                             {item.foto ? (
@@ -262,7 +259,6 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
                     )}
                 </div>
             </div>
-
 
             {/* Modal para ver foto */}
             {showModal && (

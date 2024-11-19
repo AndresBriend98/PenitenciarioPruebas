@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaPermisos = () => {
     const [confirmDeletePermisoModal, setConfirmDeletePermisoModal] = useState(false);
     const [selectedPermisoIndex, setSelectedPermisoIndex] = useState(null);
 
-    // Estado para manejar los permisos
     const [permisos, setPermisos] = useState([]);
 
-    // Estado para manejar los datos del permiso en el formulario
     const [permisoData, setPermisoData] = useState({ tipo: '', motivo: '', observacion: '', autorizadoPor: '' });
 
-    // Estado para manejar los errores
     const [errors, setErrors] = useState({
         permisos: {
             tipo: '',
@@ -21,57 +18,25 @@ const CargaPermisos = () => {
         }
     });
 
-    // Función para guardar la observación editada o nueva
     const handleGuardarObservacion = (index) => {
         const newPermisos = [...permisos];
-        const fechaModificacion = new Date().toLocaleString();  // Fecha de modificación
-
-        // Actualizar la observación y registrar fechas
+        const fechaModificacion = new Date().toLocaleString();
         newPermisos[index].observacion = newObservacion;
         newPermisos[index].ultimaModificacionObservacion = fechaModificacion;
-        newPermisos[index].fechaObservacion = newPermisos[index].fechaObservacion || fechaModificacion; // Si no hay fecha de carga, asignamos la fecha de modificación
-
-        setPermisos(newPermisos);  // Actualizamos el estado con las nuevas observaciones
-        setIsEditingObservacion(null);  // Finaliza la edición
-        setNewObservacion('');  // Reseteamos el campo de texto
+        newPermisos[index].fechaObservacion = newPermisos[index].fechaObservacion || fechaModificacion;
+        setPermisos(newPermisos); setIsEditingObservacion(null); setNewObservacion('');
     };
 
-    // Activar el modo de edición para la observación
     const handleEditarObservacion = (index) => {
-        setIsEditingObservacion(index);  // Activa la edición para el índice dado
-        setNewObservacion(permisos[index].observacion || '');  // Muestra la observación actual (si existe)
+        setIsEditingObservacion(index); setNewObservacion(permisos[index].observacion || '');
     };
 
-    // Definimos los estados necesarios para manejar la edición de la observación
-    const [isEditingObservacion, setIsEditingObservacion] = useState(null);  // Estado para controlar la edición
-    const [newObservacion, setNewObservacion] = useState('');  // Estado para almacenar el nuevo valor de la observación
-    const [isObservacionModified, setIsObservacionModified] = useState(false);  // Estado para controlar si la observación fue modificada
-
-    // Estado para manejar el archivo del permiso
+    const [isEditingObservacion, setIsEditingObservacion] = useState(null); const [newObservacion, setNewObservacion] = useState(''); const [isObservacionModified, setIsObservacionModified] = useState(false);
     const [actasArchivo, setActasArchivo] = useState(null);
     const [nombreActaArchivo, setNombreActaArchivo] = useState('');
 
     const navigate = useNavigate();
 
-    // Función para agregar/editar observación desde el historial
-    const handleAgregarObservacionDesdeHistorial = (index) => {
-        const observacion = prompt("Introduce una nueva observación:");
-
-        if (observacion) {
-            const newPermisos = [...permisos];
-            const fechaModificacion = new Date().toLocaleString();
-            const fechaCarga = newPermisos[index].fechaObservacion ? newPermisos[index].fechaObservacion : fechaModificacion;
-
-            // Si la observación ya tiene fecha de carga, solo se actualiza la fecha de modificación
-            newPermisos[index].observacion = observacion;  // Agregar/editar la observación
-            newPermisos[index].ultimaModificacionObservacion = fechaModificacion;  // Registrar la fecha de última modificación
-            newPermisos[index].fechaObservacion = fechaCarga;  // Registrar la fecha de carga de la observación
-
-            setPermisos(newPermisos);
-        }
-    };
-
-    // Función para agregar un nuevo permiso
     const handleAgregarPermiso = () => {
         let hasErrors = false;
         const newErrors = { tipo: '', motivo: '', autorizadoPor: '' };
@@ -103,8 +68,7 @@ const CargaPermisos = () => {
                 nombreActaArchivo: nombreActaArchivo,
                 fechaCargaActa: actasArchivo ? new Date().toLocaleString() : null,
                 fechasDeCargaActa: actasArchivo ? [new Date().toLocaleString()] : [],
-                fechaObservacion: permisoData.observacion ? fechaCarga : null, // Fecha de carga de observación
-                ultimaModificacionObservacion: null // Nueva propiedad para registrar la última modificación
+                fechaObservacion: permisoData.observacion ? fechaCarga : null, ultimaModificacionObservacion: null
             };
 
             setPermisos(prevPermisos => [...prevPermisos, nuevoPermiso]);
@@ -121,13 +85,10 @@ const CargaPermisos = () => {
         }
     };
 
-
-    // Función para eliminar el archivo del permiso
     const handleEliminarPermisoArchivo = () => {
         if (selectedPermisoIndex !== null) {
             const newPermisos = [...permisos];
-            const newDate = new Date().toLocaleString(); // Obtiene la fecha actual
-
+            const newDate = new Date().toLocaleString();
             if (!newPermisos[selectedPermisoIndex].fechasDeEliminacion) {
                 newPermisos[selectedPermisoIndex].fechasDeEliminacion = [];
             }
@@ -141,7 +102,6 @@ const CargaPermisos = () => {
         setSelectedPermisoIndex(null);
     };
 
-    // Función para cerrar el modal sin eliminar
     const handleCloseDeletePermisoModal = () => {
         setConfirmDeletePermisoModal(false);
         setSelectedPermisoIndex(null);
@@ -207,8 +167,7 @@ const CargaPermisos = () => {
                             type="file"
                             onChange={(e) => {
                                 const file = e.target.files[0];
-                                setActasArchivo(file); // Asigna el archivo al estado
-                                setNombreActaArchivo(file.name); // Almacena el nombre del archivo
+                                setActasArchivo(file); setNombreActaArchivo(file.name);
                             }}
                             accept=".pdf,.doc,.docx"
                             className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
@@ -237,17 +196,14 @@ const CargaPermisos = () => {
                                                 key={index}
                                                 className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm"
                                             >
-                                                {/* Tipo de permiso */}
                                                 <p className="text-sm max-w-full break-words">
                                                     <strong>Tipo de permiso:</strong> {item.tipo}
                                                 </p>
 
-                                                {/* Motivo */}
                                                 <p className="text-sm max-w-full break-words">
                                                     <strong>Motivo:</strong> {item.motivo}
                                                 </p>
 
-                                                {/* Autorizado Por */}
                                                 <p className="text-sm max-w-full break-words">
                                                     <strong>Autorizado Por:</strong> {item.autorizadoPor}
                                                 </p>
@@ -256,13 +212,12 @@ const CargaPermisos = () => {
                                                 <div className="flex flex-wrap justify-between items-start mt-2">
                                                     {isEditingObservacion === index ? (
                                                         <>
-                                                            {/* Campo de edición de observación */}
                                                             <p className="text-sm"><strong>Observación:</strong></p>
                                                             <textarea
                                                                 value={newObservacion}
                                                                 onChange={(e) => {
                                                                     setNewObservacion(e.target.value);
-                                                                    setIsObservacionModified(e.target.value !== item.observacion);  // Actualizamos si hubo cambios
+                                                                    setIsObservacionModified(e.target.value !== item.observacion);
                                                                 }}
                                                                 className="p-1 border border-gray-300 rounded text-sm ml-2 flex-1 max-w-full"
                                                                 rows="2"
@@ -309,8 +264,6 @@ const CargaPermisos = () => {
                                                     )}
                                                 </div>
 
-
-
                                                 {/* Fecha de carga y última modificación de la observación */}
                                                 {item.fechaObservacion && (
                                                     <p className="text-sm text-gray-600 mt-1 max-w-full break-words">
@@ -336,25 +289,20 @@ const CargaPermisos = () => {
                                                         type="file"
                                                         onChange={(e) => {
                                                             const newPermisos = [...permisos];
-                                                            const newDate = new Date().toLocaleString(); // Obtiene la fecha actual
-
-                                                            // Asignar el archivo a la entrada correspondiente
+                                                            const newDate = new Date().toLocaleString();
                                                             newPermisos[index].actasArchivo = e.target.files[0];
 
-                                                            // Si no existe la fecha de carga, asignamos la fecha de carga
                                                             if (!newPermisos[index].fechaCarga) {
-                                                                newPermisos[index].fechaCarga = newDate; // Asigna la fecha de carga
+                                                                newPermisos[index].fechaCarga = newDate;
                                                             }
 
-                                                            // Si no existe la fecha de carga de acta, la asignamos ahora
                                                             if (!newPermisos[index].fechasDeCargaActa) {
-                                                                newPermisos[index].fechasDeCargaActa = []; // Inicializa el arreglo si no existe
+                                                                newPermisos[index].fechasDeCargaActa = [];
                                                             }
 
-                                                            // Registra la fecha de carga de acta solo si el archivo se carga por primera vez
                                                             newPermisos[index].fechasDeCargaActa.push(newDate);
 
-                                                            setPermisos(newPermisos); // Actualiza el estado
+                                                            setPermisos(newPermisos);
                                                         }}
                                                         accept=".pdf,.doc,.docx"
                                                         className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
@@ -381,23 +329,19 @@ const CargaPermisos = () => {
                                                                     const file = e.target.files[0];
                                                                     if (file) {
                                                                         const newPermisos = [...permisos];
-                                                                        const newDate = new Date().toLocaleString(); // Fecha de edición
-
-                                                                        // Si no existe el campo `fechasDeEdicion`, lo inicializamos como un arreglo
+                                                                        const newDate = new Date().toLocaleString();
                                                                         if (!newPermisos[index].fechasDeEdicion) {
                                                                             newPermisos[index].fechasDeEdicion = [];
                                                                         }
 
-                                                                        // Agregamos la nueva fecha de edición
                                                                         newPermisos[index].fechasDeEdicion.push(newDate);
 
-                                                                        // Reemplaza el archivo con el nuevo
                                                                         newPermisos[index].actasArchivo = file;
                                                                         setPermisos(newPermisos);
                                                                     }
                                                                 };
 
-                                                                input.click(); // Abre el selector de archivos
+                                                                input.click();
                                                             }}
                                                             className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
                                                         >
@@ -407,9 +351,7 @@ const CargaPermisos = () => {
                                                         {/* Botón de Eliminar */}
                                                         <button
                                                             onClick={() => {
-                                                                // Abrimos el modal de confirmación de eliminación
-                                                                setSelectedPermisoIndex(index); // Guardamos el índice del archivo
-                                                                setConfirmDeletePermisoModal(true); // Abrimos el modal
+                                                                setSelectedPermisoIndex(index); setConfirmDeletePermisoModal(true);
                                                             }}
                                                             className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
                                                         >

@@ -1,18 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header'; // Asegúrate de usar la ruta correcta
-
-// Componente CargaSalidas.js
+import Header from '../components/Header'; 
 const CargaSalidas = () => {
+
+    const [confirmDeleteHistorialModal, setConfirmDeleteHistorialModal] = useState(false);
+    const [selectedHistorialIndex, setSelectedHistorialIndex] = useState(null);
+        const handleCloseDeleteHistorialModal = () => {
+        setConfirmDeleteHistorialModal(false);
+        setSelectedHistorialIndex(null);
+    };
+    const handleEliminarActaArchivo = () => {
+        if (selectedHistorialIndex !== null) {
+            const newHistorial = [...historial];
+            const newDate = new Date().toLocaleString(); 
+                        if (!newHistorial[selectedHistorialIndex].fechasDeEliminacion) {
+                newHistorial[selectedHistorialIndex].fechasDeEliminacion = [];
+            }
+
+                        newHistorial[selectedHistorialIndex].fechasDeEliminacion.push(newDate);
+
+                        newHistorial[selectedHistorialIndex].actasArchivo = null;
+            newHistorial[selectedHistorialIndex].nombreActaArchivo = '';
+
+                        setHistorial(newHistorial);
+        }
+
+                setConfirmDeleteHistorialModal(false);
+        setSelectedHistorialIndex(null);
+    };
+
     const handleGenerarReporte = (index) => {
-        const registro = historial[index]; // Obtener la información de la salida
-        const fechaHora = new Date();
+
+        const registro = historial[index];         const fechaHora = new Date();
 
         const reporte = `
             Reporte de Salida
     
             Motivo de la salida: ${registro.motivoSalida}
-            Acompañante del interno: ${registro.acompananteInterno}
+            Nombre/s y apellido/s del acompañante del interno: ${registro.acompananteInterno}
+            DNI del acompañante del interno: ${registro.dniAcompananteInterno}
             Matrícula del móvil: ${registro.matriculaMovil}
             Nombre del personal de custodia: ${registro.nombreCustodia}
             DNI del personal de custodia: ${registro.dniCustodia}
@@ -37,21 +63,18 @@ const CargaSalidas = () => {
         ventanaImpresion.document.write('<pre>' + reporte + '</pre>');
         ventanaImpresion.document.write('</body></html>');
         ventanaImpresion.document.close();
-        ventanaImpresion.print(); // Imprimir el reporte
-    };
-    const [encargados, setEncargados] = useState([]); // Lista de encargados (custodia)
-    // Función para imprimir el registro
-    const handlePrintRegistro = (index) => {
+        ventanaImpresion.print();     };
+    const [encargados, setEncargados] = useState([]);         const handlePrintRegistro = (index) => {
         const registro = historialAnulados[index];
 
-        // Crear el contenido HTML para imprimir
-        const contenidoImprimir = `
+                const contenidoImprimir = `
         <div style="padding: 20px;">
             <h2>Salida Anulada</h2>
             <p><strong>Motivo de anulación:</strong> ${registro.motivoAnulacion}</p>
             <p><strong>Fecha de anulación:</strong> ${registro.fechaAnulacion}</p>
             <p><strong>Motivo de la salida:</strong> ${registro.motivoSalida}</p>
-            <p><strong>Acompañante del interno:</strong> ${registro.acompananteInterno}</p>
+            <p><strong>Nombre/s y apellido/s del acompañante del interno:</strong> ${registro.acompananteInterno}</p>
+            <p><strong>DNI del acompañante del interno:</strong> ${registro.dniAcompananteInterno}</p>
             <p><strong>Fecha de salida:</strong> ${registro.fechaSalida}</p>
             <p><strong>Hora de salida:</strong> ${registro.horaSalida}</p>
             <p><strong>Fecha de entrada:</strong> ${registro.fechaEntrada}</p>
@@ -61,8 +84,7 @@ const CargaSalidas = () => {
         </div>
     `;
 
-        // Crear un nuevo documento para imprimir
-        const ventanaImpresion = window.open('', '_blank');
+                const ventanaImpresion = window.open('', '_blank');
         ventanaImpresion.document.write(`
         <html>
             <head>
@@ -74,9 +96,9 @@ const CargaSalidas = () => {
         </html>
     `);
         ventanaImpresion.document.close();
-        ventanaImpresion.print();  // Imprimir el contenido
-    };
-
+        ventanaImpresion.print();      };
+        const [actasArchivo, setActasArchivo] = useState(null);
+    const [nombreActaArchivo, setNombreActaArchivo] = useState('');
     const [anularArchivo, setAnularArchivo] = useState(null);
     const [anularArchivoNombre, setAnularArchivoNombre] = useState('');
     const handleSaveAnulacion = () => {
@@ -88,23 +110,20 @@ const CargaSalidas = () => {
             motivoAnulacion: anularMotivo,
             fechaAnulacion: now,
             estadoVisita: 'Anulada',
-            archivoAdjunto: anularArchivoNombre,  // Guardar el nombre del archivo
-        };
+            archivoAdjunto: anularArchivoNombre,          };
 
         setHistorialAnulados((prev) => [...prev, anulacion]);
         setHistorial(updatedHistorial.filter((_, i) => i !== selectedIndex));
         setAnularModalOpen(false);
         setAnularMotivo('');
         setAnularArchivo(null);
-        setAnularArchivoNombre('');  // Limpiar nombre del archivo
-    };
+        setAnularArchivoNombre('');      };
 
-    // Función para determinar el estado
-    const getEstadoVisita = (fechaSalida, fechaEntrada) => {
+    const fileInputRef = useRef(null);
+
+        const getEstadoVisita = (fechaSalida, fechaEntrada) => {
         const ahora = new Date();
-        const fechaHoraSalida = new Date(`${fechaSalida}T00:00:00`); // Asumir hora 00:00 para fecha de salida
-        const fechaHoraEntrada = new Date(`${fechaEntrada}T23:59:59`); // Asumir hora 23:59 para fecha de entrada
-
+        const fechaHoraSalida = new Date(`${fechaSalida}T00:00:00`);         const fechaHoraEntrada = new Date(`${fechaEntrada}T23:59:59`); 
         if (fechaHoraSalida < ahora && fechaHoraEntrada < ahora) {
             return { color: 'bg-green-500', texto: 'Concretada', colorTexto: 'text-green-500' };
         } else if (fechaHoraSalida > ahora) {
@@ -113,51 +132,43 @@ const CargaSalidas = () => {
         return { color: 'bg-red-500', texto: 'Anulada', colorTexto: 'text-red-500' };
     };
 
-    // Estado inicial con los nuevos campos
-    const [formData, setFormData] = useState({
+        const [formData, setFormData] = useState({
         motivoSalida: '',
         acompananteInterno: '',
+        dniAcompananteInterno: '',
         fechaSalida: '',
         horaSalida: '',
         fechaEntrada: '',
         horaEntrada: '',
         observacion: '',
-        matriculaMovil: '', // Nuevo campo
-        nombreCustodia: '', // Nuevo campo: Nombre y apellido del personal de custodia
-        dniCustodia: '',   // Nuevo campo: DNI del personal de custodia
-        nombreChofer: '',  // Nuevo campo: Nombre y apellido del chofer
-        dniChofer: ''      // Nuevo campo: DNI del chofer
-    });
+        matriculaMovil: '',         nombreCustodia: '',         dniCustodia: '',           nombreChofer: '',          dniChofer: ''          });
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Función para manejar el submit del formulario
     const handleSubmit = () => {
         if (validateForm()) {
             const now = new Date();
-            const fechaCarga = now.toLocaleString(); // Fecha de carga de la observación
-            const fechaSalida = formData.fechaSalida;
+            const fechaCarga = now.toLocaleString();             const fechaSalida = formData.fechaSalida;
             const fechaEntrada = formData.fechaEntrada;
 
-            // Determinar el estado de la visita con las fechas de salida y entrada
-            const estadoVisita = getEstadoVisita(fechaSalida, fechaEntrada);
+                        const estadoVisita = getEstadoVisita(fechaSalida, fechaEntrada);
 
-            const newHistorial = {
+                        const newHistorial = {
                 ...formData,
-                fechaCarga, // Asignamos la fecha de carga al nuevo historial
-                estadoVisita, // Agregamos el estado de la visita
-                encargados,  // Agregamos los encargados (custodias)
-            };
+                fechaCarga,                 estadoVisita,                 encargados,                 actasArchivo,                 nombreActaArchivo,                 fechaCargaActa: actasArchivo ? new Date().toLocaleString() : null,                 fechasDeCargaActa: actasArchivo ? [new Date().toLocaleString()] : [],
+
+                                observacion: formData.observacion || '',
+                fechaCargaObservacion: formData.observacion ? now.toLocaleString() : null,             };
 
             setHistorial((prev) => [...prev, newHistorial]);
 
-            // Limpiar los campos del formulario después del submit
-            setFormData({
+                        setFormData({
                 motivoSalida: '',
                 acompananteInterno: '',
+                dniAcompananteInterno: '',
                 fechaSalida: '',
                 horaSalida: '',
                 fechaEntrada: '',
@@ -169,13 +180,15 @@ const CargaSalidas = () => {
                 nombreChofer: '',
                 dniChofer: ''
             });
+
+                        setActasArchivo(null);
+            setNombreActaArchivo('');
+            fileInputRef.current.value = ''; 
             setErrors({});
         }
     };
 
-
-    // Función para eliminar un encargado
-    const handleEliminarEncargado = (index) => {
+        const handleEliminarEncargado = (index) => {
         const nuevosEncargados = encargados.filter((_, i) => i !== index);
         setEncargados(nuevosEncargados);
     };
@@ -209,12 +222,9 @@ const CargaSalidas = () => {
             updatedHistorial[selectedIndex] = {
                 ...updatedHistorial[selectedIndex],
                 observacion: inputValue,
-                // Si no hay fecha de carga de observación, asignamos la fecha de carga.
-                fechaCargaObservacion: updatedHistorial[selectedIndex].fechaCargaObservacion
+                                fechaCargaObservacion: updatedHistorial[selectedIndex].fechaCargaObservacion
                     ? updatedHistorial[selectedIndex].fechaCargaObservacion
-                    : fechaActual,  // Solo asigna la fecha de carga si no existe
-                // Si ya existe una observación, solo actualizamos la fecha de modificación.
-                fechaModificacionObservacion: fechaActual,
+                    : fechaActual,                                  fechaModificacionObservacion: fechaActual,
             };
         }
 
@@ -222,13 +232,12 @@ const CargaSalidas = () => {
         setModalOpen(false);
     };
 
-    // Función para validar el formulario
-    const validateForm = () => {
+        const validateForm = () => {
         const errors = {};
 
-        // Validación de otros campos
-        if (!formData.motivoSalida) errors.motivoSalida = 'Motivo de la salida es obligatorio.';
+                if (!formData.motivoSalida) errors.motivoSalida = 'Motivo de la salida es obligatorio.';
         if (!formData.acompananteInterno) errors.acompananteInterno = 'Acompañante del interno es obligatorio.';
+        if (!formData.dniAcompananteInterno) errors.dniAcompananteInterno = 'DNI del acompañante del interno es obligatorio.';
         if (!formData.fechaSalida) errors.fechaSalida = 'Fecha de salida es obligatoria.';
         if (!formData.horaSalida) errors.horaSalida = 'Hora de salida es obligatoria.';
         if (!formData.fechaEntrada) errors.fechaEntrada = 'Fecha de entrada es obligatoria.';
@@ -237,8 +246,7 @@ const CargaSalidas = () => {
         if (!formData.nombreChofer) errors.nombreChofer = 'Nombre del chofer es obligatorio.';
         if (!formData.dniChofer) errors.dniChofer = 'DNI del chofer es obligatorio.';
 
-        // Validación de nombre y DNI de custodia solo si no hay encargados
-        if (encargados.length === 0) {
+                if (encargados.length === 0) {
             if (!formData.nombreCustodia) {
                 errors.nombreCustodia = 'Nombre del personal de custodia es obligatorio.';
             }
@@ -250,13 +258,11 @@ const CargaSalidas = () => {
         setErrors(errors);
         return Object.keys(errors).length === 0;
     };
-    // Función para agregar un encargado (custodia)
-    const handleAgregarEncargado = () => {
+        const handleAgregarEncargado = () => {
         const newErrors = { ...errors };
         let isValid = true;
 
-        // Validación de nombre y DNI del encargado
-        if (!formData.nombreCustodia) {
+                if (!formData.nombreCustodia) {
             newErrors.nombreCustodia = 'Nombre del personal de custodia es requerido';
             isValid = false;
         } else {
@@ -270,16 +276,14 @@ const CargaSalidas = () => {
             newErrors.dniCustodia = '';
         }
 
-        setErrors(newErrors); // Actualizar los errores
-
+        setErrors(newErrors); 
         if (isValid) {
             setEncargados([
                 ...encargados,
                 { nombre: formData.nombreCustodia, dni: formData.dniCustodia }
             ]);
 
-            // Limpiar campos de custodia después de agregar
-            setFormData({
+                        setFormData({
                 ...formData,
                 nombreCustodia: '',
                 dniCustodia: ''
@@ -370,7 +374,6 @@ const CargaSalidas = () => {
                             )}
                         </div>
                         <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4">
-                            {/* Campos de Nombre y DNI del personal de custodia y chofer */}
                             <div className="grid grid-cols-2 gap-2">
 
                                 {/* Nombre del chofer */}
@@ -437,7 +440,7 @@ const CargaSalidas = () => {
 
                             {/* Campo Acompañante del interno */}
                             <div>
-                                <label className="block text-sm font-medium mb-1 mt-2" htmlFor="acompananteInterno">Acompañante del interno:</label>
+                                <label className="block text-sm font-medium mb-1 mt-2" htmlFor="acompananteInterno">"Nombre/s y apellido/s (acompañante del interno):</label>
                                 <input
                                     type="text"
                                     id="acompananteInterno"
@@ -445,14 +448,28 @@ const CargaSalidas = () => {
                                     value={formData.acompananteInterno}
                                     onChange={handleInputChange}
                                     className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                    placeholder="Ingrese el acompañante del interno"
+                                    placeholder="Ingrese el Nombre/s y apellido/s acompañante del interno"
                                 />
                                 {errors.acompananteInterno && <p className="text-red-500 text-xs mt-1">{errors.acompananteInterno}</p>}
+                            </div>
+                            {/* DNI Acompañante del interno */}
+                            <div>
+                                <label className="block text-sm font-medium mb-1 mt-2" htmlFor="dniAcompananteInterno">
+                                    DNI (acompañante del interno):
+                                </label>
+                                <input
+                                    type="number"
+                                    id="dniAcompananteInterno"
+                                    name="dniAcompananteInterno"                                     value={formData.dniAcompananteInterno}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                                    placeholder="Ingrese el DNI del acompañante del interno"
+                                />
+                                {errors.dniAcompananteInterno && <p className="text-red-500 text-xs mt-1">{errors.dniAcompananteInterno}</p>}
                             </div>
 
                             {/* Campos de fecha y hora de salida */}
                             <div className="grid grid-cols-2 gap-2 mt-2">
-                                {/* Fecha de salida */}
                                 <div>
                                     <label className="block text-sm font-medium mb-1" htmlFor="fechaSalida">Fecha de salida:</label>
                                     <input
@@ -520,6 +537,16 @@ const CargaSalidas = () => {
                                     rows="3"
                                 />
                             </div>
+                            {/* Campo para subir actas */}
+                            <label className="block text-sm font-bold mt-2 mb-2">Subir Acta</label>
+                            <input
+                                type="file"
+                                ref={fileInputRef}                                  onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    setActasArchivo(file);                                     setNombreActaArchivo(file.name);                                 }}
+                                accept=".pdf,.doc,.docx"
+                                className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
+                            />
                         </div>
                         {/* Botón de envío */}
                         <div className="flex justify-center mt-2">
@@ -546,27 +573,23 @@ const CargaSalidas = () => {
                             ) : (
                                 <ul className="space-y-3">
                                     {historial.map((registro, index) => {
-                                        // Crear objetos de fecha para comparar
-                                        const fechaHoraSalida = new Date(`${registro.fechaSalida}T${registro.horaSalida}`);
+                                                                                const fechaHoraSalida = new Date(`${registro.fechaSalida}T${registro.horaSalida}`);
                                         const fechaHoraEntrada = new Date(`${registro.fechaEntrada}T${registro.horaEntrada}`);
                                         const ahora = new Date();
 
                                         let estadoColor = '', estadoTextoColor = '', estadoTexto = '';
 
-                                        // Si la salida está anulada, asignar estado Anulada
-                                        if (registro.motivoAnulacion) {
+                                                                                if (registro.motivoAnulacion) {
                                             estadoColor = 'bg-red-500';
                                             estadoTextoColor = 'text-red-500';
                                             estadoTexto = 'Anulada';
                                         }
-                                        // Si la fecha de entrada ya pasó, la salida está Concretada
-                                        else if (fechaHoraEntrada <= ahora) {
+                                                                                else if (fechaHoraEntrada <= ahora) {
                                             estadoColor = 'bg-green-500';
                                             estadoTextoColor = 'text-green-500';
                                             estadoTexto = 'Concretada';
                                         }
-                                        // Si la fecha de salida es mayor que la fecha y hora actual, la salida está Pendiente
-                                        else if (fechaHoraSalida < ahora) {
+                                                                                else if (fechaHoraSalida < ahora) {
                                             estadoColor = 'bg-yellow-500';
                                             estadoTextoColor = 'text-yellow-500';
                                             estadoTexto = 'Pendiente';
@@ -603,9 +626,10 @@ const CargaSalidas = () => {
                                                 <p className='text-sm'><strong>DNI del chofer:</strong> {registro.dniChofer}</p>
                                                 <p className='text-sm'><strong>Patente del móvil:</strong> {registro.matriculaMovil}</p>
 
-                                                <p className='text-sm mt-2'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
-                                                <p className='text-sm'><strong>Acompañante del interno:</strong> {registro.acompananteInterno}</p>
-                                                <p className='text-sm'><strong>Fecha de salida:</strong> {registro.fechaSalida}</p>
+                                                <p className='text-sm mt-2'><strong>Nombres/s y Apellido/s (compañante del interno):</strong> {registro.acompananteInterno}</p>
+                                                <p className='text-sm'><strong>DNI (compañante del interno):</strong> {registro.dniAcompananteInterno}</p>
+                                                <p className='text-sm'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
+                                                <p className='text-sm mt-2'><strong>Fecha de salida:</strong> {registro.fechaSalida}</p>
                                                 <p className='text-sm'><strong>Hora de salida:</strong> {registro.horaSalida}</p>
                                                 <p className='text-sm'><strong>Fecha de entrada:</strong> {registro.fechaEntrada}</p>
                                                 <p className='text-sm'><strong>Hora de entrada:</strong> {registro.horaEntrada}</p>
@@ -625,6 +649,143 @@ const CargaSalidas = () => {
                                                         </div>
                                                     </p>
                                                 )}
+                                                {/* Acta */}
+                                                <span className="text-sm max-w-full break-words">
+                                                    <strong>Acta:</strong>
+                                                </span>
+
+                                                {/* Si no hay archivo cargado */}
+                                                {!registro.actasArchivo ? (
+                                                    <input
+                                                        type="file"
+                                                        onChange={(e) => {
+                                                            const newHistorial = [...historial];
+                                                            const newDate = new Date().toLocaleString(); 
+                                                                                                                        newHistorial[index].actasArchivo = e.target.files[0];
+
+                                                                                                                        if (!newHistorial[index].fechaCarga) {
+                                                                newHistorial[index].fechaCarga = newDate;                                                             }
+
+                                                                                                                        if (!newHistorial[index].fechasDeCargaActa) {
+                                                                newHistorial[index].fechasDeCargaActa = [];                                                             }
+
+                                                                                                                        newHistorial[index].fechasDeCargaActa.push(newDate);
+
+                                                            setHistorial(newHistorial);                                                         }}
+                                                        accept=".pdf,.doc,.docx"
+                                                        className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
+                                                    />
+                                                ) : (
+                                                    <>
+                                                        {/* Enlace para descargar el archivo */}
+                                                        <a
+                                                            href={URL.createObjectURL(registro.actasArchivo)}
+                                                            download={registro.actasArchivo.name}
+                                                            className="mt-2 ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                        >
+                                                            Descargar Acta
+                                                        </a>
+
+                                                        {/* Botón de Editar */}
+                                                        <button
+                                                            onClick={() => {
+                                                                const input = document.createElement("input");
+                                                                input.type = "file";
+                                                                input.accept = ".pdf,.doc,.docx";
+
+                                                                input.onchange = (e) => {
+                                                                    const file = e.target.files[0];
+                                                                    if (file) {
+                                                                        const newHistorial = [...historial];
+                                                                        const newDate = new Date().toLocaleString(); 
+                                                                                                                                                if (!newHistorial[index].fechasDeEdicion) {
+                                                                            newHistorial[index].fechasDeEdicion = [];
+                                                                        }
+
+                                                                                                                                                newHistorial[index].fechasDeEdicion.push(newDate);
+
+                                                                                                                                                newHistorial[index].actasArchivo = file;
+                                                                        setHistorial(newHistorial);
+                                                                    }
+                                                                };
+
+                                                                input.click();                                                             }}
+                                                            className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
+                                                        >
+                                                            Editar Acta
+                                                        </button>
+
+                                                        {/* Botón de Eliminar */}
+                                                        <button
+                                                            onClick={() => {
+                                                                                                                                setSelectedHistorialIndex(index);                                                                 setConfirmDeleteHistorialModal(true);                                                             }}
+                                                            className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
+                                                        >
+                                                            Eliminar Acta
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                <div>
+
+                                                    {/* Mostrar la fecha de carga de acta solo si existe */}
+                                                    {registro.fechasDeCargaActa && (
+                                                        <div className="mt-2">
+                                                            <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                <strong>Fecha de carga de acta:</strong>
+                                                            </p>
+                                                            <ul className="list-disc list-inside">
+                                                                {registro.fechasDeCargaActa.map((fecha, index) => (
+                                                                    <li
+                                                                        key={index}
+                                                                        className="text-sm text-gray-500 max-w-full break-words"
+                                                                    >
+                                                                        {fecha}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Mostrar las fechas de edición solo si hay al menos una */}
+                                                    {registro.fechasDeEdicion && registro.fechasDeEdicion.length > 0 && (
+                                                        <div className="mt-2">
+                                                            <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                <strong>Fecha de edición de acta:</strong>
+                                                            </p>
+                                                            <ul className="list-disc list-inside">
+                                                                {registro.fechasDeEdicion.map((fecha, index) => (
+                                                                    <li
+                                                                        key={index}
+                                                                        className="text-sm text-gray-500 max-w-full break-words"
+                                                                    >
+                                                                        {fecha}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Mostrar las fechas de eliminación solo si hay al menos una */}
+                                                    {registro.fechasDeEliminacion &&
+                                                        registro.fechasDeEliminacion.length > 0 && (
+                                                            <div className="mt-2">
+                                                                <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                    <strong>Fecha de eliminación de acta:</strong>
+                                                                </p>
+                                                                <ul className="list-disc list-inside">
+                                                                    {registro.fechasDeEliminacion.map((fecha, index) => (
+                                                                        <li
+                                                                            key={index}
+                                                                            className="text-sm text-gray-500 max-w-full break-words"
+                                                                        >
+                                                                            {fecha}
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                </div>
 
                                                 <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {registro.fechaCarga}</p>
 
@@ -666,7 +827,29 @@ const CargaSalidas = () => {
                             )}
                         </div>
                     </div>
-
+                    {/* Modal de confirmación de eliminación */}
+                    {confirmDeleteHistorialModal && (
+                        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
+                            <div className="bg-white p-6 rounded-md shadow-lg text-center w-full max-w-md mx-4 md:mx-0 max-h-screen overflow-auto">
+                                <h2 className="text-lg font-bold mb-4 text-red-600">Confirmar Eliminación</h2>
+                                <p>¿Estás seguro de que deseas eliminar este archivo? Esta acción no se puede deshacer.</p>
+                                <div className="mt-4 flex justify-center">
+                                    <button
+                                        onClick={handleEliminarActaArchivo}
+                                        className="bg-red-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-red-600"
+                                    >
+                                        Eliminar
+                                    </button>
+                                    <button
+                                        onClick={handleCloseDeleteHistorialModal}
+                                        className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Historial de Salidas Anuladas */}
                     <div className="flex-1 bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
@@ -689,82 +872,180 @@ const CargaSalidas = () => {
                                                 <p className='text-sm italic'><strong>Fecha de anulación:</strong> {registro.fechaAnulacion}</p>
                                                 {registro.archivoAdjunto && (
                                                     <div className="mt-3">
-                                                        {/* Diseño para el botón de descarga */}
                                                         <strong className="text-sm italic">Acta: </strong>
                                                         <a
-                                                            href={registro.archivoAdjunto}  // URL del archivo
-                                                            download={registro.archivoAdjunto}  // Usa el nombre guardado
-                                                            className="inline-block bg-blue-400 text-white px-2 py-1 rounded hover:bg-blue-500 text-xs"
+                                                            href={registro.archivoAdjunto}                                                              download={registro.archivoAdjunto}                                                              className="inline-block bg-blue-400 text-white px-2 py-1 rounded hover:bg-blue-500 text-xs"
                                                         >
                                                             Descargar Acta
                                                         </a>
                                                     </div>
                                                 )}
                                             </div>
+                                            <div className='border border-gray-300 rounded-lg p-3 mb-2 bg-gray-100'>
+                                                {/* Mostrar información de los encargados */}
+                                                <div className="text-sm">
+                                                    {registro.encargados.length === 1 ? (
+                                                        <div>
+                                                            <strong className="text-sm">Custodia: </strong>
+                                                            <strong>Nombre/s y Apellido/s:</strong> {registro.encargados[0].nombre || "No disponible"} -
+                                                            <strong>DNI:</strong> {registro.encargados[0].dni || "No disponible"}
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            {registro.encargados.map((encargado, encargadoIndex) => (
+                                                                <div key={encargadoIndex}>
+                                                                    <strong className="text-sm">Custodia {encargadoIndex + 1}: </strong>
+                                                                    <strong>Nombre/s y Apellido/s:</strong> {encargado.nombre || "No disponible"} -
+                                                                    <strong>DNI:</strong> {encargado.dni || "No disponible"}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
 
-                                            {/* Mostrar información de los encargados */}
-                                            <div className="text-sm mt-2">
-                                                {registro.encargados.length === 1 ? (
-                                                    <div>
-                                                        <strong className="text-sm">Custodia: </strong>
-                                                        <strong>Nombre/s y Apellido/s:</strong> {registro.encargados[0].nombre || "No disponible"} -
-                                                        <strong>DNI:</strong> {registro.encargados[0].dni || "No disponible"}
-                                                    </div>
-                                                ) : (
-                                                    <div>
-                                                        {registro.encargados.map((encargado, encargadoIndex) => (
-                                                            <div key={encargadoIndex}>
-                                                                <strong className="text-sm">Custodia {encargadoIndex + 1}: </strong>
-                                                                <strong>Nombre/s y Apellido/s:</strong> {encargado.nombre || "No disponible"} -
-                                                                <strong>DNI:</strong> {encargado.dni || "No disponible"}
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                                <p className='text-sm mt-2'><strong>Nombre/s y Apellido/s (chofer):</strong> {registro.nombreChofer}</p>
+                                                <p className='text-sm'><strong>DNI (chofer):</strong> {registro.dniChofer}</p>
+                                                <p className='text-sm'><strong>Patente del móvil:</strong> {registro.matriculaMovil}</p>
+
+                                                <p className='text-sm mt-2'><strong>Nombres/s y Apellido/s (compañante del interno):</strong> {registro.acompananteInterno}</p>
+                                                <p className='text-sm'><strong>DNI (compañante del interno):</strong> {registro.dniAcompananteInterno}</p>
+                                                <p className='text-sm'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
+                                                <p className='text-sm mt-2'><strong>Fecha de salida:</strong> {registro.fechaSalida}</p>
+                                                <p className='text-sm'><strong>Hora de salida:</strong> {registro.horaSalida}</p>
+                                                <p className='text-sm'><strong>Fecha de entrada:</strong> {registro.fechaEntrada}</p>
+                                                <p className='text-sm'><strong>Hora de entrada:</strong> {registro.horaEntrada}</p>
+
+                                                {/* Mostrar observación si existe */}
+                                                {registro.observacion && (
+                                                    <p className='text-sm'>
+                                                        <strong>Observación:</strong> {registro.observacion}
+                                                        <div className="mt-2 text-sm text-gray-500">
+                                                            {registro.fechaCargaObservacion && (
+                                                                <span>
+                                                                    <strong>Fecha de carga observación:</strong> {registro.fechaCargaObservacion}
+                                                                    {registro.fechaModificacionObservacion && (
+                                                                        <span className="ml-2">
+                                                                            <strong>(Última modificación:</strong> {registro.fechaModificacionObservacion})
+                                                                        </span>
+                                                                    )}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </p>
                                                 )}
-                                            </div>
 
-                                            <p className='text-sm mt-2'><strong>Nombre/s y Apellido/s (chofer):</strong> {registro.nombreChofer}</p>
-                                            <p className='text-sm'><strong>DNI (chofer):</strong> {registro.dniChofer}</p>
-                                            <p className='text-sm'><strong>Patente del móvil:</strong> {registro.matriculaMovil}</p>
+                                                {/* Mostrar fecha de carga */}
+                                                <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {registro.fechaCarga}</p>
 
-                                            {/* Mostrar detalles de la salida anulada */}
-                                            <p className='text-sm mt-2'><strong>Motivo de la salida:</strong> {registro.motivoSalida}</p>
-                                            <p className='text-sm'><strong>Acompañante del interno:</strong> {registro.acompananteInterno}</p>
-                                            <p className='text-sm'><strong>Fecha de salida:</strong> {registro.fechaSalida}</p>
-                                            <p className='text-sm'><strong>Hora de salida:</strong> {registro.horaSalida}</p>
-                                            <p className='text-sm'><strong>Fecha de entrada:</strong> {registro.fechaEntrada}</p>
-                                            <p className='text-sm'><strong>Hora de entrada:</strong> {registro.horaEntrada}</p>
 
-                                            {/* Mostrar observación si existe */}
-                                            {registro.observacion && (
-                                                <p className='text-sm'>
-                                                    <strong>Observación:</strong> {registro.observacion}
-                                                    <div className="mt-2 text-sm text-gray-500">
-                                                        {registro.fechaCargaObservacion && (
-                                                            <span>
-                                                                <strong>Fecha de carga observación:</strong> {registro.fechaCargaObservacion}
-                                                                {registro.fechaModificacionObservacion && (
-                                                                    <span className="ml-2">
-                                                                        <strong>(Última modificación:</strong> {registro.fechaModificacionObservacion})
-                                                                    </span>
-                                                                )}
-                                                            </span>
+                                                {/* Acta */}
+                                                <span className="text-sm max-w-full break-words">
+                                                    <strong>Acta:</strong>
+                                                </span>
+
+                                                {/* Si no hay archivo cargado */}
+                                                {!registro.actasArchivo ? (
+                                                    <input
+                                                        type="file"
+                                                        onChange={(e) => {
+                                                            const newHistorial = [...historial];
+                                                            const newDate = new Date().toLocaleString(); 
+                                                                                                                        newHistorial[index].actasArchivo = e.target.files[0];
+
+                                                                                                                        if (!newHistorial[index].fechaCarga) {
+                                                                newHistorial[index].fechaCarga = newDate;                                                             }
+
+                                                                                                                        if (!newHistorial[index].fechasDeCargaActa) {
+                                                                newHistorial[index].fechasDeCargaActa = [];                                                             }
+
+                                                                                                                        newHistorial[index].fechasDeCargaActa.push(newDate);
+
+                                                            setHistorial(newHistorial);                                                         }}
+                                                        accept=".pdf,.doc,.docx"
+                                                        className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
+                                                    />
+                                                ) : (
+                                                    <>
+                                                        {/* Enlace para descargar el archivo */}
+                                                        <a
+                                                            href={URL.createObjectURL(registro.actasArchivo)}
+                                                            download={registro.actasArchivo.name}
+                                                            className="mt-2 ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                        >
+                                                            Descargar Acta
+                                                        </a>
+                                                    </>
+                                                )}
+                                                <div>
+
+                                                    {/* Mostrar la fecha de carga de acta solo si existe */}
+                                                    {registro.fechasDeCargaActa && (
+                                                        <div className="mt-2">
+                                                            <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                <strong>Fecha de carga de acta:</strong>
+                                                            </p>
+                                                            <ul className="list-disc list-inside">
+                                                                {registro.fechasDeCargaActa.map((fecha, index) => (
+                                                                    <li
+                                                                        key={index}
+                                                                        className="text-sm text-gray-500 max-w-full break-words"
+                                                                    >
+                                                                        {fecha}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Mostrar las fechas de edición solo si hay al menos una */}
+                                                    {registro.fechasDeEdicion && registro.fechasDeEdicion.length > 0 && (
+                                                        <div className="mt-2">
+                                                            <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                <strong>Fecha de edición:</strong>
+                                                            </p>
+                                                            <ul className="list-disc list-inside">
+                                                                {registro.fechasDeEdicion.map((fecha, index) => (
+                                                                    <li
+                                                                        key={index}
+                                                                        className="text-sm text-gray-500 max-w-full break-words"
+                                                                    >
+                                                                        {fecha}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Mostrar las fechas de eliminación solo si hay al menos una */}
+                                                    {registro.fechasDeEliminacion &&
+                                                        registro.fechasDeEliminacion.length > 0 && (
+                                                            <div className="mt-2">
+                                                                <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                    <strong>Fecha de eliminación:</strong>
+                                                                </p>
+                                                                <ul className="list-disc list-inside">
+                                                                    {registro.fechasDeEliminacion.map((fecha, index) => (
+                                                                        <li
+                                                                            key={index}
+                                                                            className="text-sm text-gray-500 max-w-full break-words"
+                                                                        >
+                                                                            {fecha}
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
                                                         )}
-                                                    </div>
-                                                </p>
-                                            )}
+                                                </div>
 
-                                            {/* Mostrar fecha de carga */}
-                                            <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {registro.fechaCarga}</p>
-
-                                            {/* Botón de imprimir */}
-                                            <div className="mt-4 flex justify-end">
-                                                <button
-                                                    onClick={() => handlePrintRegistro(index)}
-                                                    className="bg-blue-800 text-white px-2 py-1 rounded-md hover:bg-blue-900 text-xs"
-                                                >
-                                                    Imprimir
-                                                </button>
+                                                {/* Botón de imprimir */}
+                                                <div className="mt-4 flex justify-end">
+                                                    <button
+                                                        onClick={() => handlePrintRegistro(index)}
+                                                        className="bg-blue-800 text-white px-2 py-1 rounded-md hover:bg-blue-900 text-xs"
+                                                    >
+                                                        Imprimir
+                                                    </button>
+                                                </div>
                                             </div>
                                         </li>
                                     ))}
@@ -822,7 +1103,7 @@ const CargaSalidas = () => {
                                 rows="4"
                             />
                             <div className="mt-3">
-                                <label className="block text-sm font-medium mb-1" htmlFor="anularArchivo">Subir acta:</label>
+                                <label className="block text-sm font-medium mb-1" htmlFor="anularArchivo">  :</label>
                                 <input
                                     type="file"
                                     id="anularArchivo"
@@ -830,8 +1111,7 @@ const CargaSalidas = () => {
                                     onChange={(e) => {
                                         const archivo = e.target.files[0];
                                         setAnularArchivo(archivo);
-                                        setAnularArchivoNombre(archivo.name);  // Guardar el nombre del archivo
-                                    }}
+                                        setAnularArchivoNombre(archivo.name);                                      }}
                                     className="w-full p-2 border border-gray-300 rounded-md text-sm"
                                 />
                             </div>
@@ -839,8 +1119,7 @@ const CargaSalidas = () => {
                                 <button
                                     onClick={handleSaveAnulacion}
                                     className={`bg-red-500 text-white p-2 rounded-md hover:bg-red-600 text-xs ${!anularMotivo.trim() || !anularArchivo ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    disabled={!anularMotivo.trim() || !anularArchivo}  // Deshabilitar si está vacío o sin archivo
-                                >
+                                    disabled={!anularMotivo.trim() || !anularArchivo}                                  >
                                     Anular
                                 </button>
                                 <button

@@ -1,10 +1,8 @@
 import React from 'react';
 
-// En tu componente Modal
 const Modal = ({ isOpen, onClose, historialCambios, campoMapeado }) => {
     if (!isOpen) return null;
 
-    // Verifica si historialCambios está vacío
     const noChanges = Object.keys(historialCambios).length === 0;
 
     return (
@@ -12,7 +10,6 @@ const Modal = ({ isOpen, onClose, historialCambios, campoMapeado }) => {
             <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2 max-w-3xl">
                 <h2 className="text-lg font-bold mb-2">Historial de Cambios</h2>
 
-                {/* Si no hay cambios, mostrar el mensaje correspondiente */}
                 {noChanges ? (
                     <p className="text-center text-sm text-gray-500 mt-4">No hay cambios registrados aún.</p>
                 ) : (
@@ -27,12 +24,11 @@ const Modal = ({ isOpen, onClose, historialCambios, campoMapeado }) => {
                                     <strong>Última modificación:</strong> {ultimaModificacion ? ultimaModificacion : 'No disponible'}
                                 </p>
 
-                                {/* Si hay una imagen, mostrar enlace para descargarla */}
                                 {imagenUrl && (
                                     <div className="mt-2">
                                         <a
-                                            href={imagenUrl} // Usar imagenUrl
-                                            download={imagenNombre} // Usar el nombre original del archivo
+                                            href={imagenUrl}
+                                            download={imagenNombre} 
                                             className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
                                         >
                                             Descargar archivo

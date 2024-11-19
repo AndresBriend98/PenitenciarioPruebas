@@ -1,20 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaEducacion = () => {
     const [sabeLeer, setSabeLeer] = useState(false);
     const [sabeEscribir, setSabeEscribir] = useState(false);
     const [documentacion, setDocumentacion] = useState(false);
     const [nivelEducativo, setNivelEducativo] = useState("");
-    const [archivosAdjuntos, setArchivosAdjuntos] = useState([]); // Estado para los archivos adjuntos
-    const [archivoSeleccionado, setArchivoSeleccionado] = useState(null); // Estado para el archivo seleccionado
-    const [isModalOpenArchivo, setIsModalOpenArchivo] = useState(false); // Estado para controlar la visibilidad del modal
-    const archivoInputRef = useRef(null); // Referencia al input de archivo
+    const [archivosAdjuntos, setArchivosAdjuntos] = useState([]);
+    const [archivoSeleccionado, setArchivoSeleccionado] = useState(null);
+    const [isModalOpenArchivo, setIsModalOpenArchivo] = useState(false);
+    const archivoInputRef = useRef(null);
 
     const handleArchivoSeleccionado = (e) => {
-        const archivo = e.target.files[0]; // Obtener el primer archivo seleccionado
-        setArchivoSeleccionado(archivo);  // Establecer el archivo seleccionado
+        const archivo = e.target.files[0];
+        setArchivoSeleccionado(archivo);
     };
 
     const handleCargarArchivo = () => {
@@ -27,40 +27,24 @@ const CargaEducacion = () => {
             setArchivosAdjuntos((prevArchivos) => [...prevArchivos, nuevoArchivo]);
 
             // Restablecer el input de archivo
-            archivoInputRef.current.value = null; // Limpiar la selección de archivo en el input
-            setArchivoSeleccionado(null); // Restablecer el estado de archivo seleccionado
+            archivoInputRef.current.value = null;
+            setArchivoSeleccionado(null);
         }
     };
 
-    const handleDownloadArchivo = (index) => {
-        const archivo = archivosAdjuntos[index].archivoAdjunto;
-        const url = URL.createObjectURL(archivo);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = archivo.name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url); // Liberar el objeto URL
-    };
-
-    // Función para cargar el archivo
     const handleArchivoAdjunto = () => {
         if (archivoSeleccionado) {
             const nuevoArchivo = {
                 archivoAdjunto: archivoSeleccionado,
-                fechaArchivoAdjunto: new Date().toLocaleString(), // Fecha de carga
+                fechaArchivoAdjunto: new Date().toLocaleString(),
             };
-            // Añadir el archivo al historial
             setArchivosAdjuntos((prevArchivos) => [...prevArchivos, nuevoArchivo]);
 
-            // Restablecer el input de archivo
-            archivoInputRef.current.value = null; // Limpiar la selección de archivo en el input
-            setArchivoSeleccionado(null); // Restablecer el estado de archivo seleccionado
+            archivoInputRef.current.value = null;
+            setArchivoSeleccionado(null);
         }
     };
 
-    // Esta función se llamará para actualizar el estado de los checkboxes y el nivel educativo en la base de datos
     const actualizarDatosEnBase = async () => {
         try {
             const respuesta = await fetch('/api/actualizar-datos-educacion', {
@@ -86,10 +70,9 @@ const CargaEducacion = () => {
         }
     };
 
-    // Usamos useEffect para que se actualice en la base de datos cada vez que uno de los estados cambie
     useEffect(() => {
         actualizarDatosEnBase();
-    }, [sabeLeer, sabeEscribir, documentacion, nivelEducativo]);  // Se ejecuta cada vez que uno de los estados cambia
+    }, [sabeLeer, sabeEscribir, documentacion, nivelEducativo]);
 
     const navigate = useNavigate();
     const [historialPlan, setHistorialPlan] = useState([]);
@@ -112,44 +95,38 @@ const CargaEducacion = () => {
         nivelEducativo: ''
     });
 
-    const [archivoAnulacion, setArchivoAnulacion] = useState(null);  // Define el estado
+    const [archivoAnulacion, setArchivoAnulacion] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [motivoAnulacion, setMotivoAnulacion] = useState("");
-    const [cursoAnuladoIndex, setCursoAnuladoIndex] = useState(null); // Para saber qué curso se está anulando
+    const [cursoAnuladoIndex, setCursoAnuladoIndex] = useState(null);
     const handleAnularCursoConMotivo = () => {
-        // Verifica si el motivo y el archivo son válidos
         if (motivoAnulacion.trim() === "" || !archivoAnulacion) {
             alert("Debe ingresar el motivo y el archivo adjunto.");
             return;
         }
 
-        // Creamos el nuevo historial de anulaciones, añadiendo la información relevante
         const nuevoHistorialAnulado = [...historialCursoAnulado];
         const cursoAAnular = historialCurso[cursoAnuladoIndex];
 
-        // Añadimos la anulación con motivo, fecha, archivo adjunto y archivo original del curso
         nuevoHistorialAnulado.push({
-            ...cursoAAnular, // Información original del curso
+            ...cursoAAnular,
             motivoAnulacion: motivoAnulacion,
-            fechaAnulacion: new Date().toISOString().split('T')[0], // Fecha de anulación actual
-            archivoAnulacion: archivoAnulacion, // El archivo adjunto
-            nombreArchivo: archivoAnulacion.name, // Nombre original del archivo adjunto
-            archivoOriginalCurso: cursoAAnular.archivoAdjunto, // Agregar archivo original del curso
-            nombreArchivoOriginalCurso: cursoAAnular.archivoAdjunto, // Nombre del archivo original
+            fechaAnulacion: new Date().toISOString().split('T')[0],
+            archivoAnulacion: archivoAnulacion,
+            nombreArchivo: archivoAnulacion.name,
+            archivoOriginalCurso: cursoAAnular.archivoAdjunto,
+            nombreArchivoOriginalCurso: cursoAAnular.archivoAdjunto,
         });
 
-        // Eliminamos el curso del historial de cursos
         const nuevoHistorialCurso = historialCurso.filter((_, index) => index !== cursoAnuladoIndex);
 
-        // Actualizamos los estados
         setHistorialCurso(nuevoHistorialCurso);
         setHistorialCursoAnulado(nuevoHistorialAnulado);
 
-        // Limpiamos el motivo y el archivo tras anular el curso
         setMotivoAnulacion("");
-        setArchivoAnulacion(null); // Limpiamos el archivo adjunto
-        setIsModalOpen(false); // Cerramos el modal de anulación
-        setCursoAnuladoIndex(null); // Restablecemos el índice de curso anulado
+        setArchivoAnulacion(null);
+        setIsModalOpen(false);
+        setCursoAnuladoIndex(null);
     };
 
     const handleSaveFechaFinPlan = (index) => {
@@ -170,7 +147,6 @@ const CargaEducacion = () => {
         let meses = fin.getMonth() - inicio.getMonth();
         let dias = fin.getDate() - inicio.getDate();
 
-        // Ajustar días y meses si es necesario
         if (dias < 0) {
             meses--;
             dias += new Date(inicio.getFullYear(), inicio.getMonth(), 0).getDate();
@@ -181,7 +157,6 @@ const CargaEducacion = () => {
             meses += 12;
         }
 
-        // Construir el resultado
         const partes = [];
         if (anios > 0) partes.push(`${anios} año${anios > 1 ? 's' : ''}`);
         if (meses > 0) partes.push(`${meses} mes${meses > 1 ? 'es' : ''}`);
@@ -197,7 +172,6 @@ const CargaEducacion = () => {
         setEditingCursoIndex(null);
         setEditedFechaFinCurso('');
     };
-    // Función para manejar la carga del registro del plan
     const handleAgregarPlan = () => {
         let hasError = false;
         const newErrors = {};
@@ -217,7 +191,6 @@ const CargaEducacion = () => {
         }
 
         setErrors({});
-        // Agregar el registro al historial de planes
         const nuevoRegistroPlan = {
             planCursado,
             fechaInicio: fechaInicioPlan,
@@ -226,14 +199,13 @@ const CargaEducacion = () => {
             fechaCarga: new Date().toLocaleString(),
         };
         setHistorialPlan([...historialPlan, nuevoRegistroPlan]);
-        // Limpiar campos después de agregar
         setPlanCursado("");
         setFechaInicioPlan("");
         setFechaFinPlan("");
         setTiempoCursandoPlan("");
     };
 
-    const [archivo, setArchivo] = useState(null);  // Nuevo estado para manejar el archivo
+    const [archivo, setArchivo] = useState(null);
 
     const handleAgregarCurso = () => {
         let hasError = false;
@@ -261,26 +233,25 @@ const CargaEducacion = () => {
             fechaFin: fechaFinCurso,
             tiempoCursando: tiempoCursandoCurso,
             fechaCarga: new Date().toLocaleString(),
-            archivoAdjunto: archivo,  // Guardar el archivo completo
-            fechaArchivoAdjunto: new Date().toLocaleString(),  // Guardar la fecha de carga del archivo
+            archivoAdjunto: archivo,
+            fechaArchivoAdjunto: new Date().toLocaleString(),
         };
 
         setHistorialCurso([...historialCurso, nuevoRegistroCurso]);
 
-        // Limpiar campos después de agregar
         setCurso("");
         setFechaInicioCurso("");
         setFechaFinCurso("");
         setTiempoCursandoCurso("");
-        setArchivo(null); // Limpiar archivo
-        archivoInputRef.current.value = ""; // Limpiar el input de archivo
+        setArchivo(null);
+        archivoInputRef.current.value = "";
     };
 
     const handleGenerarInforme = () => {
 
     };
 
-    const [archivoAdjunto, setArchivoAdjunto] = useState(null); // O usar el historial de cursos para acceder al archivo
+    const [archivoAdjunto, setArchivoAdjunto] = useState(null);
 
     const handleVolver = () => {
         navigate('/general');
@@ -351,29 +322,26 @@ const CargaEducacion = () => {
                 <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
                     <h1 className="block text-sm font-semibold mb-2">Carga de Archivos Adjuntos</h1>
 
-                    {/* Input para seleccionar archivo */}
                     <input
                         type="file"
                         accept=".pdf,.doc,.docx,.jpg,.png"
                         ref={archivoInputRef}
-                        onChange={handleArchivoSeleccionado}  // Ejecuta la función al seleccionar archivo
+                        onChange={handleArchivoSeleccionado}
                         className={`w-full p-1 border rounded text-sm mb-2`}
                     />
 
-                    {/* Mostrar el botón "Cargar archivo adjunto" solo si hay un archivo seleccionado */}
                     {archivoSeleccionado && (
                         <div className="flex justify-center mb-4">
                             <button
-                                onClick={handleCargarArchivo}  // Cambié el nombre de la función aquí
+                                onClick={handleCargarArchivo}
                                 className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
-                                disabled={!archivoSeleccionado}  // Deshabilitar si no hay archivo seleccionado
+                                disabled={!archivoSeleccionado}
                             >
                                 Cargar archivo adjunto
                             </button>
                         </div>
                     )}
 
-                    {/* Ver archivos cargados, alineado a la derecha en pantallas grandes y centrado en móviles */}
                     {archivosAdjuntos.length > 0 && (
                         <div className="flex justify-center md:justify-end mt-4">
                             <button
@@ -385,7 +353,6 @@ const CargaEducacion = () => {
                         </div>
                     )}
 
-                    {/* Modal para mostrar los archivos adjuntos */}
                     {isModalOpenArchivo && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
                             <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-[90%] md:max-w-lg mx-auto">
@@ -436,13 +403,10 @@ const CargaEducacion = () => {
                     )}
                 </div>
 
-
-
-                {/* Dividir pantalla en dos */}
                 <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                    {/* Registro de un Plan */}
                     <div className="flex-1 bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <h2 className="text-lg font-bold mb-4">Cargar Registro de un Plan</h2>
-                        {/* Registro de un Plan */}
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="planCursado" className="block text-sm font-semibold mb-2">Plan cursado</label>
@@ -537,10 +501,9 @@ const CargaEducacion = () => {
 
                     </div>
 
-                    {/* Derecha: Cargar Registro de un Curso */}
+                    {/*Cargar Registro de un Curso */}
                     <div className="flex-1 bg-white p-4 rounded-md shadow-md border border-gray-300">
                         <h2 className="text-lg font-bold mb-4">Cargar Registro de un Curso</h2>
-                        {/* Registro de un Curso */}
                         <div className="space-y-4">
                             <div className="mb-2">
                                 <label htmlFor="curso" className="block text-sm font-semibold mb-2">Curso</label>
@@ -576,10 +539,10 @@ const CargaEducacion = () => {
                                 <input
                                     id="archivo"
                                     type="file"
-                                    ref={archivoInputRef} // Asignamos la ref aquí
+                                    ref={archivoInputRef}
                                     className="w-full p-2 border border-gray-300 rounded text-sm mb-2 mt-2"
                                     onChange={(e) => {
-                                        setArchivo(e.target.files[0]); // Guardamos el archivo completo
+                                        setArchivo(e.target.files[0]);
                                     }}
                                 />
                             </div>
@@ -655,14 +618,13 @@ const CargaEducacion = () => {
                                                 <div className="text-sm text-gray-500 mt-2"><strong>Fecha de Carga:</strong> {registro.fechaCarga}</div>
 
                                                 {/* Mostrar el archivo adjunto si existe */}
-                                                {/* Mostrar el archivo adjunto si existe */}
                                                 {registro.archivoAdjunto ? (
                                                     <div className="text-sm mt-2">
                                                         <strong>Archivo adjunto:</strong>{" "}
                                                         {registro.archivoAdjunto instanceof File ? (
                                                             <a
-                                                                href={URL.createObjectURL(registro.archivoAdjunto)} // Si es un objeto File válido
-                                                                download={registro.archivoAdjunto.name} // Usamos el nombre del archivo para la descarga
+                                                                href={URL.createObjectURL(registro.archivoAdjunto)}
+                                                                download={registro.archivoAdjunto.name}
                                                                 className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
                                                             >
                                                                 Descargar
@@ -696,8 +658,8 @@ const CargaEducacion = () => {
                                                 <div className="flex justify-end mt-2">
                                                     <button
                                                         onClick={() => {
-                                                            setCursoAnuladoIndex(index); // Guardamos el índice del curso que se está anulando
-                                                            setIsModalOpen(true);        // Abrimos el modal para el motivo
+                                                            setCursoAnuladoIndex(index);
+                                                            setIsModalOpen(true);
                                                         }}
                                                         className="bg-red-500 text-white p-1 rounded hover:bg-red-600 text-xs"
                                                     >
@@ -739,7 +701,7 @@ const CargaEducacion = () => {
                                         <button
                                             onClick={handleAnularCursoConMotivo}
                                             className={`bg-red-500 text-white p-2 rounded-md hover:bg-red-600 text-xs ${!motivoAnulacion.trim() || !archivoAnulacion ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            disabled={!motivoAnulacion.trim() || !archivoAnulacion}  // Deshabilitar si los campos están vacíos
+                                            disabled={!motivoAnulacion.trim() || !archivoAnulacion}
                                         >
                                             Anular Curso
                                         </button>
@@ -783,8 +745,8 @@ const CargaEducacion = () => {
                                                         <div className="text-sm italic mt-2">
                                                             <strong>Archivo adjunto:</strong>{" "}
                                                             <a
-                                                                href={URL.createObjectURL(registro.archivoAnulacion)} // URL temporal para archivos locales
-                                                                download={registro.nombreArchivo} // Nombre del archivo para la descarga
+                                                                href={URL.createObjectURL(registro.archivoAnulacion)}
+                                                                download={registro.nombreArchivo}
                                                                 className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
                                                             >
                                                                 Descargar

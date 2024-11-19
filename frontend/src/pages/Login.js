@@ -14,27 +14,20 @@ const Login = () => {
     event.preventDefault();
     setShowLoadingModal(true);
 
-    // Simulación de llamada a la API
-    setTimeout(async () => {
+        setTimeout(async () => {
       console.log('Usuario:', username, 'Contraseña:', password);
       
-      // Simulación de respuesta de la API
-      const userType = await fakeAuth(username, password);
+            const userType = await fakeAuth(username, password);
 
       if (userType) {
-        navigate(userType); // Redirige a la ruta según el rol del usuario
-      } else {
-        setShowErrorModal(true); // Muestra el modal de error si el usuario no está autenticado
-      }
+        navigate(userType);       } else {
+        setShowErrorModal(true);       }
 
-      setShowLoadingModal(false); // Oculta el modal de carga
-    }, 1000);
+      setShowLoadingModal(false);     }, 1000);
   };
 
-  // Simulación de autenticación
-  const fakeAuth = async (username, password) => {
-    // Mapa de usuarios a rutas
-    const userRoles = {
+    const fakeAuth = async (username, password) => {
+        const userRoles = {
       'admin': '/administrador',
       'jefe': '/jefatura',
       'general': '/general',
@@ -43,16 +36,12 @@ const Login = () => {
       'superadmin': '/superadministrador',
     };
 
-    // Aquí puedes realizar una validación real
-    // Por ejemplo, consulta a tu backend para verificar credenciales
-    return new Promise((resolve) => {
+            return new Promise((resolve) => {
       setTimeout(() => {
-        // Lógica para determinar el tipo de usuario
-        if (username in userRoles && password === username) {
+                if (username in userRoles && password === username) {
           resolve(userRoles[username]);
         } else {
-          resolve(null); // Usuario no válido
-        }
+          resolve(null);         }
       }, 500);
     });
   };

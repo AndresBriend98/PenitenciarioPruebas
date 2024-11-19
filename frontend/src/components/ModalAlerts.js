@@ -1,14 +1,11 @@
 import React, { useEffect } from 'react';
 
 const Modal = ({ isOpen, message, onClose }) => {
-  // Usamos useEffect para cerrar el modal después de 4 segundos cuando se abre
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
-        onClose(); // Llama a la función de cerrar modal
-      }, 4000); // 4000ms = 4 segundos
-
-      // Limpia el temporizador si el modal se cierra antes de los 4 segundos
+        onClose();
+      }, 4000); 
       return () => clearTimeout(timer);
     }
   }, [isOpen, onClose]);

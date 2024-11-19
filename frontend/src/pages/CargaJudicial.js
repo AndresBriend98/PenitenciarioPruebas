@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
-import Modal from './ModalChanges';
+import Header from '../components/Header';
+import Modal from '../components/ModalChanges';
 
 const CargaJudicial = () => {
     const [victimas, setVictimas] = useState([]);
     const [victima, setVictima] = useState({ nombres: '', dni: '', foto: null });
     const [fotoVictima, setFotoVictima] = useState(null);
     const [victimaErrors, setVictimaErrors] = useState({ nombres: '', dni: '' });
-
-    // Estado para manejar el modal de foto
-    const [showModalFoto, setShowModalFoto] = useState(false);  // Para mostrar o ocultar el modal
-    const [modalPhoto, setModalPhoto] = useState('');  // La foto que se verá en el modal
-
+    const handleAbogadoInputChange = (e, field) => {
+        const value = e.target.value;
+        setAbogado((prevState) => ({
+            ...prevState,
+            [field]: value,
+        }));
+    };
+    
+    const [showModalFoto, setShowModalFoto] = useState(false); const [modalPhoto, setModalPhoto] = useState('');
     const handleFotoChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -50,7 +54,7 @@ const CargaJudicial = () => {
     };
 
     const handleCloseFilesModal = () => {
-        setIsModalOpenFiles(false); // Simplemente cierra el modal sin recargar la página
+        setIsModalOpenFiles(false);
     };
 
     const verFoto = (foto) => {
@@ -69,13 +73,11 @@ const CargaJudicial = () => {
         }
     };
 
-    // Función para manejar la apertura del modal
     const openModal = (foto) => {
         setModalPhoto(foto);
         setShowModalFoto(true);
     };
 
-    // Función para manejar el cierre del modal
     const handleCloseModal = () => {
         setShowModalFoto(false);
         setModalPhoto('');
@@ -99,9 +101,7 @@ const CargaJudicial = () => {
     };
 
     const handleFileEdit = (key, e) => {
-        e.preventDefault(); // Prevenir la recarga del formulario o página
-        e.stopPropagation(); // Detener cualquier otro evento que pueda afectar
-
+        e.preventDefault(); e.stopPropagation();
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.onchange = (e) => handleFileChange(e, key, true);
@@ -131,29 +131,26 @@ const CargaJudicial = () => {
         }
     };
 
-    // Nueva función para abrir el modal de archivos cargados
     const handleOpenFilesModal = () => {
-        setIsModalOpenFiles(true);  // Establece el estado para abrir el modal de archivos
+        setIsModalOpenFiles(true);
     };
 
-    //Judicial------------------------------------------------------------------------
 
     const handleInputChange = (e, field) => {
         const value = e.target.value;
         const currentDate = new Date().toLocaleString();
 
         if (value !== initialDatosJudiciales[field]) {
-            setIsDataModified(true); // Marca como modificado
-            setHistorialCambios(prev => ({
+            setIsDataModified(true); setHistorialCambios(prev => ({
                 ...prev,
                 [field]: {
                     ...prev[field],
                     fechaCarga: prev[field]?.fechaCarga || currentDate,
-                    ultimaModificacion: currentDate, // Siempre actualiza la fecha de modificación
+                    ultimaModificacion: currentDate,
                 }
             }));
         } else {
-            setIsDataModified(false); // Si el valor no cambió, desmarca como modificado
+            setIsDataModified(false);
         }
 
         setDatosJudiciales({ ...datosJudiciales, [field]: value });
@@ -176,51 +173,35 @@ const CargaJudicial = () => {
         }
     };
     const [historialCambios, setHistorialCambios] = useState({});
-    const [isEditable, setIsEditable] = useState(true); // Los campos inician habilitados
-    const [buttonText, setButtonText] = useState('Cargar'); // Inicia con "Cargar"
-    const [isDataModified, setIsDataModified] = useState(false); // Controla si los datos fueron modificados
-
+    const [isEditable, setIsEditable] = useState(true); const [buttonText, setButtonText] = useState('Cargar'); const [isDataModified, setIsDataModified] = useState(false);
     const handleCargarActualizar = (e) => {
         const currentDate = new Date().toLocaleString();
 
         if (buttonText === 'Cargar') {
             const isAnyFieldFilled = Object.values(datosJudiciales).some(value => value.trim() !== '');
-            if (!isAnyFieldFilled) return; // No hacer nada si ningún campo está lleno
-
-            // Guardamos los datos iniciales (fechas de carga y modificación)
+            if (!isAnyFieldFilled) return;
             setInitialDatosJudiciales(datosJudiciales);
 
-            // Actualizar historial con fecha de carga
             setHistorialCambios(prev => {
                 const newHistorial = {};
                 Object.keys(datosJudiciales).forEach(field => {
                     if (datosJudiciales[field].trim() !== '') {
                         newHistorial[field] = {
-                            fechaCarga: currentDate, // Establece la fecha de carga
-                            ultimaModificacion: currentDate, // Establece la fecha de modificación
+                            fechaCarga: currentDate, ultimaModificacion: currentDate,
                         };
                     }
                 });
                 return { ...prev, ...newHistorial };
             });
 
-            setIsEditable(false); // No se puede editar después de cargar
-            setButtonText('Actualizar'); // Cambia el botón a 'Actualizar'
-
+            setIsEditable(false); setButtonText('Actualizar');
         } else if (buttonText === 'Actualizar') {
-            setIsEditable(true); // Permite la edición
-            setButtonText('Guardar Cambios'); // Cambia el texto del botón
-            setIsDataModified(false); // Resetear el estado de modificación
-
+            setIsEditable(true); setButtonText('Guardar Cambios'); setIsDataModified(false);
         } else if (buttonText === 'Guardar Cambios') {
-            // Verifica si realmente hay cambios antes de guardarlos
             const hasChanges = Object.keys(datosJudiciales).some(key => datosJudiciales[key] !== initialDatosJudiciales[key]);
-            if (!hasChanges) return; // No hace nada si no hay cambios
-
+            if (!hasChanges) return;
             console.log('Datos guardados');
-            setIsEditable(false); // Deshabilitar la edición
-            setButtonText('Actualizar'); // Cambia el texto del botón
-            setIsDataModified(false); // Resetear el estado de modificación
+            setIsEditable(false); setButtonText('Actualizar'); setIsDataModified(false);
         }
     };
 
@@ -271,7 +252,6 @@ const CargaJudicial = () => {
         observacion: '',
     });
 
-    //Abogado------------------------------------------------------------------------
     const [abogados, setAbogados] = useState([]);
 
     const handleAgregarAbogadoData = (event) => {
@@ -281,8 +261,7 @@ const CargaJudicial = () => {
             return;
         }
 
-        const fechaCarga = new Date().toLocaleString(); // Obtener la fecha de carga actual
-
+        const fechaCarga = new Date().toLocaleString();
         setAbogados([...abogados, { ...abogado, fechaCarga }]);
         setAbogado({ nombreApellido: '', matricula: '', poderes: '' });
         setAbogadoErrors({ nombreApellido: false, matricula: false, poderes: false });
@@ -298,8 +277,7 @@ const CargaJudicial = () => {
         const newErrors = {};
         newErrors.nombreApellido = !abogado.nombreApellido.trim();
         newErrors.matricula = !abogado.matricula.trim();
-        newErrors.poderes = !abogado.poderes.trim(); // Eliminar si poderes no es obligatorio
-
+        newErrors.poderes = !abogado.poderes.trim();
         setAbogadoErrors(newErrors);
 
         return !Object.values(newErrors).includes(true);
@@ -308,7 +286,7 @@ const CargaJudicial = () => {
     const [abogadoErrors, setAbogadoErrors] = useState({
         nombreApellido: false,
         matricula: false,
-        poderes: false, // Si también quieres que poderes sea obligatorio
+        poderes: false,
     });
 
     const handleVolver = () => {
@@ -330,8 +308,7 @@ const CargaJudicial = () => {
                                     type="text"
                                     value={datosJudiciales.nombreJuzgado}
                                     onChange={(e) => handleInputChange(e, 'nombreJuzgado')}
-                                    disabled={!isEditable} // Bloqueo condicional
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.nombreJuzgado ? 'border-red-500' : 'border-gray-300'}`}
+                                    disabled={!isEditable} className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.nombreJuzgado ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.nombreJuzgado && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
@@ -342,8 +319,7 @@ const CargaJudicial = () => {
                                     type="text"
                                     value={datosJudiciales.tipoJuzgado}
                                     onChange={(e) => handleInputChange(e, 'tipoJuzgado')}
-                                    disabled={!isEditable} // Bloqueo condicional
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.tipoJuzgado ? 'border-red-500' : 'border-gray-300'}`}
+                                    disabled={!isEditable} className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.tipoJuzgado ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.tipoJuzgado && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
@@ -355,8 +331,7 @@ const CargaJudicial = () => {
                                     type="text"
                                     value={datosJudiciales.fueroJudicial}
                                     onChange={(e) => handleInputChange(e, 'fueroJudicial')}
-                                    disabled={!isEditable} // Bloqueo condicional
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.fueroJudicial ? 'border-red-500' : 'border-gray-300'}`}
+                                    disabled={!isEditable} className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.fueroJudicial ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.fueroJudicial && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
@@ -367,8 +342,7 @@ const CargaJudicial = () => {
                                     type="text"
                                     value={datosJudiciales.ubicacionJuzgado}
                                     onChange={(e) => handleInputChange(e, 'ubicacionJuzgado')}
-                                    disabled={!isEditable} // Bloqueo condicional
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.ubicacionJuzgado ? 'border-red-500' : 'border-gray-300'}`}
+                                    disabled={!isEditable} className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.ubicacionJuzgado ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.ubicacionJuzgado && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
@@ -379,8 +353,7 @@ const CargaJudicial = () => {
                                     type="date"
                                     value={datosJudiciales.fechaInicioCausa}
                                     onChange={(e) => handleInputChange(e, 'fechaInicioCausa')}
-                                    disabled={!isEditable} // Bloqueo condicional
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.fechaInicioCausa ? 'border-red-500' : 'border-gray-300'}`}
+                                    disabled={!isEditable} className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.fechaInicioCausa ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.fechaInicioCausa && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
@@ -391,8 +364,7 @@ const CargaJudicial = () => {
                                     type="text"
                                     value={datosJudiciales.estadoCaso}
                                     onChange={(e) => handleInputChange(e, 'estadoCaso')}
-                                    disabled={!isEditable} // Bloqueo condicional
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.estadoCaso ? 'border-red-500' : 'border-gray-300'}`}
+                                    disabled={!isEditable} className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.estadoCaso ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.estadoCaso && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
@@ -403,8 +375,7 @@ const CargaJudicial = () => {
                                     type="number"
                                     value={datosJudiciales.numeroCaso}
                                     onChange={(e) => handleInputChange(e, 'numeroCaso')}
-                                    disabled={!isEditable} // Bloqueo condicional
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.numeroCaso ? 'border-red-500' : 'border-gray-300'}`}
+                                    disabled={!isEditable} className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.numeroCaso ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.numeroCaso && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
@@ -415,8 +386,7 @@ const CargaJudicial = () => {
                                     type="date"
                                     value={datosJudiciales.fechaResolucionFinal}
                                     onChange={(e) => handleInputChange(e, 'fechaResolucionFinal')}
-                                    disabled={!isEditable} // Bloqueo condicional
-                                    className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.fechaResolucionFinal ? 'border-red-500' : 'border-gray-300'}`}
+                                    disabled={!isEditable} className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.fechaResolucionFinal ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {errors.fechaResolucionFinal && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
@@ -428,8 +398,7 @@ const CargaJudicial = () => {
                                 placeholder="Ingrese las observaciones"
                                 value={datosJudiciales.observacion}
                                 onChange={(e) => handleInputChange(e, 'observacion')}
-                                disabled={!isEditable} // Bloqueo condicional
-                                className="w-full p-2 border border-gray-300 rounded text-sm border-gray-300"
+                                disabled={!isEditable} className="w-full p-2 border border-gray-300 rounded text-sm border-gray-300"
                             />
                         </div>
 
@@ -437,9 +406,7 @@ const CargaJudicial = () => {
                             <button
                                 onClick={handleCargarActualizar}
                                 className={`text-white px-4 py-2 rounded-md text-xs ${buttonText === 'Guardar Cambios' && !isDataModified
-                                    ? 'bg-blue-300 cursor-not-allowed' // Deshabilitado si no hay cambios
-                                    : 'bg-blue-500' // Habilitado si hay cambios
-                                    }`}
+                                    ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500'}`}
                                 disabled={buttonText === 'Guardar Cambios' && !isDataModified || buttonText === 'Cargar' && !Object.values(datosJudiciales).some(value => value.trim() !== '')}
                             >
                                 {buttonText}
@@ -469,6 +436,7 @@ const CargaJudicial = () => {
                                     <label className="block text-sm font-semibold mb-1">Resolución Final</label>
                                     <input
                                         type="file"
+                                        accept=".pdf"
                                         onChange={(e) => handleFileChange(e, 'resolucionFinal')}
                                         disabled={!!files.resolucionFinal}
                                         className={`w-full p-2 border ${files.resolucionFinal ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
@@ -479,6 +447,7 @@ const CargaJudicial = () => {
                                     <label className="block text-sm font-semibold mb-1">Fundamento de la Sentencia</label>
                                     <input
                                         type="file"
+                                        accept=".pdf"
                                         onChange={(e) => handleFileChange(e, 'fundamentoSentencia')}
                                         disabled={!!files.fundamentoSentencia}
                                         className={`w-full p-2 border ${files.fundamentoSentencia ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
@@ -491,6 +460,7 @@ const CargaJudicial = () => {
                                     <label className="block text-sm font-semibold mb-1">Abocamiento</label>
                                     <input
                                         type="file"
+                                        accept=".pdf"
                                         onChange={(e) => handleFileChange(e, 'abocamiento')}
                                         disabled={!!files.abocamiento}
                                         className={`w-full p-2 border ${files.abocamiento ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
@@ -501,6 +471,7 @@ const CargaJudicial = () => {
                                     <label className="block text-sm font-semibold mb-1">Cómputo</label>
                                     <input
                                         type="file"
+                                        accept=".pdf"
                                         onChange={(e) => handleFileChange(e, 'computo')}
                                         disabled={!!files.computo}
                                         className={`w-full p-2 border ${files.computo ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
@@ -527,8 +498,7 @@ const CargaJudicial = () => {
                                     <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-lg mx-auto">
                                         <button
                                             onClick={(e) => {
-                                                e.preventDefault();  // Previene el comportamiento por defecto (recarga de la página)
-                                                handleCloseFilesModal();  // Llama a tu función de cierre del modal
+                                                e.preventDefault(); handleCloseFilesModal();
                                             }}
                                             className="absolute top-2 right-2 bg-gray-400 text-white p-2 rounded-full shadow-lg hover:bg-gray-500 focus:outline-none"
                                             aria-label="Cerrar modal"
@@ -577,7 +547,7 @@ const CargaJudicial = () => {
                                                             {/* Botón de editar archivo */}
                                                             <div className="mt-2">
                                                                 <button
-                                                                    onClick={(e) => handleFileEdit(item.tipo, e)}  // Prevenir la recarga y manejar el evento correctamente
+                                                                    onClick={(e) => handleFileEdit(item.tipo, e)}
                                                                     className="bg-orange-400 text-white p-1 rounded hover:bg-orange-500 text-xs"
                                                                 >
                                                                     Editar Archivo
@@ -608,7 +578,7 @@ const CargaJudicial = () => {
                                         placeholder="Ingrese el nombre y apellido"
                                         type="text"
                                         value={abogado.nombreApellido}
-                                        onChange={(e) => handleInputChange(e, 'nombreApellido', 'abogado')}
+                                        onChange={(e) => handleAbogadoInputChange(e, 'nombreApellido')}
                                         className={`w-full p-2 border border-gray-300 rounded text-sm ${abogadoErrors.nombreApellido ? 'border-red-500' : 'border-gray-300'}`}
                                     />
                                     {abogadoErrors.nombreApellido && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
@@ -619,7 +589,7 @@ const CargaJudicial = () => {
                                         placeholder="Ingrese la matrícula"
                                         type="text"
                                         value={abogado.matricula}
-                                        onChange={(e) => handleInputChange(e, 'matricula', 'abogado')}
+                                        onChange={(e) => handleAbogadoInputChange(e, 'matricula')}
                                         className={`w-full p-2 border border-gray-300 rounded text-sm ${abogadoErrors.matricula ? 'border-red-500' : 'border-gray-300'}`}
                                     />
                                     {abogadoErrors.matricula && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
@@ -631,14 +601,14 @@ const CargaJudicial = () => {
                                 <input
                                     placeholder="Ingrese los poderes"
                                     value={abogado.poderes}
-                                    onChange={(e) => handleInputChange(e, 'poderes', 'abogado')}
+                                    onChange={(e) => handleAbogadoInputChange(e, 'poderes')}
                                     className={`w-full p-2 border border-gray-300 rounded text-sm ${abogadoErrors.poderes ? 'border-red-500' : 'border-gray-300'}`}
                                 />
                                 {abogadoErrors.poderes && <p className="text-red-500 text-sm mt-1">Este campo es obligatorio.</p>}
                             </div>
                             <div className="flex justify-center mb-4">
                                 <button
-                                    type="button" // Asegúrate de que sea de tipo "button"
+                                    type="button"
                                     onClick={handleAgregarAbogadoData}
                                     className="bg-blue-500 text-white px-4 py-2 rounded-md text-xs"
                                 >

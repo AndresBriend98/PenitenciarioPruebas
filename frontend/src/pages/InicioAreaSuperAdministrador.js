@@ -3,55 +3,42 @@ import { useNavigate } from 'react-router-dom';
 import logoPenitenciaria from '../assets/images/logoPenitenciaria.png';
 
 const InicioAreaSuperAdministrador = () => {
-  const [searchDNI, setSearchDNI] = useState('');  // Campo de búsqueda por DNI
-  const [searchLegajo, setSearchLegajo] = useState('');  // Campo de búsqueda por Legajo
-  const [selectedUnit, setSelectedUnit] = useState('');
-  const [data, setData] = useState([]);  // Datos que se generarán una sola vez
-  const navigate = useNavigate();
+  const [searchDNI, setSearchDNI] = useState('');    const [searchLegajo, setSearchLegajo] = useState('');    const [selectedUnit, setSelectedUnit] = useState('');
+  const [data, setData] = useState([]);    const navigate = useNavigate();
 
   const user = {
     name: 'Catriel Luque',
     area: 'Super Administrador',
   };
 
-  // Solo se genera una vez al montar el componente
-  useEffect(() => {
+    useEffect(() => {
     const generatedData = Array(15).fill(null).map((_, index) => ({
       name: 'Juan Carlos López',
-      dni: Math.floor(10000000 + Math.random() * 90000000), // Genera un DNI aleatorio de 8 dígitos
-      crime: 'Robo',
+      dni: Math.floor(10000000 + Math.random() * 90000000),       crime: 'Robo',
       sentenceDate: '25/06/2025',
       court: 'T.O.P.LIBRES',
       sentence: '25/06/2025',
-      fileNumber: Math.floor(1000 + Math.random() * 9000), // Genera un número de legajo aleatorio de 4 dígitos
-      transferDate: '25/06/2025',
+      fileNumber: Math.floor(1000 + Math.random() * 9000),       transferDate: '25/06/2025',
       assistanceDate: '25/06/2025',
       admissionDate: '25/06/2025',
-      unidad: `Unidad ${Math.floor(Math.random() * 12) + 1}`, // Genera una Unidad aleatoria entre 1 y 12
-      internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado',
+      unidad: `Unidad ${Math.floor(Math.random() * 12) + 1}`,       internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado',
     }));
-    setData(generatedData); // Solo se setea una vez
-  }, []);
+    setData(generatedData);   }, []);
 
-  // Filtra los datos según el término de búsqueda (DNI o Legajo) y la unidad seleccionada
-  const filteredData = data.filter((item) => {
+    const filteredData = data.filter((item) => {
 
-    // Si el interno es "Condenado", validamos el número de legajo
-    const isValidLegajo = item.internalType === 'Condenado'
+        const isValidLegajo = item.internalType === 'Condenado'
       ? item.fileNumber && item.fileNumber.toString().startsWith(searchLegajo)
-      : false;  // Los "Procesados" no deberían tener legajo
-
+      : false;  
     const matchesDNI = searchDNI === '' || (item.dni && item.dni.toString().startsWith(searchDNI));
     const matchesLegajo = searchLegajo === '' || isValidLegajo;
 
-    // Filtrado por unidad
-    const matchesUnit = selectedUnit === '' || item.unidad === `Unidad ${selectedUnit}`;
+        const matchesUnit = selectedUnit === '' || item.unidad === `Unidad ${selectedUnit}`;
 
     return matchesDNI && matchesLegajo && matchesUnit;
   });
   const handleLogout = () => {
-    // Falta logica
-    navigate('/login');
+        navigate('/login');
   };
 
   const handleManageUsers = () => {
@@ -128,8 +115,8 @@ const InicioAreaSuperAdministrador = () => {
                 <tr>
                   <th className="p-2 border">#</th>
                   <th className="p-2 border">Nombre/Apellido</th>
-                  <th className="p-2 border">DNI</th> {/* Nueva columna de DNI */}
-                  <th className="p-2 border">Unidad</th> {/* Nueva columna Unidad */}
+                  <th className="p-2 border">DNI</th>
+                  <th className="p-2 border">Unidad</th>
                   <th className="p-2 border">Delitos</th>
                   <th className="p-2 border">Tipo Interno</th>
                   <th className="p-2 border">Juzgado</th>
@@ -147,8 +134,8 @@ const InicioAreaSuperAdministrador = () => {
                   <tr key={index} className="hover:bg-gray-100">
                     <td className="p-2 border text-xs">{index + 1}</td>
                     <td className="p-2 border text-xs">{item.name}</td>
-                    <td className="p-2 border text-xs">{item.dni}</td> {/* Mostrar DNI */}
-                    <td className="p-2 border text-xs">{item.unidad}</td> {/* Muestra la Unidad aquí */}
+                    <td className="p-2 border text-xs">{item.dni}</td>
+                    <td className="p-2 border text-xs">{item.unidad}</td>
                     <td className="p-2 border text-xs">{item.crime}</td>
                     <td className="p-2 border text-xs">{item.internalType}</td>
                     <td className="p-2 border text-xs">{item.court}</td>

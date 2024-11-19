@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
     const navigate = useNavigate();
-    const location = useLocation(); // Para obtener la ubicación actual
+    const location = useLocation();
     const scrollContainerRef = useRef(null);
 
     const user = {
@@ -40,7 +40,7 @@ const Header = () => {
         'Fisionomía',
         'Consejo'
     ];
-    // Obtener el área de la URL actual
+
     const getAreaFromPath = (path) => {
         switch (path) {
             case '/cargasalud':
@@ -80,19 +80,15 @@ const Header = () => {
             case '/cargaconsejo':
                 return 'Consejo';
             default:
-                return 'Psicológica'; // Valor por defecto si el path no coincide
+                return 'Psicológica';
         }
     };
-
-    // Estado para el área seleccionada
     const [selectedArea, setSelectedArea] = useState(getAreaFromPath(location.pathname));
 
-    // Actualiza el área seleccionada cuando la URL cambia
     useEffect(() => {
         setSelectedArea(getAreaFromPath(location.pathname));
     }, [location.pathname]);
 
-    // Función de desplazamiento
     const scroll = (direction) => {
         if (scrollContainerRef.current) {
             scrollContainerRef.current.scrollBy({
@@ -101,11 +97,10 @@ const Header = () => {
             });
         }
     };
-    // Función que maneja el cambio de área y la navegación
-    const handleAreaChange = (area) => {
-        setSelectedArea(area); // Actualiza el área seleccionada
 
-        // Navega a la ruta correspondiente según el área seleccionada
+    const handleAreaChange = (area) => {
+        setSelectedArea(area);
+
         switch (area) {
             case 'Salud':
                 navigate('/cargasalud');
@@ -166,6 +161,7 @@ const Header = () => {
                 break;
         }
     };
+
     useEffect(() => {
         if (scrollContainerRef.current) {
             const container = scrollContainerRef.current;
@@ -178,7 +174,7 @@ const Header = () => {
                 });
             }
         }
-    }, [selectedArea]);  // Este efecto solo se ejecuta cuando 'selectedArea' cambia
+    }, [selectedArea]);
 
     return (
         <div>
@@ -226,7 +222,7 @@ const Header = () => {
                                     <input
                                         type="date"
                                         id="egresoDate"
-                                        value="2024-09-09" // Valor preestablecido
+                                        value="2024-09-09"
                                         readOnly
                                         className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
                                     />
@@ -234,7 +230,7 @@ const Header = () => {
                                     <input
                                         type="text"
                                         id="numOficioEgreso"
-                                        value="12345" // Valor preestablecido
+                                        value="12345"
                                         readOnly
                                         className="w-full p-1 border border-gray-300 rounded text-sm"
                                     />
@@ -286,7 +282,7 @@ const Header = () => {
                         <button
                             key={area}
                             data-area={area}
-                            onClick={() => handleAreaChange(area)} // Utiliza la función handleAreaChange
+                            onClick={() => handleAreaChange(area)}
                             className={`px-12 py-2 text-sm font-medium rounded-full transition-transform transform border border-black ${selectedArea === area
                                 ? 'bg-gradient-to-r from-blue-500 to-teal-500 text-white shadow-lg scale-95'
                                 : 'bg-gray-200 text-gray-800 hover:bg-gray-300'

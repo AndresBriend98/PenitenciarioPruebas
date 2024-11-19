@@ -1,46 +1,45 @@
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaAlojamientoYMovimiento = () => {
+    const [alojamientoActual, setAlojamientoActual] = useState({
+        pabellon: '',
+        celda: ''
+    });
+
+    const [realojamientos, setRealojamientos] = useState([]);
+    const [realojamientoData, setRealojamientoData] = useState({
+        sector: '',
+        pabellon: '',
+        observacion: '',
+        celda: '',
+        fechaIngreso: '',
+        motivoRealojamiento: ''
+    });
+
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editedFechaEgreso, setEditedFechaEgreso] = useState('');
+
     const [confirmDeleteRealojamientoModal, setConfirmDeleteRealojamientoModal] = useState(false);
     const [selectedRealojamientoIndex, setSelectedRealojamientoIndex] = useState(null);
-    const [editingIndex, setEditingIndex] = useState(null); // Para saber qué ítem se está editando
-    const [editedFechaEgreso, setEditedFechaEgreso] = useState(''); // Estado para la fecha de egreso editada
 
-    const handleEditClick = (index, fechaEgreso) => {
-        setEditingIndex(index);
-        setEditedFechaEgreso(fechaEgreso || ''); // Si ya hay una fecha, la coloca; si no, lo pone vacío
-    };
+    const [actasArchivo, setActasArchivo] = useState(null);
+    const [nombreActaArchivo, setNombreActaArchivo] = useState('');
 
-    const handleSaveClick = (index) => {
-        console.log("Guardando fecha de egreso:", editedFechaEgreso, "para el index:", index);  // Verifica la fecha de egreso
-        const newRealojamientos = [...realojamientos];
-        newRealojamientos[index].fechaEgreso = editedFechaEgreso;
-        newRealojamientos[index].fechaCargaEgreso = new Date().toLocaleString();
-        setRealojamientos(newRealojamientos);
-        setEditingIndex(null);
-        setEditedFechaEgreso('');
-    };    
-
-    const handleEliminarRealojamientoArchivo = () => {
-        if (selectedRealojamientoIndex !== null) {
-            const newRealojamientos = [...realojamientos];
-            const newDate = new Date().toLocaleString();
-
-            if (!newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion) {
-                newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion = [];
-            }
-
-            newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion.push(newDate);
-            newRealojamientos[selectedRealojamientoIndex].actasArchivo = null;
-            setRealojamientos(newRealojamientos);
+    const [errors, setErrors] = useState({
+        realojamientos: {
+            sector: '',
+            pabellon: '',
+            celda: ''
         }
+    });
 
-        setConfirmDeleteRealojamientoModal(false);
-        setSelectedRealojamientoIndex(null);
+    const navigate = useNavigate();
+
+    const actualizarAlojamientoActual = (pabellon, celda) => {
+        setAlojamientoActual({ pabellon, celda });
     };
-
 
     const handleAgregarRealojamiento = () => {
         let hasErrors = false;
@@ -76,13 +75,11 @@ const CargaAlojamientoYMovimiento = () => {
             const fechaCarga = new Date().toLocaleString();
             const nuevoRealojamiento = {
                 ...realojamientoData,
-                motivoRealojamiento: realojamientoData.motivoRealojamiento,
-                fechaIngreso: realojamientoData.fechaIngreso,
                 fechaCarga,
-                fechaEgreso: '', // Inicializar la fecha de egreso vacía
-                fechaCargaEgreso: '', // Inicializar la fecha de carga de egreso vacía
-                actasArchivo: actasArchivo,
-                nombreActaArchivo: nombreActaArchivo,
+                fechaEgreso: '',
+                fechaCargaEgreso: '',
+                actasArchivo,
+                nombreActaArchivo,
                 fechaCargaActa: actasArchivo ? new Date().toLocaleString() : null,
                 fechasDeCargaActa: actasArchivo ? [new Date().toLocaleString()] : [],
             };
@@ -91,8 +88,9 @@ const CargaAlojamientoYMovimiento = () => {
                 return [...prevRealojamientos, nuevoRealojamiento];
             });
 
-            // Limpiar el formulario
-            setRealojamientoData({ sector: '', pabellon: '', observacion: '', celda: '' });
+            actualizarAlojamientoActual(realojamientoData.pabellon, realojamientoData.celda);
+
+            setRealojamientoData({ sector: '', pabellon: '', observacion: '', celda: '', fechaIngreso: '', motivoRealojamiento: '' });
             setActasArchivo(null);
             setNombreActaArchivo('');
             document.querySelector('input[type="file"]').value = '';
@@ -104,31 +102,47 @@ const CargaAlojamientoYMovimiento = () => {
         }
     };
 
-    const handleCloseDeleteRealojamientoModal = () => {
+    const handleEditClick = (index, fechaEgreso) => {
+        setEditingIndex(index);
+        setEditedFechaEgreso(fechaEgreso || '');
+    };
+
+    const handleSaveClick = (index) => {
+        const newRealojamientos = [...realojamientos];
+        newRealojamientos[index].fechaEgreso = editedFechaEgreso;
+        newRealojamientos[index].fechaCargaEgreso = new Date().toLocaleString();
+        setRealojamientos(newRealojamientos);
+        setEditingIndex(null);
+        setEditedFechaEgreso('');
+        actualizarAlojamientoActual(newRealojamientos[index].pabellon, newRealojamientos[index].celda);
+    };
+
+    const handleEliminarRealojamientoArchivo = () => {
+        if (selectedRealojamientoIndex !== null) {
+            const newRealojamientos = [...realojamientos];
+            const newDate = new Date().toLocaleString();
+
+            if (!newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion) {
+                newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion = [];
+            }
+
+            newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion.push(newDate);
+            newRealojamientos[selectedRealojamientoIndex].actasArchivo = null;
+            setRealojamientos(newRealojamientos);
+        }
+
         setConfirmDeleteRealojamientoModal(false);
         setSelectedRealojamientoIndex(null);
     };
-
-    const [actasArchivo, setActasArchivo] = useState(null);
-    const [nombreActaArchivo, setNombreActaArchivo] = useState('');
-
-    const navigate = useNavigate();
-
-    const [errors, setErrors] = useState({
-        realojamientos: {
-            sector: '',
-            pabellon: '',
-            celda: ''
-        }
-    });
-
-    const [realojamientoData, setRealojamientoData] = useState({ sector: '', pabellon: '', observacion: '', celda: '' });
-    const [realojamientos, setRealojamientos] = useState([]);
 
     const handleVolver = () => {
         navigate('/general');
     };
 
+    const handleCloseDeleteRealojamientoModal = () => {
+        setConfirmDeleteRealojamientoModal(false);
+        setSelectedRealojamientoIndex(null);
+    };
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             <Header />
@@ -136,8 +150,15 @@ const CargaAlojamientoYMovimiento = () => {
                 <h1 className="text-xl font-bold mb-4">Carga de Alojamiento y Movimiento</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+
                     {/* Realojamiento */}
                     <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 ">
+                        <h2 className="mb-4 flex items-center bg-white p-4 rounded-md shadow-md border border-gray-300 mt-4">
+                            <span className="font-bold text-sm mr-2">Lugar de alojamiento actual:</span>
+                            <span className="text-sm border border-gray-300 bg-gray-100 p-2 rounded">
+                                Pabellón: {alojamientoActual.pabellon || 'No disponible'} - Celda: {alojamientoActual.celda || 'No disponible'}
+                            </span>
+                        </h2>
 
                         <label className="block text-sm font-semibold mt-2 mb-2">Sector</label>
                         <input
@@ -195,8 +216,8 @@ const CargaAlojamientoYMovimiento = () => {
                             type="file"
                             onChange={(e) => {
                                 const file = e.target.files[0];
-                                setActasArchivo(file); // Asigna el archivo al estado
-                                setNombreActaArchivo(file.name); // Almacena el nombre del archivo
+                                setActasArchivo(file);
+                                setNombreActaArchivo(file.name);
                             }}
                             accept=".pdf,.doc,.docx"
                             className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
@@ -226,7 +247,6 @@ const CargaAlojamientoYMovimiento = () => {
                                             <p className="text-sm"><strong>Celda:</strong> {item.celda}</p>
                                             <p className="text-sm"><strong>Fecha de ingreso:</strong> {item.fechaIngreso}</p>
                                             <p className="text-sm">
-                                                {/* Fecha de egreso */}
                                                 <p className="text-sm">
                                                     <strong className='text-sm'>Fecha de egreso: </strong>
                                                     {editingIndex === index ? (
@@ -246,7 +266,6 @@ const CargaAlojamientoYMovimiento = () => {
                                                         </>
                                                     ) : (
                                                         <>
-                                                            {/* Usa realojamientos[index] para acceder al dato correcto */}
                                                             {realojamientos[index].fechaEgreso || 'Sin definir'}
                                                             <button
                                                                 onClick={() => handleEditClick(index, realojamientos[index].fechaEgreso)}
@@ -262,38 +281,35 @@ const CargaAlojamientoYMovimiento = () => {
 
                                             <span className="text-sm"><strong>Acta:</strong></span>
 
-                                            {/* Si no hay archivo cargado */}
                                             {!item.actasArchivo ? (
                                                 <input
                                                     type="file"
                                                     onChange={(e) => {
                                                         const newRealojamientos = [...realojamientos];
-                                                        const newDate = new Date().toLocaleString(); // Obtiene la fecha actual
+                                                        const newDate = new Date().toLocaleString();
 
-                                                        // Asignar el archivo a la entrada correspondiente
+
                                                         newRealojamientos[index].actasArchivo = e.target.files[0];
 
-                                                        // Si no existe la fecha de carga, asignamos la fecha de carga
                                                         if (!newRealojamientos[index].fechaCarga) {
-                                                            newRealojamientos[index].fechaCarga = newDate; // Asigna la fecha de carga
+                                                            newRealojamientos[index].fechaCarga = newDate;
                                                         }
 
-                                                        // Si no existe la fecha de carga de acta, la asignamos ahora
+                                         
                                                         if (!newRealojamientos[index].fechasDeCargaActa) {
-                                                            newRealojamientos[index].fechasDeCargaActa = []; // Inicializa el arreglo si no existe
+                                                            newRealojamientos[index].fechasDeCargaActa = [];
                                                         }
 
-                                                        // Registra la fecha de carga de acta solo si el archivo se carga por primera vez
+
                                                         newRealojamientos[index].fechasDeCargaActa.push(newDate);
 
-                                                        setRealojamientos(newRealojamientos); // Actualiza el estado
+                                                        setRealojamientos(newRealojamientos);
                                                     }}
                                                     accept=".pdf,.doc,.docx"
                                                     className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
                                                 />
                                             ) : (
                                                 <>
-                                                    {/* Enlace para descargar el archivo */}
                                                     <a
                                                         href={URL.createObjectURL(item.actasArchivo)}
                                                         download={item.actasArchivo.name}
@@ -302,7 +318,6 @@ const CargaAlojamientoYMovimiento = () => {
                                                         Descargar Acta
                                                     </a>
 
-                                                    {/* Botón de Editar */}
                                                     <button
                                                         onClick={() => {
                                                             const input = document.createElement("input");
@@ -313,35 +328,30 @@ const CargaAlojamientoYMovimiento = () => {
                                                                 const file = e.target.files[0];
                                                                 if (file) {
                                                                     const newRealojamientos = [...realojamientos];
-                                                                    const newDate = new Date().toLocaleString(); // Fecha de edición
+                                                                    const newDate = new Date().toLocaleString();
 
-                                                                    // Si no existe el campo `fechasDeEdicion`, lo inicializamos como un arreglo
                                                                     if (!newRealojamientos[index].fechasDeEdicion) {
                                                                         newRealojamientos[index].fechasDeEdicion = [];
                                                                     }
 
-                                                                    // Agregamos la nueva fecha de edición
                                                                     newRealojamientos[index].fechasDeEdicion.push(newDate);
 
-                                                                    // Reemplaza el archivo con el nuevo
                                                                     newRealojamientos[index].actasArchivo = file;
                                                                     setRealojamientos(newRealojamientos);
                                                                 }
                                                             };
 
-                                                            input.click(); // Abre el selector de archivos
+                                                            input.click();
                                                         }}
                                                         className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
                                                     >
                                                         Editar Acta
                                                     </button>
 
-                                                    {/* Botón de Eliminar */}
                                                     <button
                                                         onClick={() => {
-                                                            // Abrimos el modal de confirmación de eliminación
-                                                            setSelectedRealojamientoIndex(index);  // Guardamos el índice del archivo
-                                                            setConfirmDeleteRealojamientoModal(true);  // Abrimos el modal
+                                                            setSelectedRealojamientoIndex(index); 
+                                                            setConfirmDeleteRealojamientoModal(true);
                                                         }}
                                                         className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
                                                     >

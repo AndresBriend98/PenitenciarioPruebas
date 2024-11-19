@@ -2,63 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoPenitenciaria from '../assets/images/logoPenitenciaria.png';
 
-const InicioAreaTecnica = () => {
-  const [searchDNI, setSearchDNI] = useState('');  // Campo de búsqueda por DNI
-  const [searchLegajo, setSearchLegajo] = useState('');  // Campo de búsqueda por Legajo
-  const [selectedUnit, setSelectedUnit] = useState('');
-  const [data, setData] = useState([]);  // Datos que se generarán una sola vez
+const InicioAreaGeneral = () => {
   const navigate = useNavigate();
-
+  const [searchDNI, setSearchDNI] = useState('');    const [searchLegajo, setSearchLegajo] = useState('');    const [data, setData] = useState([]);  
   const user = {
-    name: 'Alfredo Fernandez',
-    area: 'Técnica',
+    name: 'Josefina Tomei',
+    area: 'General (Aca van todas las areas como Salud, Trabajo, Psicologia, etc..)',
+    unit: '6'
   };
 
-  // Solo se genera una vez al montar el componente
-  useEffect(() => {
+    useEffect(() => {
     const generatedData = Array(15).fill(null).map((_, index) => ({
       name: 'Juan Carlos López',
-      dni: Math.floor(10000000 + Math.random() * 90000000), // Genera un DNI aleatorio de 8 dígitos
       crime: 'Robo',
       sentenceDate: '25/06/2025',
       court: 'T.O.P.LIBRES',
       sentence: '25/06/2025',
-      fileNumber: Math.floor(1000 + Math.random() * 9000), // Genera un número de legajo aleatorio de 4 dígitos
-      transferDate: '25/06/2025',
+      fileNumber: Math.floor(1000 + Math.random() * 9000),       transferDate: '25/06/2025',
       assistanceDate: '25/06/2025',
       admissionDate: '25/06/2025',
-      unidad: `Unidad ${Math.floor(Math.random() * 12) + 1}`, // Genera una Unidad aleatoria entre 1 y 12
       internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado',
-    }));
-    setData(generatedData); // Solo se setea una vez
-  }, []);
+      dni: Math.floor(10000000 + Math.random() * 90000000)     }));
+    setData(generatedData);   }, []);
 
-  // Filtra los datos según el término de búsqueda (DNI o Legajo) y la unidad seleccionada
   const filteredData = data.filter((item) => {
-    const isValidLegajo = item.internalType === 'Condenado'
-      ? item.fileNumber && item.fileNumber.toString().startsWith(searchLegajo)
-      : false;  // Los "Procesados" no deberían tener legajo
-
+        const isValidLegajo = item.internalType === 'Condenado'
+      ? (item.fileNumber && item.fileNumber.toString().startsWith(searchLegajo))
+      : false;  
     const matchesDNI = searchDNI === '' || (item.dni && item.dni.toString().startsWith(searchDNI));
     const matchesLegajo = searchLegajo === '' || isValidLegajo;
 
-    // Filtrado por unidad
-    const matchesUnit = selectedUnit === '' || item.unidad === `Unidad ${selectedUnit}`;
-
-    return matchesDNI && matchesLegajo && matchesUnit;
+        return matchesDNI && matchesLegajo;
   });
 
   const handleLogout = () => {
-    navigate('/login');
+        navigate('/login');
   };
 
   return (
     <div className="bg-general bg-cover bg-center min-h-screen flex flex-col p-4">
       <div className="bg-gray-100 flex-1 p-4 rounded-md flex flex-col">
-        <div className="flex flex-col md:flex-row md:justify-between items-start mb-4">
+        <div className="flex flex-col md:flex-row md:justify-between items-start">
           <div className="text-left text-base mb-4 md:mb-0">
             <p className='text-lg'><strong>Bienvenido/a, {user.name}</strong></p>
             <p className='text-sm'><strong>Área:</strong> {user.area}</p>
+            <p className='text-sm'><strong>Unidad:</strong> {user.unit}</p>
           </div>
 
           <div className="my-4 md:my-0 flex flex-col items-center">
@@ -89,33 +77,17 @@ const InicioAreaTecnica = () => {
                 className="w-full p-1 border border-gray-300 rounded text-sm"
               />
             </div>
-
-            <div className="flex items-center">
-              <label htmlFor="unit" className="mr-3 text-base font-semibold text-sm">Unidad:</label>
-              <select
-                id="unit"
-                value={selectedUnit}
-                onChange={(e) => setSelectedUnit(e.target.value)}
-                className="w-full p-1 border border-gray-300 rounded text-sm text-gray-400"
-              >
-                <option value="">Seleccione una unidad</option>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i + 1} value={i + 1}>Unidad {i + 1}</option>
-                ))}
-              </select>
-            </div>
           </div>
         </div>
 
         <div className="flex-1 overflow-x-auto">
           <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
             <table className="w-full text-left bg-white rounded-md shadow-md text-sm">
-            <thead className="bg-gray-400">
+              <thead className="bg-gray-400">
                 <tr>
                   <th className="p-2 border">#</th>
                   <th className="p-2 border">Nombre/Apellido</th>
                   <th className="p-2 border">DNI</th>
-                  <th className="p-2 border">Unidad</th>
                   <th className="p-2 border">Delitos</th>
                   <th className="p-2 border">Tipo Interno</th>
                   <th className="p-2 border">Juzgado</th>
@@ -133,7 +105,6 @@ const InicioAreaTecnica = () => {
                     <td className="p-2 border text-xs">{index + 1}</td>
                     <td className="p-2 border text-xs">{item.name}</td>
                     <td className="p-2 border text-xs">{item.dni}</td>
-                    <td className="p-2 border text-xs">{item.unidad}</td>
                     <td className="p-2 border text-xs">{item.crime}</td>
                     <td className="p-2 border text-xs">{item.internalType}</td>
                     <td className="p-2 border text-xs">{item.court}</td>
@@ -151,10 +122,8 @@ const InicioAreaTecnica = () => {
                       {item.internalType === 'Condenado' ? item.assistanceDate : '-'}
                     </td>
                     <td className="p-2 border text-center">
-                      <button
-                        className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
-                        onClick={() => navigate('/fichaingreso')}
-                      >
+                      <button className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
+                        onClick={() => navigate('/fichaingreso')}>
                         Ver
                       </button>
                     </td>
@@ -164,6 +133,7 @@ const InicioAreaTecnica = () => {
             </table>
           </div>
         </div>
+
         <div className="flex justify-between mt-4">
           <button
             onClick={handleLogout}
@@ -171,13 +141,10 @@ const InicioAreaTecnica = () => {
           >
             Cerrar sesión
           </button>
-          <button className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 text-xs">
-            Generar Informe Completo
-          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default InicioAreaTecnica;
+export default InicioAreaGeneral;

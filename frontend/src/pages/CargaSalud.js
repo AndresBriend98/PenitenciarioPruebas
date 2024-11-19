@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import JSZip from "jszip";
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaSalud = () => {
     const navigate = useNavigate();
@@ -17,32 +17,24 @@ const CargaSalud = () => {
     const [padecimientoData, setPadecimientoData] = useState({ descripcion: '', fecha: '', file: null, fileName: '' });
     const [fileKey, setFileKey] = useState(0);
     const [historialpadecimiento, setHistorialpadecimiento] = useState([]);
-    // Estado para el modal de Tratamientos
-    const [isModalOpenTratamiento, setIsModalOpenTratamiento] = useState(false);
+        const [isModalOpenTratamiento, setIsModalOpenTratamiento] = useState(false);
 
-    // Deshabilitar el scroll cuando el modal de Tratamientos está abierto
-    useEffect(() => {
+        useEffect(() => {
         if (isModalOpenTratamiento) {
-            document.body.style.overflow = "hidden"; // Deshabilita el scroll
-        } else {
-            document.body.style.overflow = "auto"; // Restaura el scroll cuando se cierra el modal
-        }
+            document.body.style.overflow = "hidden";         } else {
+            document.body.style.overflow = "auto";         }
 
         return () => {
-            document.body.style.overflow = "auto"; // Restaura cuando el componente se desmonta
-        };
+            document.body.style.overflow = "auto";         };
     }, [isModalOpenTratamiento]);
 
-    // Estado para el modal de Padecimientos
-    const [isModalOpenPadecimiento, setIsModalOpenPadecimiento] = useState(false);
+        const [isModalOpenPadecimiento, setIsModalOpenPadecimiento] = useState(false);
 
-    // Función para descargar todos los archivos cargados como ZIP (específica para Tratamientos)
-    const handleDownloadAllFilesTratamiento = () => {
+        const handleDownloadAllFilesTratamiento = () => {
         const zip = new JSZip();
         const zipFilename = "archivos_tratamientos.zip";
 
-        // Crear una lista de promesas para cada archivo descargable
-        const filePromises = sortedHistorialTratamientos.map((item) => {
+                const filePromises = sortedHistorialTratamientos.map((item) => {
             if (item.file) {
                 return fetch(item.file)
                     .then((response) => response.blob())
@@ -50,14 +42,11 @@ const CargaSalud = () => {
                         zip.file(item.fileName, blob);
                     });
             }
-            return null; // Si no hay archivo, no hacemos nada
-        });
+            return null;         });
 
-        // Usar Promise.all para esperar a que todas las descargas se completen
-        Promise.all(filePromises).then(() => {
+                Promise.all(filePromises).then(() => {
             zip.generateAsync({ type: "blob" }).then((content) => {
-                // Descargar el archivo ZIP generado
-                const a = document.createElement("a");
+                                const a = document.createElement("a");
                 a.href = URL.createObjectURL(content);
                 a.download = zipFilename;
                 document.body.appendChild(a);
@@ -89,29 +78,24 @@ const CargaSalud = () => {
             const tratamientoConFecha = {
                 ...tratamientoData,
                 fechaCarga: new Date().toLocaleString(),
-                file: tratamientoData.file ? URL.createObjectURL(tratamientoData.file) : '', // Convertir archivo a URL para mostrarlo
-            };
+                file: tratamientoData.file ? URL.createObjectURL(tratamientoData.file) : '',             };
 
             setTratamientos([...tratamientos, tratamientoConFecha]);
             setTratamientoData({ descripcion: '', fecha: '', file: null, fileName: '' });
-            setFileKey(prevKey => prevKey + 1); // Reiniciar el input
-            setErrors(prevErrors => ({
+            setFileKey(prevKey => prevKey + 1);             setErrors(prevErrors => ({
                 ...prevErrors,
                 tratamientos: { descripcion: '', fecha: '' }
             }));
         }
     };
 
-    // Función para ordenar por fecha de carga los tratamientos
-    const sortedHistorialTratamientos = [...tratamientos].sort((a, b) => new Date(b.fechaCarga) - new Date(a.fechaCarga));
+        const sortedHistorialTratamientos = [...tratamientos].sort((a, b) => new Date(b.fechaCarga) - new Date(a.fechaCarga));
 
-    // Función para descargar todos los archivos cargados como ZIP (específica para Padecimientos)
-    const handleDownloadAllFilesPadecimiento = () => {
+        const handleDownloadAllFilesPadecimiento = () => {
         const zip = new JSZip();
         const zipFilename = "archivos_padecimientos.zip";
 
-        // Crear una lista de promesas para cada archivo descargable
-        const filePromises = sortedHistorial.map((item) => {
+                const filePromises = sortedHistorial.map((item) => {
             if (item.file) {
                 return fetch(item.file)
                     .then((response) => response.blob())
@@ -119,14 +103,11 @@ const CargaSalud = () => {
                         zip.file(item.fileName, blob);
                     });
             }
-            return null; // Si no hay archivo, no hacemos nada
-        });
+            return null;         });
 
-        // Usar Promise.all para esperar a que todas las descargas se completen
-        Promise.all(filePromises).then(() => {
+                Promise.all(filePromises).then(() => {
             zip.generateAsync({ type: "blob" }).then((content) => {
-                // Descargar el archivo ZIP generado
-                const a = document.createElement("a");
+                                const a = document.createElement("a");
                 a.href = URL.createObjectURL(content);
                 a.download = zipFilename;
                 document.body.appendChild(a);
@@ -157,22 +138,19 @@ const CargaSalud = () => {
             const padecimientoConFecha = {
                 ...padecimientoData,
                 fechaCarga: new Date().toLocaleString(),
-                file: padecimientoData.file ? URL.createObjectURL(padecimientoData.file) : '', // Asegúrate de esto
-                fileName: padecimientoData.fileName
+                file: padecimientoData.file ? URL.createObjectURL(padecimientoData.file) : '',                 fileName: padecimientoData.fileName
             };
 
             setHistorialpadecimiento([...historialpadecimiento, padecimientoConFecha]);
             setPadecimientoData({ descripcion: '', fecha: '', file: null, fileName: '' });
-            setFileKey(prevKey => prevKey + 1); // Reiniciar el input
-            setErrors(prevErrors => ({
+            setFileKey(prevKey => prevKey + 1);             setErrors(prevErrors => ({
                 ...prevErrors,
                 padecimientos: { descripcion: '', fecha: '' }
             }));
         }
     };
 
-    // Función para ordenar por fecha de carga
-    const sortedHistorial = [...historialpadecimiento].sort((a, b) => new Date(b.fechaCarga) - new Date(a.fechaCarga));
+        const sortedHistorial = [...historialpadecimiento].sort((a, b) => new Date(b.fechaCarga) - new Date(a.fechaCarga));
 
     const [errors, setErrors] = useState({
         vacunas: { descripcion: '', fecha: '' },
@@ -181,8 +159,7 @@ const CargaSalud = () => {
         padecimientos: { descripcion: '', fecha: '' }
     });
 
-    // Manejadores de archivos
-    const handleFileChange = (e, section) => {
+        const handleFileChange = (e, section) => {
         const file = e.target.files[0];
         if (section === "padecimiento") {
             setPadecimientoData({
@@ -238,48 +215,40 @@ const CargaSalud = () => {
 
             setVacunas([...vacunas, vacunaConFecha]);
             setVacunaData({ descripcion: '', fecha: '', file: null, fileName: '' });
-            setVacunaKey(prevKey => prevKey + 1); // Reiniciar el input
-            setErrors(prevErrors => ({
+            setVacunaKey(prevKey => prevKey + 1);             setErrors(prevErrors => ({
                 ...prevErrors,
                 vacunas: { descripcion: '', fecha: '' }
             }));
         }
     };
     const [isModalOpenVacuna, setIsModalOpenVacuna] = useState(false);
-    // Función para descargar todos los archivos como ZIP
-    const handleDownloadAllFilesVacuna = () => {
-        const archivos = vacunas.filter(item => item.file);  // Filtra los elementos que tienen archivos
-
+        const handleDownloadAllFilesVacuna = () => {
+        const archivos = vacunas.filter(item => item.file);  
         if (archivos.length === 0) {
             alert("No hay archivos para descargar.");
             return;
         }
 
-        // Genera un ZIP con los archivos (esto requiere la librería JSZIP o similar)
-        const zip = new JSZip();
+                const zip = new JSZip();
         archivos.forEach((item, index) => {
             zip.file(item.fileName, item.file);
         });
 
-        // Guarda el archivo ZIP en el navegador
-        zip.generateAsync({ type: "blob" }).then(content => {
+                zip.generateAsync({ type: "blob" }).then(content => {
             const blob = new Blob([content], { type: "application/zip" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "vacunas.zip";  // Nombre del archivo zip
-            document.body.appendChild(link);
+            link.download = "vacunas.zip";              document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         });
     };
 
-    // Función para descargar todos los archivos cargados como ZIP (específica para Atenciones)
-    const handleDownloadAllFilesAtencion = () => {
+        const handleDownloadAllFilesAtencion = () => {
         const zip = new JSZip();
         const zipFilename = "archivos_atenciones.zip";
 
-        // Crear una lista de promesas para cada archivo descargable
-        const filePromises = sortedHistorialAtenciones.map((item) => {
+                const filePromises = sortedHistorialAtenciones.map((item) => {
             if (item.file) {
                 return fetch(item.file)
                     .then((response) => response.blob())
@@ -287,14 +256,11 @@ const CargaSalud = () => {
                         zip.file(item.fileName, blob);
                     });
             }
-            return null; // Si no hay archivo, no hacemos nada
-        });
+            return null;         });
 
-        // Usar Promise.all para esperar a que todas las descargas se completen
-        Promise.all(filePromises).then(() => {
+                Promise.all(filePromises).then(() => {
             zip.generateAsync({ type: "blob" }).then((content) => {
-                // Descargar el archivo ZIP generado
-                const a = document.createElement("a");
+                                const a = document.createElement("a");
                 a.href = URL.createObjectURL(content);
                 a.download = zipFilename;
                 document.body.appendChild(a);
@@ -308,8 +274,7 @@ const CargaSalud = () => {
         let hasErrors = false;
         const newErrors = { descripcion: '', fecha: '', hora: '' };
 
-        // Validar campos
-        if (!atencionData.descripcion) {
+                if (!atencionData.descripcion) {
             newErrors.descripcion = 'Este campo es obligatorio.';
             hasErrors = true;
         }
@@ -322,37 +287,29 @@ const CargaSalud = () => {
             hasErrors = true;
         }
 
-        // Si hay errores, los actualizamos
-        if (hasErrors) {
+                if (hasErrors) {
             setErrors(prevErrors => ({
                 ...prevErrors,
                 atenciones: newErrors
             }));
         } else {
-            // Si no hay errores, creamos una nueva atención
-            const atencionConFecha = {
+                        const atencionConFecha = {
                 ...atencionData,
                 fechaCarga: new Date().toLocaleString(),
                 file: atencionData.file ? URL.createObjectURL(atencionData.file) : '',
             };
 
-            // Agregar la nueva atención al historial
-            setAtenciones([...atenciones, atencionConFecha]);
+                        setAtenciones([...atenciones, atencionConFecha]);
 
-            // Limpiar los datos para la siguiente atención
-            setAtencionData({ descripcion: '', fecha: '', hora: '', file: null, fileName: '' });
-            setAtencionKey(prevKey => prevKey + 1); // Reiniciar input
-            setErrors(prevErrors => ({
+                        setAtencionData({ descripcion: '', fecha: '', hora: '', file: null, fileName: '' });
+            setAtencionKey(prevKey => prevKey + 1);             setErrors(prevErrors => ({
                 ...prevErrors,
                 atenciones: { descripcion: '', fecha: '', hora: '' }
             }));
         }
     };
 
-    // Estado para el modal de archivos cargados de atenciones
-    const [isModalOpenAtencion, setIsModalOpenAtencion] = useState(false); // Modal abierto o cerrado para atenciones
-    // Función para ordenar por fecha de carga
-    const sortedHistorialAtenciones = [...atenciones].sort((a, b) => new Date(b.fechaCarga) - new Date(a.fechaCarga));
+        const [isModalOpenAtencion, setIsModalOpenAtencion] = useState(false);         const sortedHistorialAtenciones = [...atenciones].sort((a, b) => new Date(b.fechaCarga) - new Date(a.fechaCarga));
 
     const handleGenerarInforme = () => {
     };
@@ -450,7 +407,6 @@ const CargaSalud = () => {
                             </div>
                             {historialpadecimiento.some(item => item.file) && (
                                 <div className="flex justify-end mt-4">
-                                    {/* Botón para abrir el modal de archivos cargados en Padecimientos */}
                                     <button
                                         onClick={() => setIsModalOpenPadecimiento(true)}
                                         className="bg-blue-800 text-white p-2 rounded hover:bg-blue-900 text-xs"
@@ -486,8 +442,7 @@ const CargaSalud = () => {
                                             <ul className="space-y-2">
                                                 {sortedHistorial.filter(item => item.file).length > 0 ? (
                                                     sortedHistorial
-                                                        .filter(item => item.file) // Filtrar solo los que tienen archivo adjunto
-                                                        .map((item, index) => (
+                                                        .filter(item => item.file)                                                         .map((item, index) => (
                                                             <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
                                                                 <div>
                                                                     <span className="text-sm"><strong>Archivo:</strong></span>
@@ -548,14 +503,12 @@ const CargaSalud = () => {
                             className={`w-full p-1 border ${errors.tratamientos.fecha ? 'border-red-500' : 'border-gray-300'} rounded text-sm mb-2`}
                         />
                         {errors.tratamientos.fecha && <p className="text-red-500 text-sm">{errors.tratamientos.fecha}</p>}
-                        {/* Input para subir archivo de tratamiento */}
                         <label className="block text-sm font-semibold  mb-2">Archivo adjunto</label>
                         <input
                             type="file"
                             accept=".pdf,.doc,.docx,.jpg,.png"
                             onChange={(e) => handleFileChange(e, "tratamiento")}
-                            key={tratamientoKey} // Usamos la clave para forzar el reset del input
-                            className={`w-full p-1 border ${errors.tratamientos.file ? 'border-red-500' : 'border-gray-300'} rounded text-sm mb-2`}
+                            key={tratamientoKey}                             className={`w-full p-1 border ${errors.tratamientos.file ? 'border-red-500' : 'border-gray-300'} rounded text-sm mb-2`}
                         />
 
                         <div className="flex justify-center">
@@ -586,8 +539,7 @@ const CargaSalud = () => {
                                                         <span className="text-sm"><strong>Archivo adjunto:</strong></span>
                                                         <a
                                                             href={item.file}
-                                                            download={item.fileName} // El archivo será descargado con su nombre original
-                                                            className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                            download={item.fileName}                                                             className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
                                                         >
                                                             Descargar Archivo
                                                         </a>
@@ -644,8 +596,7 @@ const CargaSalud = () => {
                                             <ul className="space-y-2">
                                                 {tratamientos.filter(item => item.file).length > 0 ? (
                                                     tratamientos
-                                                        .filter(item => item.file) // Filtrar solo tratamientos con archivos adjuntos
-                                                        .map((item, index) => (
+                                                        .filter(item => item.file)                                                         .map((item, index) => (
                                                             <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
                                                                 <div>
                                                                     <span className="text-sm"><strong>Archivo:</strong></span>
@@ -712,8 +663,7 @@ const CargaSalud = () => {
                             type="file"
                             accept=".pdf,.doc,.docx"
                             onChange={(e) => handleFileChange(e, "vacuna")}
-                            key={vacunaKey} // Usamos la clave para forzar el reset
-                            className={`w-full p-1 border ${errors.vacunas.file ? 'border-red-500' : 'border-gray-300'} rounded text-sm mb-2`}
+                            key={vacunaKey}                             className={`w-full p-1 border ${errors.vacunas.file ? 'border-red-500' : 'border-gray-300'} rounded text-sm mb-2`}
                         />
                         <div className="flex justify-center">
                             <button
@@ -742,8 +692,7 @@ const CargaSalud = () => {
                                                         <span className="text-sm"><strong>Archivo adjunto:</strong></span>
                                                         <a
                                                             href={item.file}
-                                                            download={item.fileName} // El archivo se descarga con su nombre original
-                                                            className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                            download={item.fileName}                                                             className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
                                                         >
                                                             Descargar Archivo
                                                         </a>
@@ -802,8 +751,7 @@ const CargaSalud = () => {
                                             <ul className="space-y-2">
                                                 {vacunas.filter(item => item.file).length > 0 ? (
                                                     vacunas
-                                                        .filter(item => item.file) // Filtrar solo vacunas con archivos adjuntos
-                                                        .map((item, index) => (
+                                                        .filter(item => item.file)                                                         .map((item, index) => (
                                                             <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
                                                                 <div>
                                                                     <span className="text-sm"><strong>Archivo:</strong></span>
@@ -881,8 +829,7 @@ const CargaSalud = () => {
                             type="file"
                             accept=".pdf,.doc,.docx"
                             onChange={(e) => handleFileChange(e, "atencion")}
-                            key={atencionKey} // Usamos la clave para forzar el reset
-                            className={`w-full p-1 border ${errors.atenciones.file ? 'border-red-500' : 'border-gray-300'} rounded text-sm mb-2`}
+                            key={atencionKey}                             className={`w-full p-1 border ${errors.atenciones.file ? 'border-red-500' : 'border-gray-300'} rounded text-sm mb-2`}
                         />
                         <div className="flex justify-center">
                             <button
@@ -913,8 +860,7 @@ const CargaSalud = () => {
                                                         <span className="text-sm"><strong>Archivo adjunto:</strong></span>
                                                         <a
                                                             href={item.file}
-                                                            download={item.fileName} // El archivo se descarga con su nombre original
-                                                            className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                            download={item.fileName}                                                             className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
                                                         >
                                                             Descargar Archivo
                                                         </a>
@@ -960,8 +906,7 @@ const CargaSalud = () => {
                                             <ul className="space-y-2">
                                                 {atenciones.filter(item => item.file).length > 0 ? (
                                                     atenciones
-                                                        .filter(item => item.file) // Filtrar solo atenciones con archivos
-                                                        .map((item, index) => (
+                                                        .filter(item => item.file)                                                         .map((item, index) => (
                                                             <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
                                                                 <div>
                                                                     <span className="text-sm"><strong>Archivo:</strong></span>
@@ -1001,7 +946,6 @@ const CargaSalud = () => {
 
                             {/* Botones de Ver archivos cargados y Generar Informe */}
                             <div className="flex justify-between mt-4">
-                                {/* Botón para generar informe a la izquierda */}
                                 {atenciones.length > 0 && (
                                     <button
                                         className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600 text-xs"

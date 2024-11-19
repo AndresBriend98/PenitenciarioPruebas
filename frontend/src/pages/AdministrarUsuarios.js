@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 Modal.setAppElement('#root');
 
 const AdministrarUsuarios = () => {
-    const [searchDNI, setSearchDNI] = useState('');  // Campo de búsqueda por DNI
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchDNI, setSearchDNI] = useState('');
     const [selectedArea, setSelectedArea] = useState('');
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
@@ -14,7 +13,7 @@ const AdministrarUsuarios = () => {
     const navigate = useNavigate();
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
-    const [data, setData] = useState([]);  // Datos que se generarán una sola vez
+    const [data, setData] = useState([]);
 
     const areas = ["Salud", "Trabajo", "Judicial", "Social", "Criminología", "Psicología"];
 
@@ -22,9 +21,9 @@ const AdministrarUsuarios = () => {
         const generateRandomData = () => {
             return Array.from({ length: 10 }, () => ({
                 name: `Juan Carlos López`,
-                dni: Math.floor(Math.random() * 100000000),  // Genera un DNI aleatorio
-                area: areas[Math.floor(Math.random() * areas.length)],  // Selección aleatoria de área
-                unidad: Math.floor(Math.random() * 10) + 1,  // Genera una unidad aleatoria
+                dni: Math.floor(Math.random() * 100000000),
+                area: areas[Math.floor(Math.random() * areas.length)],
+                unidad: Math.floor(Math.random() * 10) + 1,
                 usuario: `usuario`,
             }));
         };
@@ -32,13 +31,11 @@ const AdministrarUsuarios = () => {
         setData(generateRandomData());
     }, []);
 
-    // Filtramos los datos antes de mapearlos
     const filteredData = data.filter((item) => {
         const matchesDNI = searchDNI === '' || (item.dni && item.dni.toString().startsWith(searchDNI));
         const matchesArea = selectedArea ? item.area === selectedArea : true;
         return matchesDNI && matchesArea;
     });
-
 
     const handleOpenModal = (user) => {
         setSelectedUser(user);
@@ -58,7 +55,6 @@ const AdministrarUsuarios = () => {
     };
 
     const handleSave = () => {
-        // Lógica para guardar los cambios
         handleCloseModal();
         setShowSuccessModal(true);
         setTimeout(() => setShowSuccessModal(false), 3000);
@@ -74,13 +70,11 @@ const AdministrarUsuarios = () => {
     };
 
     const handleConfirmDelete = () => {
-        // Lógica para eliminar el usuario
         console.log('Usuario eliminado:', selectedUser);
         handleCloseConfirmationModal();
         setShowDeleteSuccessModal(true);
         setTimeout(() => setShowDeleteSuccessModal(false), 3000);
     };
-
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen flex flex-col p-4">

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaGrupoFamiliar = () => {
     const navigate = useNavigate();
@@ -14,49 +14,44 @@ const CargaGrupoFamiliar = () => {
     const handleGenerarInforme = () => {
     };
 
-    // Definimos el estado para la relación y otra relación
     const [newRelacion, setNewRelacion] = useState("");
-    const [otraRelacion, setOtraRelacion] = useState(""); // Aquí definimos el estado para 'otraRelacion'
-    const [isEditingRelacion, setIsEditingRelacion] = useState(null); // Estado para saber si estamos editando
+    const [otraRelacion, setOtraRelacion] = useState("");
+    const [isEditingRelacion, setIsEditingRelacion] = useState(null);
 
     const handleGuardarRelacion = (index) => {
-        // Aquí va la lógica para guardar la relación
         const updatedHistorial = [...historial];
         updatedHistorial[index] = {
             ...updatedHistorial[index],
             relacion: newRelacion,
-            ultimaModificacionRelacion: new Date().toLocaleString(), // Para mostrar la fecha de edición
+            ultimaModificacionRelacion: new Date().toLocaleString(),
         };
         setHistorial(updatedHistorial);
-        setIsEditingRelacion(null); // Salir del modo de edición
+        setIsEditingRelacion(null);
     };
 
     const handleEditarRelacion = (index) => {
-        setIsEditingRelacion(index); // Entrar en modo de edición
-        setNewRelacion(historial[index].relacion); // Cargar la relación actual en el estado
-        setOtraRelacion(""); // Limpiar el campo de otra relación si ya estaba en blanco
+        setIsEditingRelacion(index);
+        setNewRelacion(historial[index].relacion);
+        setOtraRelacion("");
     };
 
 
     const handleGuardarDomicilio = (index) => {
-        // Verificar si el valor del domicilio ha cambiado y no está vacío
         if (newDomicilio.trim() === "") {
             alert("El campo de domicilio no puede estar vacío.");
-            return;  // No guardar si está vacío
+            return;
         }
 
         if (newDomicilio !== historial[index].domicilio) {
             const nuevoHistorial = [...historial];
             const editDate = new Date().toLocaleString();
 
-            // Actualizamos solo si hay un cambio y el valor no está vacío
             nuevoHistorial[index].domicilio = newDomicilio;
-            nuevoHistorial[index].ultimaModificacionDomicilio = editDate;  // Guardamos la fecha de edición
+            nuevoHistorial[index].ultimaModificacionDomicilio = editDate;
 
-            setHistorial(nuevoHistorial);  // Guardamos el historial actualizado
+            setHistorial(nuevoHistorial);
         }
 
-        // Finalizamos la edición
         setIsEditingDomicilio(null);
     };
 
@@ -69,8 +64,8 @@ const CargaGrupoFamiliar = () => {
     };
 
     const handleViewPhoto = (photo) => {
-        setSelectedPhoto(photo); // Asigna la foto seleccionada
-        setShowModal(true); // Muestra el modal (asegúrate de tener el estado y el modal definidos)
+        setSelectedPhoto(photo);
+        setShowModal(true);
     };
 
     const handleInputChange = (e, field) => {
@@ -116,14 +111,13 @@ const CargaGrupoFamiliar = () => {
     };
 
     const handlePhotoChange = (e) => {
-        const file = e.target.files[0];  // Obtiene el archivo seleccionado
+        const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                // Una vez que la imagen es cargada y leída
-                setFormData({ ...formData, foto: reader.result });  // Actualiza el estado con la imagen en base64
+                setFormData({ ...formData, foto: reader.result });
             };
-            reader.readAsDataURL(file);  // Lee el archivo como Data URL (Base64)
+            reader.readAsDataURL(file);
         }
     };
 
@@ -135,10 +129,10 @@ const CargaGrupoFamiliar = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const updatedHistorial = [...historial];
-                updatedHistorial[index].foto = reader.result; // Guardamos el archivo en base64
+                updatedHistorial[index].foto = reader.result;
                 setHistorial(updatedHistorial);
             };
-            reader.readAsDataURL(file); // Leer como base64
+            reader.readAsDataURL(file);
         } else {
             console.error("No se ha seleccionado ningún archivo.");
         }
@@ -161,25 +155,19 @@ const CargaGrupoFamiliar = () => {
 
     const handleGuardarObservacion = (index) => {
         const nuevoHistorial = [...historial];
-        const editDate = new Date().toLocaleString(); // Fecha de última edición (modificación)
+        const editDate = new Date().toLocaleString();
 
-        // Verificamos si la observación fue modificada
         if (newObservacion !== historial[index].observacion) {
-            // Se actualiza la observación
             nuevoHistorial[index].observacion = newObservacion;
 
-            // Si la observación ya tiene una fecha de carga, no la cambiamos
             if (!nuevoHistorial[index].observacionCarga) {
-                // Si no tiene fecha de carga, asignamos la fecha de carga
-                nuevoHistorial[index].observacionCarga = new Date().toLocaleString(); // Fecha de carga solo la primera vez
+                nuevoHistorial[index].observacionCarga = new Date().toLocaleString();
             }
 
-            // Se actualiza solo la fecha de modificación
             nuevoHistorial[index].ultimaModificacionObservacion = editDate;
 
-            // Actualizamos el historial
             setHistorial(nuevoHistorial);
-            setIsEditingObservacion(null);  // Cerramos el modo de edición
+            setIsEditingObservacion(null);
         } else {
             setIsEditingObservacion(null);
             console.log("No hay cambios en la observación.");
@@ -211,7 +199,7 @@ const CargaGrupoFamiliar = () => {
                     fechaNacimiento: formData.fechaNacimiento,
                     fechaFallecimiento: formData.fechaFallecimiento || '',
                     observacion: formData.observacion || '',
-                    foto: formData.foto, // Guardar la foto en el historial
+                    foto: formData.foto,
                     fechaCarga: fechaCarga,
                     ultimaModificacionObservacion: null,
                     observacionCarga: formData.observacion ? fechaCarga : null,
@@ -297,7 +285,6 @@ const CargaGrupoFamiliar = () => {
                                 className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.relacion ? 'border-red-500' : 'border-gray-300'}`}
                             >
                                 <option value="" disabled>Seleccionar relación</option>
-                                {/* Opciones relacionadas con el ámbito familiar */}
                                 <option value="Madre">Madre</option>
                                 <option value="Madrastra">Madrastra</option>
                                 <option value="Padre">Padre</option>
@@ -315,7 +302,6 @@ const CargaGrupoFamiliar = () => {
                                 <option value="Otro">Otro</option>
                             </select>
                             {errors.relacion && <p className="text-red-500 text-sm mt-1">{errors.relacion}</p>}
-                            {/* Mostrar campo adicional si seleccionan "Otro" */}
                             {formData.relacion === "Otro" && (
                                 <div className="flex-grow mt-4">
                                     <label htmlFor="otraRelacion" className="block text-sm font-semibold mb-1">Especifique la relación</label>
@@ -407,7 +393,6 @@ const CargaGrupoFamiliar = () => {
                         {historial.length > 0 ? (
                             <ul className="mt-2">
                                 {historial.map((item, index) => {
-                                    // Inicializamos la referencia si no existe
                                     if (!fileInputRefs.current[index]) {
                                         fileInputRefs.current[index] = React.createRef();
                                     }
@@ -419,13 +404,11 @@ const CargaGrupoFamiliar = () => {
                                             <p className='text-sm max-w-full break-words'><strong>Nombre/s y Apellido/s:</strong> {item.nombre}</p>
                                             <p className='text-sm max-w-full break-words mt-2'><strong>DNI/M.I:</strong> {item.dni}</p>
                                             {/* Relación */}
-                                            {/* Mostrar la fecha de última edición siempre */}
                                             <div className="mt-2">
 
                                                 {isEditingRelacion === 0 ? (
 
                                                     <>
-                                                        {/* Select box para relación */}
                                                         <select
                                                             id="relacion"
                                                             value={newRelacion}
@@ -433,7 +416,6 @@ const CargaGrupoFamiliar = () => {
                                                             className={`p-1 border border-gray-300 rounded text-sm flex-1 max-w-full ${newRelacion.trim() === "" ? 'border-red-500' : 'border-gray-300'}`}
                                                         >
                                                             <option value="" disabled>Seleccionar relación</option>
-                                                            {/* Opciones de relación */}
                                                             <option value="Madre">Madre</option>
                                                             <option value="Madrastra">Madrastra</option>
                                                             <option value="Padre">Padre</option>
@@ -491,8 +473,8 @@ const CargaGrupoFamiliar = () => {
                                             </div>
 
                                             {historial[0].ultimaModificacionRelacion && (
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    <strong>Última edición de la relación:</strong> {historial[0].ultimaModificacionRelacion}
+                                                <p className="text-sm text-gray-500 mt-2">
+                                                    <strong>Última modificación de la relación:</strong> {historial[0].ultimaModificacionRelacion}
                                                 </p>
                                             )}
 
@@ -535,8 +517,8 @@ const CargaGrupoFamiliar = () => {
                                             </div>
                                             {/* Mostrar la fecha de última edición siempre */}
                                             {item.ultimaModificacionDomicilio && (
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    <strong>Última edición:</strong> {item.ultimaModificacionDomicilio}
+                                                <p className="text-sm text-gray-500 mt-2">
+                                                    <strong>Última modificación domicilio:</strong> {item.ultimaModificacionDomicilio}
                                                 </p>
                                             )}
 
@@ -549,8 +531,7 @@ const CargaGrupoFamiliar = () => {
                                                         <textarea
                                                             value={newObservacion}
                                                             onChange={(e) => {
-                                                                setNewObservacion(e.target.value); // Actualizamos el estado temporal de la nueva observación
-                                                                setIsObservacionModified(e.target.value !== historial[index].observacion);  // Verificamos si hubo cambios
+                                                                setNewObservacion(e.target.value); setIsObservacionModified(e.target.value !== historial[index].observacion);
                                                             }}
                                                             className="p-1 border border-gray-300 rounded text-sm ml-2 flex-1 max-w-full"
                                                             rows="2"
@@ -559,8 +540,7 @@ const CargaGrupoFamiliar = () => {
                                                         <button
                                                             onClick={() => handleGuardarObservacion(index)}
                                                             className={`bg-green-400 text-white p-1 rounded hover:bg-green-500 text-xs ml-2 ${!isObservacionModified ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                            disabled={!isObservacionModified} // Botón deshabilitado si no hay cambios
-                                                        >
+                                                            disabled={!isObservacionModified}                                                         >
                                                             Guardar
                                                         </button>
                                                     </>
@@ -594,11 +574,15 @@ const CargaGrupoFamiliar = () => {
                                             {item.observacion && item.observacionCarga && (
                                                 <p className="text-sm text-gray-500 mt-2">
                                                     <strong>Fecha de carga observación:</strong> {item.observacionCarga}
+                                                    {/* Verificar si hay una última modificación diferente a la fecha de carga */}
                                                     {item.ultimaModificacionObservacion && item.ultimaModificacionObservacion !== item.observacionCarga && (
-                                                        <span className="ml-2">(<strong>Última modificación:</strong> {item.ultimaModificacionObservacion})</span>
+                                                        <span className="ml-2">
+                                                            <strong>Última modificación observación:</strong> {item.ultimaModificacionObservacion}
+                                                        </span>
                                                     )}
                                                 </p>
                                             )}
+
 
                                             {item.fechaFallecimiento ? (
                                                 <p className='text-sm mt-2'><strong>Fecha de fallecimiento:</strong> {item.fechaFallecimiento}</p>
@@ -656,8 +640,7 @@ const CargaGrupoFamiliar = () => {
 
                                                 <input
                                                     type="file"
-                                                    ref={(element) => setFileInputRef(element, index)} // Asignación dinámica de la referencia
-                                                    accept="image/*"
+                                                    ref={(element) => setFileInputRef(element, index)} accept="image/*"
                                                     onChange={() => handleUploadPhoto(index)}
                                                     className="hidden"
                                                 />

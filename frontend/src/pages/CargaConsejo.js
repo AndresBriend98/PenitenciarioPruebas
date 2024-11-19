@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaConsejo = () => {
     const navigate = useNavigate();
@@ -9,9 +9,9 @@ const CargaConsejo = () => {
 
     const handleAgregarArchivo = () => {
         if (archivo) {
-            const fechaActual = new Date().toLocaleString(); // Fecha actual
+            const fechaActual = new Date().toLocaleString();
             setHistorialArchivos([...historialArchivos, { archivo: archivo.name, fecha: fechaActual, url: URL.createObjectURL(archivo) }]);
-            setArchivo(null); // Limpiar el archivo después de agregar
+            setArchivo(null);
         }
     };
 
@@ -34,7 +34,6 @@ const CargaConsejo = () => {
                 <h1 className="text-xl font-bold mb-4">Carga Consejo (Esta en desarrollo)</h1>
                 <div className="grid grid-cols-1 gap-4">
 
-                    {/* Cargar Archivo */}
                     <div className="bg-white p-4 rounded-md shadow-md">
                         <div className="flex justify-center mt-2">
                             <input

@@ -1,26 +1,19 @@
 import React, { useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaTrabajo = () => {
     const navigate = useNavigate();
     const [modalOpen, setModalOpen] = useState(false);
-    const [modalType, setModalType] = useState(''); // 'progreso' o 'observacion'
-    const [selectedRegistroIndex, setSelectedRegistroIndex] = useState(null);
-    const [inputValue, setInputValue] = useState(''); // Valor del textarea del modal
-    const [modalEntries, setModalEntries] = useState([]);
+    const [modalType, setModalType] = useState('');     const [selectedRegistroIndex, setSelectedRegistroIndex] = useState(null);
+    const [inputValue, setInputValue] = useState('');     const [modalEntries, setModalEntries] = useState([]);
 
     const handleOpenModal = (type, index) => {
-        setModalType(type); // 'progreso' u 'observacion'
-        setSelectedRegistroIndex(index); // índice del registro seleccionado
-
-        // Inicializa modalEntries basado en las entradas existentes
-        const entries = historial[index][type] || [];
+        setModalType(type);         setSelectedRegistroIndex(index); 
+                const entries = historial[index][type] || [];
         setModalEntries(entries);
 
-        setInputValue(''); // Asegúrate de que inputValue esté vacío
-        setModalOpen(true); // abre el modal
-    };
+        setInputValue('');         setModalOpen(true);     };
 
     const [historial, setHistorial] = useState([]);
 
@@ -28,9 +21,7 @@ const CargaTrabajo = () => {
         tipoCapacitacion: '',
         diasLaborales: '',
         lugarCapacitacion: '',
-        horaInicio: '', // Añadido
-        horaFin: '', // Añadido
-        remuneracion: ''
+        horaInicio: '',         horaFin: '',         remuneracion: ''
     });
 
     const [errors, setErrors] = useState('');
@@ -63,25 +54,20 @@ const CargaTrabajo = () => {
             return;
         }
 
-        // Obtener la fecha y hora actual
-        const fechaCarga = new Date().toLocaleString();
+                const fechaCarga = new Date().toLocaleString();
 
-        // Crear un nuevo registro con fechaCarga
-        const nuevoRegistro = {
+                const nuevoRegistro = {
             tipoCapacitacion,
             diasLaborales,
             lugarCapacitacion,
             horaInicio,
             horaFin,
             remuneracion,
-            fechaCarga // Añadido
-        };
+            fechaCarga         };
 
-        // Actualizar el historial con el nuevo registro
-        setHistorial([...historial, nuevoRegistro]);
+                setHistorial([...historial, nuevoRegistro]);
 
-        // Limpiar el formulario
-        setFormData({
+                setFormData({
             tipoCapacitacion: '',
             diasLaborales: '',
             lugarCapacitacion: '',
@@ -98,10 +84,8 @@ const CargaTrabajo = () => {
             return;
         }
 
-        const fechaActual = new Date().toLocaleString(); // Obtener la fecha y hora actuales
-
-        // Crear un nuevo objeto para progreso u observación
-        const nuevoRegistro = {
+        const fechaActual = new Date().toLocaleString(); 
+                const nuevoRegistro = {
             fecha: fechaActual,
             texto: inputValue
         };
@@ -113,12 +97,9 @@ const CargaTrabajo = () => {
             updatedHistorial[selectedRegistroIndex].observacion = [...modalEntries, nuevoRegistro];
         }
 
-        // Actualiza el historial y cierra el modal
-        setHistorial(updatedHistorial);
+                setHistorial(updatedHistorial);
         setModalOpen(false);
-        setModalEntries([]); // Limpiar las entradas del modal
-        setInputValue(''); // Limpiar el valor del input
-    };
+        setModalEntries([]);         setInputValue('');     };
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">\
@@ -248,7 +229,7 @@ const CargaTrabajo = () => {
                                                     ))}
                                                 </div>
                                             )}
-                                            <div className="flex justify-end mt-4"> {/* Cambiado para alinear a la derecha */}
+                                            <div className="flex justify-end mt-4">
                                                 <div className="space-x-2">
                                                     <button
                                                         onClick={() => handleOpenModal('progreso', index)}
@@ -287,8 +268,7 @@ const CargaTrabajo = () => {
                                     <button
                                         onClick={handleSave}
                                         className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 text-xs"
-                                        disabled={!inputValue.trim()} // Deshabilitar si textarea está vacío
-                                    >
+                                        disabled={!inputValue.trim()}                                     >
                                         Guardar
                                     </button>
                                     <button

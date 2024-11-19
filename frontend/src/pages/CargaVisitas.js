@@ -1,21 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HistorialVisitasProhibidas from './HistorialVisitasProhibidas'; // Asegúrate de usar la ruta correcta
-import HistorialVisitasSancionadas from './HistorialVisitasSacionadas'; // Asegúrate de usar la ruta correcta
-import Header from './Header'; // Asegúrate de usar la ruta correcta
-import Modal from './ModalAlerts';
+import HistorialVisitasProhibidas from '../components/HistorialVisitasProhibidas'; import HistorialVisitasSancionadas from '../components/HistorialVisitasSacionadas'; import Header from '../components/Header'; import Modal from '../components/ModalChanges';
 
 const CargaVisitas = () => {
     const [showModalAlert, setShowModalAlert] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const navigate = useNavigate();
-    // Función para generar el reporte e imprimirlo
     const handleGenerarReporte = () => {
         let visitasAImprimir = [];
 
-        // Si el filtro de DNI está vacío, se imprime todo el historial de visitas
         if (dniFiltro) {
-            // Filtrar las visitas basadas en el DNI ingresado
             visitasAImprimir = historialVisitas.filter(item =>
                 item.dni.toLowerCase().includes(dniFiltro.toLowerCase())
             );
@@ -25,11 +19,9 @@ const CargaVisitas = () => {
                 return;
             }
         } else {
-            // Si no hay filtro, se imprime todo el historial
             visitasAImprimir = historialVisitas;
         }
 
-        // Generar el contenido del reporte en formato HTML
         let contenidoImprimir = `
         <div style="padding: 20px;">
             <h2>Informe de Visitas</h2>
@@ -51,7 +43,6 @@ const CargaVisitas = () => {
                 </thead>
                 <tbody>`;
 
-        // Recorrer las visitas y agregar cada una al reporte
         visitasAImprimir.forEach((item) => {
             contenidoImprimir += `
             <tr>
@@ -75,7 +66,6 @@ const CargaVisitas = () => {
         </div>
     `;
 
-        // Crear una ventana nueva para imprimir el informe
         const ventanaImpresion = window.open('', '_blank');
         ventanaImpresion.document.write(`
         <html>
@@ -105,21 +95,15 @@ const CargaVisitas = () => {
         </html>
     `);
         ventanaImpresion.document.close();
-        ventanaImpresion.print();  // Imprimir el contenido
+        ventanaImpresion.print();
     };
-    const [historialVisitas, setHistorialVisitas] = useState([]);  // Historial de visitas
-    const [fileInputRefs, setFileInputRefs] = useState([]);  // Referencias a los inputs de los archivos
-    const [selectedItemId, setSelectedItemId] = useState(null);  // Item seleccionado en el historial
-    const [comportamientoObservacion, setComportamientoObservacion] = useState({ tipo: '', texto: '', fechaCarga: '' });
+    const [historialVisitas, setHistorialVisitas] = useState([]); const [fileInputRefs, setFileInputRefs] = useState([]); const [selectedItemId, setSelectedItemId] = useState(null); const [comportamientoObservacion, setComportamientoObservacion] = useState({ tipo: '', texto: '', fechaCarga: '' });
     const [showComportamientoObservacionModal, setShowComportamientoObservacionModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalPhoto, setModalPhoto] = useState('');
     const [historialVisitasProhibidas, setHistorialVisitasProhibidas] = useState([]);
-    const [historialVisitasSancionadas, setHistorialVisitasSancionadas] = useState([]);  // Historial de visitas sancionadas
-    const photoInputRef = useRef(null);  // Referencia para subir fotos
-
-    // Función para verificar si el DNI está en el historial
+    const [historialVisitasSancionadas, setHistorialVisitasSancionadas] = useState([]); const photoInputRef = useRef(null);
     const isDniAlreadyInHistory = (dni) => {
         return historialVisitasProhibidas.some(visita => visita.dni === dni);
     };
@@ -128,12 +112,10 @@ const CargaVisitas = () => {
         const { id, value, type, checked } = e.target;
 
         setNuevaVisita(prevState => {
-            // Si el campo que se está modificando es comportamiento o observación
             if (id === 'comportamiento' || id === 'observacion') {
                 return {
                     ...prevState,
                     [id]: type === 'checkbox' ? checked : value,
-                    // Asignar la fecha de carga solo si no está definida
                     [`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`]: prevState[id] !== value ? prevState[`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`] || new Date().toLocaleString() : prevState[`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`]
                 };
             }
@@ -145,7 +127,6 @@ const CargaVisitas = () => {
     };
 
 
-    // Función para verificar si el DNI estuvo sancionado y ya cumplió la sanción
     const checkDniSancionadoCumplido = (dni) => {
         const visitaSancionada = historialVisitasSancionadas.find(visita => visita.dni === dni);
 
@@ -154,7 +135,6 @@ const CargaVisitas = () => {
             const today = new Date();
             const cumplimientoDate = new Date(fechaCumplimiento);
 
-            // Si ya cumplió la sanción
             if (cumplimientoDate < today) {
                 return {
                     estuvoSancionado: true,
@@ -166,7 +146,6 @@ const CargaVisitas = () => {
 
         return { estuvoSancionado: false };
     };
-    // Estado para la nueva visita
     const [nuevaVisita, setNuevaVisita] = useState({
         foto: null,
         acreditado: false,
@@ -189,28 +168,22 @@ const CargaVisitas = () => {
             reader.onloadend = () => {
                 setNuevaVisita((prev) => ({
                     ...prev,
-                    foto: reader.result,  // Actualizar el estado con la nueva imagen
+                    foto: reader.result,
                 }));
             };
-            reader.readAsDataURL(file); // Leer la imagen como base64
+            reader.readAsDataURL(file);
         }
     };
 
-    const [editIndex, setEditIndex] = useState(null);  // Para editar visitas
-    const [errors, setErrors] = useState({});  // Para manejar errores de validación
-    // Estado para almacenar el filtro por DNI
-    const [dniFiltro, setDniFiltro] = useState('');
+    const [editIndex, setEditIndex] = useState(null); const [errors, setErrors] = useState({}); const [dniFiltro, setDniFiltro] = useState('');
 
-    // Función para manejar el cambio en el campo de filtro
     const handleFiltroDniChange = (e) => {
         setDniFiltro(e.target.value);
     };
 
-    // Filtrar el historial por el DNI ingresado
     const historialFiltrado = historialVisitas.filter(item =>
         item.dni.toLowerCase().includes(dniFiltro.toLowerCase())
     );
-    // Validación de campos requeridos
     const validateFields = () => {
         const requiredFields = ['nombre', 'dni', 'relacion', 'tipoVisita', 'motivoVisita', 'fechaVisita', 'horaVisita'];
         const newErrors = {};
@@ -231,9 +204,7 @@ const CargaVisitas = () => {
                 ? {
                     ...item,
                     [comportamientoObservacion.tipo]: comportamientoObservacion.texto,
-                    // Si no existe la fecha de carga, asignarla. Si ya existe, no la sobreescribimos.
                     [`fecha${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]: item[`fecha${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`] || new Date().toLocaleString(),
-                    // Solo actualizamos la fecha de modificación si estamos editando el campo correspondiente
                     [`fechaUltimaModificacion${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]: isEditing ? new Date().toLocaleString() : item[`fechaUltimaModificacion${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]
                 }
                 : item
@@ -242,7 +213,6 @@ const CargaVisitas = () => {
         setShowComportamientoObservacionModal(false);
     };
 
-    // y si aún está dentro del tiempo de sanción
     const checkDniInSancionadas = (dni) => {
         const visitaSancionada = historialVisitasSancionadas.find(visita => visita.dni === dni);
 
@@ -251,20 +221,19 @@ const CargaVisitas = () => {
             const today = new Date();
             const cumplimientoDate = new Date(fechaCumplimiento);
 
-            // Si la fecha de cumplimiento es posterior a la fecha actual, la sanción aún es válida
             if (cumplimientoDate >= today) {
-                return { isStillSanctioned: true, hasFulfilledSanction: false }; // Aún está sancionado
+                return { isStillSanctioned: true, hasFulfilledSanction: false };
             } else {
-                return { isStillSanctioned: false, hasFulfilledSanction: true }; // Ya cumplió la sanción
+                return { isStillSanctioned: false, hasFulfilledSanction: true };
             }
         }
 
-        return { isStillSanctioned: false, hasFulfilledSanction: false }; // No está sancionado
+        return { isStillSanctioned: false, hasFulfilledSanction: false };
     };
 
     const handleAddVisita = () => {
         if (!validateFields()) {
-            return;  // Si hay errores de validación, no continuar
+            return;
         }
 
         if (isDniAlreadyInHistory(nuevaVisita.dni)) {
@@ -288,16 +257,13 @@ const CargaVisitas = () => {
 
         const nuevaRelacion = nuevaVisita.relacion === "Otro" ? nuevaVisita.otraRelacion : nuevaVisita.relacion;
 
-        // Definir fecha de carga de la nueva visita
         const nuevaVisitaConFecha = {
             ...nuevaVisita,
             relacion: nuevaRelacion,
-            fechaCarga: new Date().toLocaleString(),  // Asignar la fecha de carga en el momento de la creación
-            fechaUltimaModificacion: '',  // No modificar aún la fecha de modificación
+            fechaCarga: new Date().toLocaleString(), fechaUltimaModificacion: '',
         };
 
         if (editIndex !== null) {
-            // Editar una visita existente
             const updatedHistorial = [...historialVisitas];
             updatedHistorial[editIndex] = {
                 ...nuevaVisitaConFecha,
@@ -306,14 +272,12 @@ const CargaVisitas = () => {
             setHistorialVisitas(updatedHistorial);
             setEditIndex(null);
         } else {
-            // Agregar una nueva visita
             setHistorialVisitas(prev => [
                 ...prev,
                 nuevaVisitaConFecha
             ]);
         }
 
-        // Resetear el formulario después de agregar la visita
         setNuevaVisita({
             foto: '',
             acreditado: false,
@@ -344,7 +308,7 @@ const CargaVisitas = () => {
                 const updatedHistorial = [...historialVisitas];
                 updatedHistorial[index] = {
                     ...updatedHistorial[index],
-                    foto: reader.result,  // Actualizar la foto en el historial de visitas
+                    foto: reader.result,
                 };
                 setHistorialVisitas(updatedHistorial);
             };
@@ -365,7 +329,7 @@ const CargaVisitas = () => {
 
     const handleCloseModal = () => {
         setShowModal(false);
-        setSelectedPhoto(null); // Limpiar la foto seleccionada al cerrar el modal
+        setSelectedPhoto(null);
     };
 
     const handleVolver = () => {
@@ -401,17 +365,14 @@ const CargaVisitas = () => {
                             <input
                                 type="file"
                                 accept="image/*"
-                                onChange={handlePhotoChange}  // Manejador de cambio de foto
-                                className="hidden"
-                                ref={photoInputRef}  // Referencia a input de foto
-                            />
+                                onChange={handlePhotoChange} className="hidden"
+                                ref={photoInputRef} />
 
                             {/* Botón para activar el input */}
                             <label
                                 htmlFor="fotoInput"
                                 className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer"
-                                onClick={() => photoInputRef.current.click()}  // Abrir selector de archivo al hacer clic
-                            >
+                                onClick={() => photoInputRef.current.click()}                              >
                                 +
                             </label>
                         </div>
@@ -623,15 +584,13 @@ const CargaVisitas = () => {
                         {historialVisitas.length === 0 ? (
                             <p className="text-sm text-gray-500 text-center">No hay visitas registradas aún.</p>
                         ) : (
-                            // Mostrar mensaje si el filtro no devuelve resultados
                             historialFiltrado.length === 0 ? (
                                 <p className="text-sm text-gray-500 text-center">No se encontraron visitas para el DNI ingresado.</p>
                             ) : (
                                 <ul className="mt-2">
                                     {historialFiltrado.map((item, index) => {
                                         const inputRef = fileInputRefs[index];
-                                        const sancionadoInfo = checkDniSancionadoCumplido(item.dni); // Verificar si estuvo sancionado
-
+                                        const sancionadoInfo = checkDniSancionadoCumplido(item.dni);
                                         return (
                                             <li key={item.id} className="border border-gray-300 p-2 mb-2 rounded bg-white shadow-sm">
                                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -665,32 +624,37 @@ const CargaVisitas = () => {
                                                         <p className='text-sm'><strong>Hora de la Visita:</strong> {item.horaVisita}</p>
 
                                                         {item.comportamiento && (
-                                                            <p className='text-sm'>
+                                                            <p className="text-sm">
                                                                 <strong>Comportamiento:</strong> {item.comportamiento}
+                                                                {/* Mostrar la fecha de carga comportamiento */}
                                                                 {item.fechaComportamiento && (
-                                                                    <span className="text-gray-500">
-                                                                        {` Fecha de carga: ${item.fechaComportamiento} `}
+                                                                    <span className="text-gray-500 ml-2">
+                                                                        <strong>Fecha de carga comportamiento:</strong> {item.fechaComportamiento}
                                                                     </span>
                                                                 )}
-                                                                {item.fechaUltimaModificacionComportamiento && item.fechaComportamiento !== item.fechaUltimaModificacionComportamiento && (
-                                                                    <span className="text-gray-500">
-                                                                        {` (Última modificación: ${item.fechaUltimaModificacionComportamiento})`}
+                                                                {/* Verificar si hay una última modificación diferente a la fecha de carga */}
+                                                                {item.fechaUltimaModificacionComportamiento && item.fechaUltimaModificacionComportamiento !== item.fechaComportamiento && (
+                                                                    <span className="text-gray-500 ml-2">
+                                                                        <strong>Última modificación comportamiento:</strong> {item.fechaUltimaModificacionComportamiento}
                                                                     </span>
                                                                 )}
                                                             </p>
                                                         )}
 
+
                                                         {item.observacion && (
                                                             <p className='text-sm'>
                                                                 <strong>Observación:</strong> {item.observacion}
+                                                                {/* Mostrar la fecha de carga observación */}
                                                                 {item.fechaObservacion && (
-                                                                    <span className="text-gray-500">
-                                                                        {` Fecha de carga: ${item.fechaObservacion} `}
+                                                                    <span className="text-gray-500 ml-2">
+                                                                        <strong>Fecha de carga observación:</strong> {item.fechaObservacion}
                                                                     </span>
                                                                 )}
-                                                                {item.fechaUltimaModificacionObservacion && item.fechaObservacion !== item.fechaUltimaModificacionObservacion && (
-                                                                    <span className="text-gray-500">
-                                                                        {` (Última modificación: ${item.fechaUltimaModificacionObservacion})`}
+                                                                {/* Verificar si hay una última modificación diferente a la fecha de carga */}
+                                                                {item.fechaUltimaModificacionObservacion && item.fechaUltimaModificacionObservacion !== item.fechaObservacion && (
+                                                                    <span className="text-gray-500 ml-2">
+                                                                        <strong>Última modificación observación:</strong> {item.fechaUltimaModificacionObservacion}
                                                                     </span>
                                                                 )}
                                                             </p>

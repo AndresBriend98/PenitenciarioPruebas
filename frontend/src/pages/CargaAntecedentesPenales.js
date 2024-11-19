@@ -1,6 +1,6 @@
 import React, { useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 
 const CargaAntecendentesPenales = () => {
     const navigate = useNavigate();
@@ -14,12 +14,12 @@ const CargaAntecendentesPenales = () => {
 
     const handleAgregarAntecedente = () => {
         if (antecedentesPenales.trim()) {
-            const fechaActual = new Date().toLocaleString(); // Fecha actual
+            const fechaActual = new Date().toLocaleString();
             setHistorialAntecedentes([...historialAntecedentes, { informe: antecedentesPenales, fecha: fechaActual }]);
-            setAntecedentesPenales(''); // Limpiar el campo después de agregar
-            setErrors({ antecedentes: '' }); // Limpiar el error si la entrada es válida
+            setAntecedentesPenales('');
+            setErrors({ antecedentes: '' });
         } else {
-            setErrors({ antecedentes: 'El campo de antecedentes es requerido.' }); // Mostrar error si está vacío
+            setErrors({ antecedentes: 'El campo de antecedentes es requerido.' });
         }
     };
 

@@ -2,59 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoPenitenciaria from '../assets/images/logoPenitenciaria.png';
 
-const InicioAreaGeneral = () => {
+const InicioAreaJudicial = () => {
   const navigate = useNavigate();
-  const [searchDNI, setSearchDNI] = useState('');  // Campo de búsqueda por DNI
-  const [searchLegajo, setSearchLegajo] = useState('');  // Campo de búsqueda por Legajo
-  const [data, setData] = useState([]);  // Datos que se generarán una sola vez
 
+  const [searchDNI, setSearchDNI] = useState('');    const [searchLegajo, setSearchLegajo] = useState('');    const [data, setData] = useState([]);  
   const user = {
-    name: 'Josefina Tomei',
-    area: 'General (Aca van todas las areas como Salud, Trabajo, Psicologia, etc..)',
-    unit: '6'
+    name: 'Tomás Torres',
+    area: 'Judicial',
+    unit: '4'
   };
-
-  // Solo se genera una vez al montar el componente
-  useEffect(() => {
+    useEffect(() => {
     const generatedData = Array(15).fill(null).map((_, index) => ({
       name: 'Juan Carlos López',
       crime: 'Robo',
       sentenceDate: '25/06/2025',
       court: 'T.O.P.LIBRES',
       sentence: '25/06/2025',
-      fileNumber: Math.floor(1000 + Math.random() * 9000), // Genera un número de legajo aleatorio de 4 dígitos
-      transferDate: '25/06/2025',
+      fileNumber: Math.floor(1000 + Math.random() * 9000),       transferDate: '25/06/2025',
       assistanceDate: '25/06/2025',
       admissionDate: '25/06/2025',
       internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado',
-      dni: Math.floor(10000000 + Math.random() * 90000000) // DNI aleatorio de 8 dígitos
-    }));
-    setData(generatedData); // Solo se setea una vez
-  }, []);
+      dni: Math.floor(10000000 + Math.random() * 90000000)     }));
+    setData(generatedData);   }, []);
 
   const filteredData = data.filter((item) => {
-    // Si el interno es "Procesado", no tiene legajo
-    const isValidLegajo = item.internalType === 'Condenado'
+        const isValidLegajo = item.internalType === 'Condenado'
       ? (item.fileNumber && item.fileNumber.toString().startsWith(searchLegajo))
-      : false;  // Procesados no tienen legajo, por lo que siempre será false
-
+      : false;  
     const matchesDNI = searchDNI === '' || (item.dni && item.dni.toString().startsWith(searchDNI));
     const matchesLegajo = searchLegajo === '' || isValidLegajo;
 
-    // Solo mostrar internos que sean válidos (condenados con legajo o procesados sin legajo)
-    return matchesDNI && matchesLegajo;
+        return matchesDNI && matchesLegajo;
   });
 
   const handleLogout = () => {
-    // Falta lógica para el logout
-    navigate('/login');
+        navigate('/login');
+  };
+
+  const handleAddInterno = () => {
+    navigate('/carganuevointerno');
   };
 
   return (
     <div className="bg-general bg-cover bg-center min-h-screen flex flex-col p-4">
       <div className="bg-gray-100 flex-1 p-4 rounded-md flex flex-col">
-        <div className="flex flex-col md:flex-row md:justify-between items-start">
-          <div className="text-left text-base mb-4 md:mb-0">
+        <div className="flex flex-col md:flex-row md:justify-between items-center">
+          <div className="text-center md:text-left text-base mb-4 md:mb-0 flex flex-col items-center md:items-start">
             <p className='text-lg'><strong>Bienvenido/a, {user.name}</strong></p>
             <p className='text-sm'><strong>Área:</strong> {user.area}</p>
             <p className='text-sm'><strong>Unidad:</strong> {user.unit}</p>
@@ -98,7 +91,7 @@ const InicioAreaGeneral = () => {
                 <tr>
                   <th className="p-2 border">#</th>
                   <th className="p-2 border">Nombre/Apellido</th>
-                  <th className="p-2 border">DNI</th> {/* Nueva columna de DNI */}
+                  <th className="p-2 border">DNI</th>
                   <th className="p-2 border">Delitos</th>
                   <th className="p-2 border">Tipo Interno</th>
                   <th className="p-2 border">Juzgado</th>
@@ -110,6 +103,7 @@ const InicioAreaGeneral = () => {
                   <th className="p-2 border">Acciones</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredData.slice(0, 15).map((item, index) => (
                   <tr key={index} className="hover:bg-gray-100">
@@ -141,6 +135,7 @@ const InicioAreaGeneral = () => {
                   </tr>
                 ))}
               </tbody>
+
             </table>
           </div>
         </div>
@@ -152,10 +147,16 @@ const InicioAreaGeneral = () => {
           >
             Cerrar sesión
           </button>
+          <button
+            onClick={handleAddInterno}
+            className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 text-xs"
+          >
+            Agregar Interno
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default InicioAreaGeneral;
+export default InicioAreaJudicial;

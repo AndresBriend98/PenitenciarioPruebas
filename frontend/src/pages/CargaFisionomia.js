@@ -1,7 +1,7 @@
 import React, { useState, } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
-import Modal from './ModalChanges';
+import Header from '../components/Header';
+import Modal from '../components/ModalChanges';
 
 const CargaFisionomia = () => {
     const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
@@ -46,7 +46,7 @@ const CargaFisionomia = () => {
         menton: '',
         narizDorso: '',
         narizBase: '',
-        imagen: null, // Nuevo campo para la imagen
+        imagen: null,
         ultimaModificacion: ''
     });
 
@@ -69,7 +69,7 @@ const CargaFisionomia = () => {
         menton: '',
         narizDorso: '',
         narizBase: '',
-        imagen: null, // Nuevo campo para la imagen
+        imagen: null,
     });
 
     const handleInputChange = (e, field) => {
@@ -78,16 +78,14 @@ const CargaFisionomia = () => {
         if (field === 'imagen') {
             const file = e.target.files[0];
             if (file) {
-                const imageUrl = URL.createObjectURL(file); // Crear una URL para la previsualización
+                const imageUrl = URL.createObjectURL(file);
 
-                // Guardar la imagen y el nombre en el estado
                 setDatosFisionomicos(prevState => ({
                     ...prevState,
-                    imagen: imageUrl,        // Guardar la URL para previsualizar
-                    imagenNombre: file.name  // Guardar el nombre del archivo para la descarga
+                    imagen: imageUrl,
+                    imagenNombre: file.name
                 }));
 
-                // Actualizar el historial de cambios
                 setHistorialCambios(prev => ({
                     ...prev,
                     [field]: {
@@ -95,17 +93,17 @@ const CargaFisionomia = () => {
                         fechaCarga: prev[field]?.fechaCarga || currentDate,
                         ultimaModificacion: currentDate,
                         imagenUrl: imageUrl,
-                        imagenNombre: file.name // Guardar el nombre para la descarga
+                        imagenNombre: file.name
                     }
                 }));
 
-                setIsDataModified(true); // Marcar como modificado
+                setIsDataModified(true);
             }
         } else {
             const value = e.target.value;
 
             if (value !== initialDatosFisionomicos[field]) {
-                setIsDataModified(true); // Marcar como modificado
+                setIsDataModified(true);
                 setHistorialCambios(prev => ({
                     ...prev,
                     [field]: {
@@ -115,7 +113,7 @@ const CargaFisionomia = () => {
                     }
                 }));
             } else {
-                setIsDataModified(false); // Si no hay cambio, resetear el estado de modificación
+                setIsDataModified(false);
             }
 
             setDatosFisionomicos(prevState => ({ ...prevState, [field]: value }));
@@ -127,9 +125,8 @@ const CargaFisionomia = () => {
 
         if (buttonText === 'Cargar') {
             const isAnyFieldFilled = Object.values(datosFisionomicos).some(value => value.trim() !== '');
-            if (!isAnyFieldFilled) return; // No hacer nada si ningún campo está lleno
+            if (!isAnyFieldFilled) return;
 
-            // Guardamos los datos iniciales (fechas de carga y modificación)
             setInitialDatosFisionomicos(datosFisionomicos);
 
             setHistorialCambios(prev => {
@@ -139,37 +136,37 @@ const CargaFisionomia = () => {
                         newHistorial[field] = {
                             fechaCarga: currentDate,
                             ultimaModificacion: currentDate,
-                            imagenUrl: field === 'imagen' ? datosFisionomicos['imagen'] : null, // Guardar URL de imagen si es el campo 'imagen'
-                            imagenNombre: field === 'imagen' ? datosFisionomicos['imagenNombre'] : null // Guardar nombre de imagen si es el campo 'imagen'
+                            imagenUrl: field === 'imagen' ? datosFisionomicos['imagen'] : null,
+                            imagenNombre: field === 'imagen' ? datosFisionomicos['imagenNombre'] : null
                         };
                     }
                 });
                 return { ...prev, ...newHistorial };
             });
 
-            setIsEditable(false); // No se puede editar después de cargar
-            setButtonText('Actualizar'); // Cambia el botón a 'Actualizar'
+            setIsEditable(false); 
+            setButtonText('Actualizar');
 
         } else if (buttonText === 'Actualizar') {
-            setIsEditable(true); // Permite la edición
-            setButtonText('Guardar Cambios'); // Cambia el texto del botón
-            setIsDataModified(false); // Resetear el estado de modificación
+            setIsEditable(true); 
+            setButtonText('Guardar Cambios');
+            setIsDataModified(false);
 
         } else if (buttonText === 'Guardar Cambios') {
-            // Verifica si realmente hay cambios antes de guardarlos
+
             const hasChanges = Object.keys(datosFisionomicos).some(key => datosFisionomicos[key] !== initialDatosFisionomicos[key]);
-            if (!hasChanges) return; // No hace nada si no hay cambios
+            if (!hasChanges) return;
 
             console.log('Datos guardados');
-            setIsEditable(false); // Deshabilitar la edición
-            setButtonText('Actualizar'); // Cambia el texto del botón
-            setIsDataModified(false); // Resetear el estado de modificación
+            setIsEditable(false);
+            setButtonText('Actualizar'); 
+            setIsDataModified(false); 
         }
     };
 
-    const [isEditable, setIsEditable] = useState(true); // Los campos inician habilitados
-    const [buttonText, setButtonText] = useState('Cargar'); // Inicia con "Cargar"
-    const [isDataModified, setIsDataModified] = useState(false); // Controla si los datos fueron modificado
+    const [isEditable, setIsEditable] = useState(true);
+    const [buttonText, setButtonText] = useState('Cargar');
+    const [isDataModified, setIsDataModified] = useState(false);
     const [historialCambios, setHistorialCambios] = useState({});
     const navigate = useNavigate();
 
@@ -427,8 +424,8 @@ const CargaFisionomia = () => {
                         {datosFisionomicos.imagenNombre && (
                             <div className="mt-2">
                                 <a
-                                    href={datosFisionomicos.imagen} // La URL del archivo en memoria
-                                    download={datosFisionomicos.imagenNombre} // Usar el nombre original del archivo
+                                    href={datosFisionomicos.imagen}
+                                    download={datosFisionomicos.imagenNombre}
                                     className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
                                 >
                                     Descargar Tatuajes/Marcas Distintivas
@@ -448,21 +445,20 @@ const CargaFisionomia = () => {
                     <button
                         onClick={handleCargarActualizar}
                         className={`text-white px-4 py-2 rounded-md text-xs ${buttonText === 'Guardar Cambios' && !isDataModified
-                            ? 'bg-blue-300 cursor-not-allowed' // Deshabilitado si no hay cambios
-                            : 'bg-blue-500' // Habilitado si hay cambios
+                            ? 'bg-blue-300 cursor-not-allowed'
+                            : 'bg-blue-500'
                             }`}
                         disabled={
-                            (buttonText === 'Guardar Cambios' && !isDataModified) || // Deshabilitado si no hay cambios
+                            (buttonText === 'Guardar Cambios' && !isDataModified) || 
                             (buttonText === 'Cargar' &&
                                 !Object.values(datosFisionomicos).some(value => {
-                                    // Verifica si el valor no está vacío
                                     if (typeof value === 'string') {
-                                        return value.trim() !== ''; // Verifica cadenas
+                                        return value.trim() !== ''; 
                                     }
-                                    if (datosFisionomicos.imagen) { // Verificación directa del campo imagen
-                                        return true; // Si hay imagen cargada, no deshabilitar
+                                    if (datosFisionomicos.imagen) {
+                                        return true; 
                                     }
-                                    return false; // Ignora otros tipos
+                                    return false;
                                 })
                             )
                         }

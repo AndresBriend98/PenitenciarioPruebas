@@ -15,23 +15,16 @@ const CargaNuevoInterno = () => {
         remainingSentence: '3 años 2 meses 5 días',
     });
 
-    // Función para manejar el cambio en el tipo de interno
-    const handleTipoInternoChange = (e) => {
+        const handleTipoInternoChange = (e) => {
         setTipoInterno(e.target.value);
     };
 
-    // Función para manejar el cambio de delitos
-    const handleDelitoChange = (e) => {
+        const handleDelitoChange = (e) => {
         setDelito(e.target.value);
     };
 
-    // Función para aplicar el estilo de deshabilitado
-    const disabledStyle = {
-        backgroundColor: '#f0f0f0', // Gris claro
-        borderColor: '#d1d5db', // Gris claro para el borde
-        color: '#6b7280', // Gris oscuro para el texto
-        cursor: 'not-allowed', // Cambia el cursor para indicar que está deshabilitado
-    };
+        const disabledStyle = {
+        backgroundColor: '#f0f0f0',         borderColor: '#d1d5db',         color: '#6b7280',         cursor: 'not-allowed',     };
 
     const [egreso, setEgreso] = useState(false);
     const [motivoEgreso, setMotivoEgreso] = useState('');
@@ -96,8 +89,7 @@ const CargaNuevoInterno = () => {
     const handleEgresoChange = () => {
         setEgreso(!egreso);
         if (!egreso) {
-            // Resetear valores si se desmarca el checkbox
-            setEgresoDate('');
+                        setEgresoDate('');
             setNumOficioEgreso('');
         }
     };
@@ -231,8 +223,7 @@ const CargaNuevoInterno = () => {
                         />
                     </div>
                 </div>
-
-                {/* Checkboxes alineados a la derecha en pantallas grandes y a la izquierda en pantallas pequeñas */}
+                
                 <div className="flex flex-col space-y-2 mt-4 md:mt-0 w-full md:w-auto">
                     {/* Egreso checkbox, fecha, motivo y oficio de egreso */}
                     <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex flex-col items-start shadow-sm">
@@ -281,7 +272,6 @@ const CargaNuevoInterno = () => {
                                     <option value="fallecimiento">Fallecimiento</option>
                                 </select>
 
-                                {/* Oficio de Egreso */}
                                 <div className="flex-1 mt-3">
                                     <label className="block text-gray-700 text-sm font-bold">Oficio de Egreso</label>
                                     <input
@@ -352,8 +342,7 @@ const CargaNuevoInterno = () => {
                         <select
                             className="w-full p-1 border border-gray-300 rounded text-sm"
                             value={delito}
-                            onChange={handleDelitoChange} // Cambia el manejador de eventos según sea necesario
-                        >
+                            onChange={handleDelitoChange}                         >
                             <option value="" disabled>Seleccionar delito</option>
                             <option value="A DESHO">A DESHO</option>
                             <option value="A SEXUAL">A SEXUAL</option>
