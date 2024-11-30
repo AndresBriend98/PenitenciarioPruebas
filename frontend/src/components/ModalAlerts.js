@@ -5,7 +5,7 @@ const Modal = ({ isOpen, message, onClose }) => {
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 4000); 
+      }, 9000);
       return () => clearTimeout(timer);
     }
   }, [isOpen, onClose]);

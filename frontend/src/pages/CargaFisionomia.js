@@ -2,9 +2,25 @@ import React, { useState, } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Modal from '../components/ModalChanges';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+
 
 const CargaFisionomia = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isImagenCargada, setIsImagenCargada] = useState(false);
+    const handleDownloadZip = () => {
+        const zip = new JSZip();
+
+        datosFisionomicos.imagen.forEach(file => {
+            zip.file(file.name, fetch(file.url).then(res => res.blob()));
+        });
+
+        zip.generateAsync({ type: 'blob' }).then(content => {
+            saveAs(content, 'tatuajes-marcas-distintivas.zip');
+        });
+    };
+
     const campoMapeadoFisionomia = {
         estatura: 'Estatura',
         cuerpo: 'Cuerpo',
@@ -46,7 +62,7 @@ const CargaFisionomia = () => {
         menton: '',
         narizDorso: '',
         narizBase: '',
-        imagen: null,
+        imagen: [],
         ultimaModificacion: ''
     });
 
@@ -73,70 +89,66 @@ const CargaFisionomia = () => {
     });
 
     const handleInputChange = (e, field) => {
-        const currentDate = new Date().toLocaleString();
-
+        let value = e.target.value;
+    
         if (field === 'imagen') {
-            const file = e.target.files[0];
-            if (file) {
-                const imageUrl = URL.createObjectURL(file);
-
-                setDatosFisionomicos(prevState => ({
-                    ...prevState,
-                    imagen: imageUrl,
-                    imagenNombre: file.name
-                }));
-
-                setHistorialCambios(prev => ({
-                    ...prev,
-                    [field]: {
-                        ...prev[field],
-                        fechaCarga: prev[field]?.fechaCarga || currentDate,
-                        ultimaModificacion: currentDate,
-                        imagenUrl: imageUrl,
-                        imagenNombre: file.name
-                    }
-                }));
-
-                setIsDataModified(true);
-            }
+            const files = Array.from(e.target.files);
+            const fileUrls = files.map(file => ({
+                name: file.name,
+                url: URL.createObjectURL(file)
+            }));
+    
+            setDatosFisionomicos(prevState => ({
+                ...prevState,
+                imagen: fileUrls
+            }));
+    
+            setIsDataModified(true);
         } else {
-            const value = e.target.value;
-
-            if (value !== initialDatosFisionomicos[field]) {
-                setIsDataModified(true);
-                setHistorialCambios(prev => ({
-                    ...prev,
-                    [field]: {
-                        ...prev[field],
-                        fechaCarga: prev[field]?.fechaCarga || currentDate,
-                        ultimaModificacion: currentDate,
-                    }
-                }));
-            } else {
-                setIsDataModified(false);
-            }
-
-            setDatosFisionomicos(prevState => ({ ...prevState, [field]: value }));
+            setDatosFisionomicos(prevState => {
+                const updatedDatos = { ...prevState, [field]: value };
+                setIsDataModified(
+                    Object.keys(updatedDatos).some(key => updatedDatos[key] !== initialDatosFisionomicos[key])
+                );
+                return updatedDatos;
+            });
         }
-    };
+    };    
 
     const handleCargarActualizar = () => {
         const currentDate = new Date().toLocaleString();
 
         if (buttonText === 'Cargar') {
-            const isAnyFieldFilled = Object.values(datosFisionomicos).some(value => value.trim() !== '');
+            const isAnyFieldFilled = Object.values(datosFisionomicos).some(value => {
+                if (typeof value === 'string') {
+                    return value.trim() !== '';
+                }
+                if (Array.isArray(value)) {
+                    return value.length > 0;
+                }
+                return value !== null && value !== undefined;
+            });
+
             if (!isAnyFieldFilled) return;
+
+            if (datosFisionomicos.imagen && datosFisionomicos.imagen.length > 0) {
+                setIsImagenCargada(true);
+            }
 
             setInitialDatosFisionomicos(datosFisionomicos);
 
             setHistorialCambios(prev => {
                 const newHistorial = {};
                 Object.keys(datosFisionomicos).forEach(field => {
-                    if (datosFisionomicos[field] && datosFisionomicos[field] !== '') {
+                    const fieldValue = datosFisionomicos[field];
+
+                    if (fieldValue && (Array.isArray(fieldValue) ? fieldValue.length > 0 : fieldValue.trim() !== '')
+                        && (fieldValue !== initialDatosFisionomicos[field])) {
+
                         newHistorial[field] = {
                             fechaCarga: currentDate,
                             ultimaModificacion: currentDate,
-                            imagenUrl: field === 'imagen' ? datosFisionomicos['imagen'] : null,
+                            imagenUrl: field === 'imagen' ? fieldValue : null,
                             imagenNombre: field === 'imagen' ? datosFisionomicos['imagenNombre'] : null
                         };
                     }
@@ -144,23 +156,39 @@ const CargaFisionomia = () => {
                 return { ...prev, ...newHistorial };
             });
 
-            setIsEditable(false); 
+            setIsEditable(false);
             setButtonText('Actualizar');
-
         } else if (buttonText === 'Actualizar') {
-            setIsEditable(true); 
+            setIsEditable(true);
             setButtonText('Guardar Cambios');
             setIsDataModified(false);
-
         } else if (buttonText === 'Guardar Cambios') {
+            const hasChanges = Object.keys(datosFisionomicos).some(key => {
+                return datosFisionomicos[key] !== initialDatosFisionomicos[key];
+            });
 
-            const hasChanges = Object.keys(datosFisionomicos).some(key => datosFisionomicos[key] !== initialDatosFisionomicos[key]);
             if (!hasChanges) return;
 
-            console.log('Datos guardados');
             setIsEditable(false);
-            setButtonText('Actualizar'); 
-            setIsDataModified(false); 
+            setButtonText('Actualizar');
+            setIsDataModified(false);
+
+            setHistorialCambios(prev => {
+                const updatedHistorial = {};
+                Object.keys(datosFisionomicos).forEach(field => {
+                    if (datosFisionomicos[field] !== initialDatosFisionomicos[field]) {
+                        updatedHistorial[field] = {
+                            fechaCarga: prev[field]?.fechaCarga || currentDate,
+                            ultimaModificacion: currentDate,
+                            imagenUrl: field === 'imagen' ? datosFisionomicos['imagen'] : null,
+                            imagenNombre: field === 'imagen' ? datosFisionomicos['imagenNombre'] : null
+                        };
+                    }
+                });
+                return { ...prev, ...updatedHistorial };
+            });
+
+            setInitialDatosFisionomicos(datosFisionomicos);
         }
     };
 
@@ -413,26 +441,36 @@ const CargaFisionomia = () => {
                     {/* Tatuajes/Marcas Distintivas */}
                     <div className='mt-2'>
                         <label className="block text-sm font-semibold mb-2">Tatuajes/Marcas Distintivas</label>
-                        <input
-                            type="file"
-                            className="border rounded p-2 w-full text-sm"
-                            onChange={(e) => handleInputChange(e, 'imagen')}
-                            disabled={!isEditable}
-                        />
-
-                        {/* Mostrar el enlace para descargar el archivo subido */}
-                        {datosFisionomicos.imagenNombre && (
-                            <div className="mt-2">
-                                <a
-                                    href={datosFisionomicos.imagen}
-                                    download={datosFisionomicos.imagenNombre}
-                                    className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
-                                >
-                                    Descargar Tatuajes/Marcas Distintivas
-                                </a>
-                            </div>
-                        )}
+                        <div className="border border-gray-300 p-2 rounded-md bg-gray-50 mt-1">
+                            {isEditable ? (
+                                <input
+                                    type="file"
+                                    className="w-full text-sm text-gray-500"
+                                    onChange={(e) => handleInputChange(e, 'imagen')}
+                                    multiple
+                                />
+                            ) : (
+                                <div className="flex items-center justify-between">
+                                    <p className="text-gray-500 text-sm">
+                                        {datosFisionomicos.imagen && datosFisionomicos.imagen.length > 0
+                                            ? `${datosFisionomicos.imagen.length} archivo(s) cargado(s)`
+                                            : 'Ningún archivo cargado'}
+                                    </p>
+                                    {datosFisionomicos.imagen && datosFisionomicos.imagen.length > 0 && (
+                                        <button
+                                            className="ml-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition"
+                                            onClick={() => handleDownloadZip(datosFisionomicos.imagen)}
+                                        >
+                                            <i className="fas fa-download"></i>
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
+
+
+
                 </div>
 
                 <div className="flex justify-between mt-10">
@@ -446,17 +484,17 @@ const CargaFisionomia = () => {
                         onClick={handleCargarActualizar}
                         className={`text-white px-4 py-2 rounded-md text-xs ${buttonText === 'Guardar Cambios' && !isDataModified
                             ? 'bg-blue-300 cursor-not-allowed'
-                            : 'bg-blue-500'
+                            : 'bg-blue-600'
                             }`}
                         disabled={
-                            (buttonText === 'Guardar Cambios' && !isDataModified) || 
+                            (buttonText === 'Guardar Cambios' && !isDataModified) ||
                             (buttonText === 'Cargar' &&
                                 !Object.values(datosFisionomicos).some(value => {
                                     if (typeof value === 'string') {
-                                        return value.trim() !== ''; 
+                                        return value.trim() !== '';
                                     }
                                     if (datosFisionomicos.imagen) {
-                                        return true; 
+                                        return true;
                                     }
                                     return false;
                                 })

@@ -433,7 +433,7 @@ const CargaDatosPersonales = () => {
                         onClick={handleCargarActualizar}
                         className={`text-white px-4 py-2 rounded-md text-xs ${buttonText === 'Guardar Cambios' && !isDataModified
                             ? 'bg-blue-300 cursor-not-allowed'
-                            : 'bg-blue-500'
+                            : 'bg-blue-600'
                             }`}
                         disabled={buttonText === 'Guardar Cambios' && !isDataModified || buttonText === 'Cargar' && !Object.values(datosPersonales).some(value => value.trim() !== '')}
                     >

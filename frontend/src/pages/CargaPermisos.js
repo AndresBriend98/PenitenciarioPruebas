@@ -67,8 +67,10 @@ const CargaPermisos = () => {
                 actasArchivo: actasArchivo,
                 nombreActaArchivo: nombreActaArchivo,
                 fechaCargaActa: actasArchivo ? new Date().toLocaleString() : null,
-                fechasDeCargaActa: actasArchivo ? [new Date().toLocaleString()] : [],
-                fechaObservacion: permisoData.observacion ? fechaCarga : null, ultimaModificacionObservacion: null
+                fechaObservacion: permisoData.observacion ? fechaCarga : null,
+                ultimaModificacionObservacion: null,
+                fechasDeEdicion: [],
+                fechasDeEliminacion: []
             };
 
             setPermisos(prevPermisos => [...prevPermisos, nuevoPermiso]);
@@ -85,16 +87,43 @@ const CargaPermisos = () => {
         }
     };
 
+    const handleEditarActa = (index) => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".pdf";
+
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const newPermisos = [...permisos];
+                const newDate = new Date().toLocaleString();
+
+                if (!newPermisos[index].fechasDeEdicion) {
+                    newPermisos[index].fechasDeEdicion = [];
+                }
+
+                newPermisos[index].actasArchivo = file;
+                newPermisos[index].fechasDeEdicion = [newDate];
+
+                setPermisos(newPermisos);
+            }
+        };
+
+        input.click();
+    };
+
     const handleEliminarPermisoArchivo = () => {
         if (selectedPermisoIndex !== null) {
             const newPermisos = [...permisos];
             const newDate = new Date().toLocaleString();
+
             if (!newPermisos[selectedPermisoIndex].fechasDeEliminacion) {
                 newPermisos[selectedPermisoIndex].fechasDeEliminacion = [];
             }
 
-            newPermisos[selectedPermisoIndex].fechasDeEliminacion.push(newDate);
             newPermisos[selectedPermisoIndex].actasArchivo = null;
+            newPermisos[selectedPermisoIndex].fechasDeEliminacion = [newDate];
+
             setPermisos(newPermisos);
         }
 
@@ -169,14 +198,14 @@ const CargaPermisos = () => {
                                 const file = e.target.files[0];
                                 setActasArchivo(file); setNombreActaArchivo(file.name);
                             }}
-                            accept=".pdf,.doc,.docx"
+                            accept=".pdf"
                             className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
                         />
 
                         <div className="flex justify-center mt-2">
                             <button
                                 onClick={handleAgregarPermiso}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
+                                className="bg-blue-600 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
                                 Cargar
                             </button>
@@ -266,7 +295,7 @@ const CargaPermisos = () => {
 
                                                 {/* Fecha de carga y última modificación de la observación */}
                                                 {item.fechaObservacion && (
-                                                    <p className="text-sm text-gray-600 mt-1 max-w-full break-words">
+                                                    <p className="text-sm text-gray-500 mt-1 max-w-full break-words">
                                                         <strong>Fecha de carga de observación:</strong>{" "}
                                                         {item.fechaObservacion}
                                                         {item.ultimaModificacionObservacion && (
@@ -278,11 +307,17 @@ const CargaPermisos = () => {
                                                     </p>
                                                 )}
 
+                                                {/* Fecha de carga y otras fechas */}
+                                                {item.fechaCarga && (
+                                                    <p className="text-sm text-gray-500 mt-2 max-w-full break-words">
+                                                        <strong>Fecha de carga:</strong> {item.fechaCarga}
+                                                    </p>
+                                                )}
+
                                                 {/* Acta */}
                                                 <span className="text-sm max-w-full break-words">
                                                     <strong>Acta:</strong>
                                                 </span>
-
                                                 {/* Si no hay archivo cargado */}
                                                 {!item.actasArchivo ? (
                                                     <input
@@ -291,20 +326,13 @@ const CargaPermisos = () => {
                                                             const newPermisos = [...permisos];
                                                             const newDate = new Date().toLocaleString();
                                                             newPermisos[index].actasArchivo = e.target.files[0];
-
-                                                            if (!newPermisos[index].fechaCarga) {
-                                                                newPermisos[index].fechaCarga = newDate;
-                                                            }
-
-                                                            if (!newPermisos[index].fechasDeCargaActa) {
-                                                                newPermisos[index].fechasDeCargaActa = [];
-                                                            }
-
-                                                            newPermisos[index].fechasDeCargaActa.push(newDate);
+                                                            newPermisos[index].fechasDeEdicion = [];
+                                                            newPermisos[index].fechasDeEliminacion = [];
+                                                            newPermisos[index].fechaCargaActa = newDate;
 
                                                             setPermisos(newPermisos);
                                                         }}
-                                                        accept=".pdf,.doc,.docx"
+                                                        accept=".pdf"
                                                         className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
                                                     />
                                                 ) : (
@@ -320,29 +348,7 @@ const CargaPermisos = () => {
 
                                                         {/* Botón de Editar */}
                                                         <button
-                                                            onClick={() => {
-                                                                const input = document.createElement("input");
-                                                                input.type = "file";
-                                                                input.accept = ".pdf,.doc,.docx";
-
-                                                                input.onchange = (e) => {
-                                                                    const file = e.target.files[0];
-                                                                    if (file) {
-                                                                        const newPermisos = [...permisos];
-                                                                        const newDate = new Date().toLocaleString();
-                                                                        if (!newPermisos[index].fechasDeEdicion) {
-                                                                            newPermisos[index].fechasDeEdicion = [];
-                                                                        }
-
-                                                                        newPermisos[index].fechasDeEdicion.push(newDate);
-
-                                                                        newPermisos[index].actasArchivo = file;
-                                                                        setPermisos(newPermisos);
-                                                                    }
-                                                                };
-
-                                                                input.click();
-                                                            }}
+                                                            onClick={() => handleEditarActa(index)}
                                                             className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
                                                         >
                                                             Editar Acta
@@ -351,7 +357,8 @@ const CargaPermisos = () => {
                                                         {/* Botón de Eliminar */}
                                                         <button
                                                             onClick={() => {
-                                                                setSelectedPermisoIndex(index); setConfirmDeletePermisoModal(true);
+                                                                setSelectedPermisoIndex(index);
+                                                                setConfirmDeletePermisoModal(true);
                                                             }}
                                                             className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
                                                         >
@@ -360,72 +367,23 @@ const CargaPermisos = () => {
                                                     </>
                                                 )}
 
-                                                <div>
-                                                    {/* Mostrar la fecha de carga solo si existe */}
-                                                    {item.fechaCarga && (
-                                                        <p className="text-sm text-gray-500 mt-2 max-w-full break-words">
-                                                            <strong>Fecha de carga:</strong> {item.fechaCarga}
-                                                        </p>
-                                                    )}
+                                                {item.fechaCargaActa && (
+                                                    <p className="text-sm text-gray-500 mt-2 max-w-full break-words">
+                                                        <strong>Fecha de carga acta:</strong> {item.fechaCargaActa}
+                                                    </p>
+                                                )}
 
-                                                    {/* Mostrar la fecha de carga de acta solo si existe */}
-                                                    {item.fechasDeCargaActa && (
-                                                        <div className="mt-2">
-                                                            <p className="text-sm text-gray-500 max-w-full break-words">
-                                                                <strong>Fecha de carga de acta:</strong>
-                                                            </p>
-                                                            <ul className="list-disc list-inside">
-                                                                {item.fechasDeCargaActa.map((fecha, index) => (
-                                                                    <li
-                                                                        key={index}
-                                                                        className="text-sm text-gray-500 max-w-full break-words"
-                                                                    >
-                                                                        {fecha}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
+                                                {item.fechasDeEdicion && item.fechasDeEdicion.length > 0 && (
+                                                    <p className="text-sm text-gray-500 mt-2 max-w-full break-words">
+                                                        <strong>Fecha de edición acta:</strong> {item.fechasDeEdicion[0]}
+                                                    </p>
+                                                )}
 
-                                                    {/* Mostrar las fechas de edición solo si hay al menos una */}
-                                                    {item.fechasDeEdicion && item.fechasDeEdicion.length > 0 && (
-                                                        <div className="mt-2">
-                                                            <p className="text-sm text-gray-500 max-w-full break-words">
-                                                                <strong>Fecha de edición:</strong>
-                                                            </p>
-                                                            <ul className="list-disc list-inside">
-                                                                {item.fechasDeEdicion.map((fecha, index) => (
-                                                                    <li
-                                                                        key={index}
-                                                                        className="text-sm text-gray-500 max-w-full break-words"
-                                                                    >
-                                                                        {fecha}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Mostrar las fechas de eliminación solo si hay al menos una */}
-                                                    {item.fechasDeEliminacion &&
-                                                        item.fechasDeEliminacion.length > 0 && (
-                                                            <div className="mt-2">
-                                                                <p className="text-sm text-gray-500 max-w-full break-words">
-                                                                    <strong>Fecha de eliminación:</strong>
-                                                                </p>
-                                                                <ul className="list-disc list-inside">
-                                                                    {item.fechasDeEliminacion.map((fecha, index) => (
-                                                                        <li
-                                                                            key={index}
-                                                                            className="text-sm text-gray-500 max-w-full break-words"
-                                                                        >
-                                                                            {fecha}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                </div>
+                                                {item.fechasDeEliminacion && item.fechasDeEliminacion.length > 0 && (
+                                                    <p className="text-sm text-gray-500 mt-2 max-w-full break-words">
+                                                        <strong>Fecha de eliminación acta:</strong> {item.fechasDeEliminacion[0]}
+                                                    </p>
+                                                )}
                                             </li>
                                         ))}
                                     </ul>

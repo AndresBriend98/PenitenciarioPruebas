@@ -11,17 +11,33 @@ const CargaPsicologia = () => {
     const [confirmDeleteHistorialModal, setConfirmDeleteHistorialModal] = useState(false);
     const [selectedHistorialIndex, setSelectedHistorialIndex] = useState(null);
 
+    const handleEliminarActaArchivo = () => {
+        const newHistorial = [...historial];
+        const newDate = new Date().toLocaleString();
+
+        if (!newHistorial[selectedHistorialIndex].fechaEliminacion) {
+            newHistorial[selectedHistorialIndex].fechaEliminacion = newDate;
+        } else {
+            newHistorial[selectedHistorialIndex].fechaEliminacion = newDate;
+        }
+
+        newHistorial[selectedHistorialIndex].actasArchivo = null;
+        setHistorial(newHistorial);
+        setConfirmDeleteHistorialModal(false);
+    };
+
     const handleCloseDeleteHistorialModal = () => {
         setConfirmDeleteHistorialModal(false);
         setSelectedHistorialIndex(null);
     };
-    const [tituloEditado, setTituloEditado] = useState('');     const [informeEditado, setInformeEditado] = useState('');     const [observacionEditada, setObservacionEditada] = useState('');     const handleEdit = (index) => {
+    const [tituloEditado, setTituloEditado] = useState(''); const [informeEditado, setInformeEditado] = useState(''); const [observacionEditada, setObservacionEditada] = useState(''); const handleEdit = (index) => {
         const entrada = historial[index];
-        setEditIndex(index);         setTituloEditado(entrada.titulo);         setInformeEditado(entrada.informe);         setObservacionEditada(entrada.observacion || ''); 
-                setOriginalTitulo(entrada.titulo);
+        setEditIndex(index); setTituloEditado(entrada.titulo); setInformeEditado(entrada.informe); setObservacionEditada(entrada.observacion || '');
+        setOriginalTitulo(entrada.titulo);
         setOriginalInforme(entrada.informe);
         setOriginalObservacion(entrada.observacion || '');
-        setIsModified(false);     };
+        setIsModified(false);
+    };
     const handleSaveEdit = () => {
         const historialActualizado = [...historial];
         historialActualizado[editIndex] = {
@@ -29,60 +45,50 @@ const CargaPsicologia = () => {
             titulo: tituloEditado,
             informe: informeEditado,
             observacion: observacionEditada,
-            fechaModificacion: new Date().toLocaleString(),         };
-        setHistorial(historialActualizado);         setEditIndex(null);         setTituloEditado('');         setInformeEditado('');         setObservacionEditada('');     };
+            fechaModificacion: new Date().toLocaleString(),
+        };
+        setHistorial(historialActualizado); setEditIndex(null); setTituloEditado(''); setInformeEditado(''); setObservacionEditada('');
+    };
 
     const handleCancelEdit = () => {
-        setEditIndex(null);         setTituloEditado('');         setInformeEditado('');         setObservacionEditada('');     };
+        setEditIndex(null); setTituloEditado(''); setInformeEditado(''); setObservacionEditada('');
+    };
     const [editIndex, setEditIndex] = useState(null);
     const handleInputChange = (setValue, value, originalValue) => {
         setValue(value);
-        setIsModified(value !== originalValue);     };
-    const handleEliminarActaArchivo = () => {
-        if (selectedHistorialIndex !== null) {
-            const newHistorial = [...historial];
-            const newDate = new Date().toLocaleString(); 
-                        if (!newHistorial[selectedHistorialIndex].fechasDeEliminacion) {
-                newHistorial[selectedHistorialIndex].fechasDeEliminacion = [];
-            }
-
-                        newHistorial[selectedHistorialIndex].fechasDeEliminacion.push(newDate);
-
-                        newHistorial[selectedHistorialIndex].actasArchivo = null;
-            newHistorial[selectedHistorialIndex].nombreActaArchivo = '';
-
-                        setHistorial(newHistorial);
-        }
-
-                setConfirmDeleteHistorialModal(false);
-        setSelectedHistorialIndex(null);
+        setIsModified(value !== originalValue);
     };
-        const [actasArchivo, setActasArchivo] = useState(null);
+
+    const [actasArchivo, setActasArchivo] = useState(null);
     const [nombreActaArchivo, setNombreActaArchivo] = useState('');
     const [nombreArchivo, setNombreArchivo] = useState('');
-    const [tituloInformePsicologico, setTituloInformePsicologico] = useState('');     const [informePsicologico, setInformePsicologico] = useState('');     const [observacionPsicologica, setObservacionPsicologica] = useState('');     const [historial, setHistorial] = useState([]);     const [hasErrorPsicologico, setHasErrorPsicologico] = useState(false); 
-        const handleCargarPsicologico = () => {
+    const [tituloInformePsicologico, setTituloInformePsicologico] = useState(''); const [informePsicologico, setInformePsicologico] = useState(''); const [observacionPsicologica, setObservacionPsicologica] = useState(''); const [historial, setHistorial] = useState([]); const [hasErrorPsicologico, setHasErrorPsicologico] = useState(false);
+    const handleCargarPsicologico = () => {
         if (informePsicologico.trim() === '' || tituloInformePsicologico.trim() === '') {
-            setHasErrorPsicologico(true);             return;
+            setHasErrorPsicologico(true);
+            return;
         }
-        setHasErrorPsicologico(false); 
-                const nuevaEntradaPsicologica = {
+
+        setHasErrorPsicologico(false);
+        const nuevaEntradaPsicologica = {
             titulo: tituloInformePsicologico,
             informe: informePsicologico,
             observacion: observacionPsicologica,
             fecha: new Date().toLocaleString(),
-            actasArchivo,             nombreActaArchivo,             fechaCargaActa: actasArchivo ? new Date().toLocaleString() : null,             fechasDeCargaActa: actasArchivo ? [new Date().toLocaleString()] : [],
-            fecha: new Date().toLocaleString(),
+            actasArchivo,
+            nombreActaArchivo,
+            fechaCargaActa: actasArchivo ? new Date().toLocaleString() : null,
+            fechasDeCargaActa: actasArchivo ? [new Date().toLocaleString()] : [],
+            fechaCarga: actasArchivo ? new Date().toLocaleString() : null,
         };
 
         setHistorial(prevHistorial => [...prevHistorial, nuevaEntradaPsicologica]);
 
-                setTituloInformePsicologico('');
+        setTituloInformePsicologico('');
         setInformePsicologico('');
         setObservacionPsicologica('');
         setNombreArchivo('');
     };
-
 
     const handleVolver = () => {
         navigate('/general');
@@ -101,7 +107,7 @@ const CargaPsicologia = () => {
                         <input
                             type="text"
                             className={`w-full p-2 border border-gray-300 rounded text-sm ${hasErrorPsicologico ? 'border-red-500' : ''}`}
-                            value={tituloInformePsicologico}                              onChange={(e) => setTituloInformePsicologico(e.target.value)}
+                            value={tituloInformePsicologico} onChange={(e) => setTituloInformePsicologico(e.target.value)}
                             placeholder="Ingresar el título del informe psicológico"
                         />
                         {hasErrorPsicologico && <p className="text-red-500 text-sm mt-1">El título es obligatorio.</p>}
@@ -138,8 +144,9 @@ const CargaPsicologia = () => {
                         type="file"
                         onChange={(e) => {
                             const file = e.target.files[0];
-                            setActasArchivo(file);                             setNombreActaArchivo(file.name);                         }}
-                        accept=".pdf,.doc,.docx"
+                            setActasArchivo(file); setNombreActaArchivo(file.name);
+                        }}
+                        accept=".pdf"
                         className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
                     />
 
@@ -147,7 +154,7 @@ const CargaPsicologia = () => {
                     <div className="flex justify-center mt-2">
                         <button
                             onClick={handleCargarPsicologico}
-                            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
+                            className="bg-blue-600 text-white p-2 rounded hover:bg-blue-600 text-xs"
                         >
                             Cargar
                         </button>
@@ -170,7 +177,7 @@ const CargaPsicologia = () => {
                                                             className="border p-1 rounded text-sm w-full"
                                                             type="text"
                                                             value={tituloEditado}
-                                                            onChange={(e) => handleInputChange(setTituloEditado, e.target.value, originalTitulo)}                                                         />
+                                                            onChange={(e) => handleInputChange(setTituloEditado, e.target.value, originalTitulo)} />
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium mb-1">Informe:</label>
@@ -178,7 +185,7 @@ const CargaPsicologia = () => {
                                                             className="border p-1 rounded text-sm w-full"
                                                             type="text"
                                                             value={informeEditado}
-                                                            onChange={(e) => handleInputChange(setInformeEditado, e.target.value, originalInforme)}                                                         />
+                                                            onChange={(e) => handleInputChange(setInformeEditado, e.target.value, originalInforme)} />
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium mb-1">Observación:</label>
@@ -186,12 +193,12 @@ const CargaPsicologia = () => {
                                                             className="border p-1 rounded text-sm w-full"
                                                             type="text"
                                                             value={observacionEditada}
-                                                            onChange={(e) => handleInputChange(setObservacionEditada, e.target.value, originalObservacion)}                                                         />
+                                                            onChange={(e) => handleInputChange(setObservacionEditada, e.target.value, originalObservacion)} />
                                                     </div>
                                                     <div className="flex justify-center space-x-2 mt-2">
                                                         <button
                                                             onClick={handleSaveEdit}
-                                                            disabled={!isModified}                                                             className={`bg-green-500 text-white px-4 py-1 rounded text-xs hover:bg-green-600 ${!isModified ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                            disabled={!isModified} className={`bg-green-500 text-white px-4 py-1 rounded text-xs hover:bg-green-600 ${!isModified ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                         >
                                                             Guardar
                                                         </button>
@@ -226,19 +233,17 @@ const CargaPsicologia = () => {
                                                         type="file"
                                                         onChange={(e) => {
                                                             const newHistorial = [...historial];
-                                                            const newDate = new Date().toLocaleString(); 
-                                                                                                                        newHistorial[index].actasArchivo = e.target.files[0];
+                                                            const newDate = new Date().toLocaleString();
+                                                            newHistorial[index].actasArchivo = e.target.files[0];
 
-                                                                                                                        if (!newHistorial[index].fechaCarga) {
-                                                                newHistorial[index].fechaCarga = newDate;                                                             }
+                                                            newHistorial[index].fechaCarga = newDate;
 
-                                                                                                                        if (!newHistorial[index].fechasDeCargaActa) {
-                                                                newHistorial[index].fechasDeCargaActa = [];                                                             }
+                                                            newHistorial[index].fechasDeEdicion = [];
+                                                            newHistorial[index].fechaEliminacion = null;
 
-                                                                                                                        newHistorial[index].fechasDeCargaActa.push(newDate);
-
-                                                            setHistorial(newHistorial);                                                         }}
-                                                        accept=".pdf,.doc,.docx"
+                                                            setHistorial(newHistorial);
+                                                        }}
+                                                        accept=".pdf"
                                                         className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
                                                     />
                                                 ) : (
@@ -256,101 +261,67 @@ const CargaPsicologia = () => {
                                                             onClick={() => {
                                                                 const input = document.createElement("input");
                                                                 input.type = "file";
-                                                                input.accept = ".pdf,.doc,.docx";
+                                                                input.accept = ".pdf";
 
                                                                 input.onchange = (e) => {
                                                                     const file = e.target.files[0];
                                                                     if (file) {
                                                                         const newHistorial = [...historial];
-                                                                        const newDate = new Date().toLocaleString(); 
-                                                                                                                                                if (!newHistorial[index].fechasDeEdicion) {
+                                                                        const newDate = new Date().toLocaleString();
+
+                                                                        if (!newHistorial[index].fechasDeEdicion) {
                                                                             newHistorial[index].fechasDeEdicion = [];
                                                                         }
 
-                                                                                                                                                newHistorial[index].fechasDeEdicion.push(newDate);
+                                                                        newHistorial[index].fechasDeEdicion.push(newDate);
 
-                                                                                                                                                newHistorial[index].actasArchivo = file;
+                                                                        newHistorial[index].actasArchivo = file;
+
                                                                         setHistorial(newHistorial);
                                                                     }
                                                                 };
 
-                                                                input.click();                                                             }}
+                                                                input.click();
+                                                            }}
                                                             className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
                                                         >
                                                             Editar Informe
                                                         </button>
 
+
                                                         {/* Botón de Eliminar */}
                                                         <button
                                                             onClick={() => {
-                                                                                                                                setSelectedHistorialIndex(index);                                                                 setConfirmDeleteHistorialModal(true);                                                             }}
+                                                                setSelectedHistorialIndex(index);
+                                                                setConfirmDeleteHistorialModal(true);
+                                                            }}
                                                             className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
                                                         >
                                                             Eliminar Informe
                                                         </button>
+
                                                     </>
                                                 )}
 
-                                                <div>
+                                                {/* Mostrar las fechas de carga, edición y eliminación */}
+                                                {entrada.fechaCarga && (
+                                                    <p className="text-sm text-gray-500 max-w-full break-words">
+                                                        <strong>Fecha de carga informe:</strong> {entrada.fechaCarga}
+                                                    </p>
+                                                )}
 
-                                                    {/* Mostrar la fecha de carga de acta solo si existe */}
-                                                    {entrada.fechasDeCargaActa && (
-                                                        <div className="mt-2">
-                                                            <p className="text-sm text-gray-500 max-w-full break-words">
-                                                                <strong>Fecha de carga informe:</strong>
-                                                            </p>
-                                                            <ul className="list-disc list-inside">
-                                                                {entrada.fechasDeCargaActa.map((fecha, index) => (
-                                                                    <li
-                                                                        key={index}
-                                                                        className="text-sm text-gray-500 max-w-full break-words"
-                                                                    >
-                                                                        {fecha}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
+                                                {entrada.fechasDeEdicion && entrada.fechasDeEdicion.length > 0 && (
+                                                    <p className="text-sm text-gray-500 max-w-full break-words">
+                                                        <strong>Fecha de edición informe:</strong> {entrada.fechasDeEdicion[entrada.fechasDeEdicion.length - 1]}
+                                                    </p>
+                                                )}
 
-                                                    {/* Mostrar las fechas de edición solo si hay al menos una */}
-                                                    {entrada.fechasDeEdicion && entrada.fechasDeEdicion.length > 0 && (
-                                                        <div className="mt-2">
-                                                            <p className="text-sm text-gray-500 max-w-full break-words">
-                                                                <strong>Fecha de edición informe:</strong>
-                                                            </p>
-                                                            <ul className="list-disc list-inside">
-                                                                {entrada.fechasDeEdicion.map((fecha, index) => (
-                                                                    <li
-                                                                        key={index}
-                                                                        className="text-sm text-gray-500 max-w-full break-words"
-                                                                    >
-                                                                        {fecha}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
+                                                {entrada.fechaEliminacion && (
+                                                    <p className="text-sm text-gray-500 max-w-full break-words">
+                                                        <strong>Fecha de eliminación informe:</strong> {entrada.fechaEliminacion}
+                                                    </p>
+                                                )}
 
-                                                    {/* Mostrar las fechas de eliminación solo si hay al menos una */}
-                                                    {entrada.fechasDeEliminacion &&
-                                                        entrada.fechasDeEliminacion.length > 0 && (
-                                                            <div className="mt-2">
-                                                                <p className="text-sm text-gray-500 max-w-full break-words">
-                                                                    <strong>Fecha de eliminación informe:</strong>
-                                                                </p>
-                                                                <ul className="list-disc list-inside">
-                                                                    {entrada.fechasDeEliminacion.map((fecha, index) => (
-                                                                        <li
-                                                                            key={index}
-                                                                            className="text-sm text-gray-500 max-w-full break-words"
-                                                                        >
-                                                                            {fecha}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                </div>
                                                 <div className="flex justify-center mt-2">
                                                     <button onClick={() => handleEdit(index)} className="bg-orange-400 text-white p-2 rounded-md hover:bg-orange-500 text-xs">
                                                         Editar

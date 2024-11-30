@@ -109,15 +109,13 @@ const CargaConducConcepFases = () => {
     const handleEliminarArchivo = () => {
         if (selectedItemIndex !== null) {
             const newHistorial = [...historialCorrectivo];
+            const currentItem = newHistorial[selectedItemIndex];
             const newDate = new Date().toLocaleString();
 
-            if (!newHistorial[selectedItemIndex].fechasDeEliminacion) {
-                newHistorial[selectedItemIndex].fechasDeEliminacion = [];
-            }
+            currentItem.fechaDeEliminacion = newDate;
 
-            newHistorial[selectedItemIndex].fechasDeEliminacion.push(newDate);
+            currentItem.disposicion = null;
 
-            newHistorial[selectedItemIndex].disposicion = null;
             setHistorialCorrectivo(newHistorial);
         }
 
@@ -129,7 +127,6 @@ const CargaConducConcepFases = () => {
         setConfirmDeleteArchivoModal(false);
         setSelectedItemIndex(null);
     };
-
 
     const [disposicion, setDisposicion] = useState(null);
     const [historialCorrectivo, setHistorialCorrectivo] = useState([]);
@@ -179,23 +176,18 @@ const CargaConducConcepFases = () => {
         };
 
         if (disposicion) {
-            const fechaDisposicion = new Date().toLocaleString();
-
-            if (!nuevoCorrectivo.fechasDeCargaDisposicion) {
-                nuevoCorrectivo.fechasDeCargaDisposicion = [];
-            }
-            nuevoCorrectivo.fechasDeCargaDisposicion.push(fechaDisposicion);
+            nuevoCorrectivo.fechaDeCargaDisposicion = new Date().toLocaleString();
         }
 
         setHistorialCorrectivo([...historialCorrectivo, nuevoCorrectivo]);
 
-        // Limpiar campos
         setCorrectivo('');
         setFechaInicioCorrectivo('');
         setFechaFinCorrectivo('');
         setDisposicion(null);
         setErrors({});
     };
+
 
     const handleAddItem = () => {
         let hasErrors = false;
@@ -559,7 +551,7 @@ const CargaConducConcepFases = () => {
                         <div className="flex justify-center">
                             <button
                                 onClick={handleAgregarEvolucion}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
+                                className="bg-blue-600 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
                                 Cargar
                             </button>
@@ -625,16 +617,16 @@ const CargaConducConcepFases = () => {
                             onChange={(e) => {
                                 const file = e.target.files[0];
                                 setDisposicion(file);
-                                setNombreDisposicion(file ? file.name : ''); 
+                                setNombreDisposicion(file ? file.name : '');
                             }}
-                            accept=".pdf,.doc,.docx"
+                            accept=".pdf"
                             className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
                         />
 
                         <div className="flex justify-center">
                             <button
                                 onClick={handleAgregarCorrectivo}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
+                                className="bg-blue-600 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
                                 Cargar
                             </button>
@@ -652,6 +644,12 @@ const CargaConducConcepFases = () => {
                                                 <p className="text-sm"><strong>Fecha Inicio:</strong> {item.fechaInicio}</p>
                                                 <p className="text-sm"><strong>Fecha Fin:</strong> {item.fechaFin}</p>
 
+                                                {/* Mostrar la fecha de carga solo si existe */}
+                                                {item.fechaCarga && (
+                                                    <p className="text-sm text-gray-500 mt-2">
+                                                        <strong>Fecha de carga:</strong> {item.fechaCarga}
+                                                    </p>
+                                                )}
                                                 <span className="text-sm"><strong>Disposición:</strong></span>
 
                                                 {/* Si no hay archivo cargado */}
@@ -659,25 +657,25 @@ const CargaConducConcepFases = () => {
                                                     <input
                                                         type="file"
                                                         onChange={(e) => {
-                                                            const newHistorial = [...historialCorrectivo];
-                                                            const newDate = new Date().toLocaleString();
+                                                            const file = e.target.files[0];
+                                                            if (file) {
+                                                                const newHistorial = [...historialCorrectivo];
+                                                                const currentItem = newHistorial[index];
+                                                                const newDate = new Date().toLocaleString();
 
-                                                            if (!newHistorial[index].fechaCarga) {
-                                                                newHistorial[index].fechaCarga = newDate;
+                                                                currentItem.fechaDeCargaDisposicion = newDate;
+                                                                currentItem.fechaDeEdicion = null;
+                                                                currentItem.fechaDeEliminacion = null;
+                                                                currentItem.disposicion = file;
+
+                                                                setHistorialCorrectivo(newHistorial);
                                                             }
-
-                                                            if (!newHistorial[index].fechasDeCargaDisposicion) {
-                                                                newHistorial[index].fechasDeCargaDisposicion = [];
-                                                            }
-                                                            newHistorial[index].fechasDeCargaDisposicion.push(newDate);
-
-                                                            newHistorial[index].disposicion = e.target.files[0];
-
-                                                            setHistorialCorrectivo(newHistorial);
                                                         }}
-                                                        accept=".pdf,.doc,.docx"
+                                                        accept=".pdf"
                                                         className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
                                                     />
+
+
                                                 ) : (
                                                     <>
                                                         <a
@@ -692,27 +690,30 @@ const CargaConducConcepFases = () => {
                                                             onClick={() => {
                                                                 const input = document.createElement("input");
                                                                 input.type = "file";
-                                                                input.accept = ".pdf,.doc,.docx";
+                                                                input.accept = ".pdf";
 
                                                                 input.onchange = (e) => {
                                                                     const file = e.target.files[0];
                                                                     if (file) {
                                                                         const newHistorial = [...historialCorrectivo];
+                                                                        const currentItem = newHistorial[index];
                                                                         const newDate = new Date().toLocaleString();
 
-                                                                        if (!newHistorial[index].fechasDeEdicion) {
-                                                                            newHistorial[index].fechasDeEdicion = [];
-                                                                        }
-                                                                        newHistorial[index].fechasDeEdicion.push(newDate);
+                                                                        currentItem.fechaDeEdicion = newDate;
 
-                                                                        newHistorial[index].disposicion = file;
+                                                                        if (!currentItem.fechaDeCargaDisposicion) {
+                                                                            currentItem.fechaDeCargaDisposicion = newDate;
+                                                                        }
+
+                                                                        currentItem.disposicion = file;
+
                                                                         setHistorialCorrectivo(newHistorial);
                                                                     }
                                                                 };
 
                                                                 input.click();
                                                             }}
-                                                            className="mt-2 ml-2 bg-yellow-400 text-white p-2 rounded-full text-xs hover:bg-yellow-500"
+                                                            className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
                                                         >
                                                             Editar disposición
                                                         </button>
@@ -731,60 +732,25 @@ const CargaConducConcepFases = () => {
                                                 )}
 
                                                 <div>
-                                                    {/* Mostrar la fecha de carga solo si existe */}
-                                                    {item.fechaCarga && (
-                                                        <p className="text-sm text-gray-500 mt-2">
-                                                            <strong>Fecha de carga:</strong> {item.fechaCarga}
+
+                                                    {item.fechaDeCargaDisposicion && (
+                                                        <p className="text-sm text-gray-500">
+                                                            <strong>Fecha de carga disposición:</strong> {item.fechaDeCargaDisposicion}
                                                         </p>
                                                     )}
 
-                                                    {/* Mostrar la fecha de carga de disposición solo si existe */}
-                                                    {item.fechasDeCargaDisposicion && (
-                                                        <div className="mt-2">
-                                                            <p className="text-sm text-gray-500">
-                                                                <strong>Fecha de carga de disposición:</strong>
-                                                            </p>
-                                                            <ul className="list-disc list-inside">
-                                                                {item.fechasDeCargaDisposicion.map((fecha, index) => (
-                                                                    <li key={index} className="text-sm text-gray-500">
-                                                                        {fecha}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
+                                                    {item.fechaDeEdicion && (
+                                                        <p className="text-sm text-gray-500">
+                                                            <strong>Fecha de edición disposición:</strong> {item.fechaDeEdicion}
+                                                        </p>
                                                     )}
 
-                                                    {/* Mostrar las fechas de edición solo si hay al menos una */}
-                                                    {item.fechasDeEdicion && item.fechasDeEdicion.length > 0 && (
-                                                        <div className="mt-2">
-                                                            <p className="text-sm text-gray-500">
-                                                                <strong>Fecha de edición:</strong>
-                                                            </p>
-                                                            <ul className="list-disc list-inside">
-                                                                {item.fechasDeEdicion.map((fecha, index) => (
-                                                                    <li key={index} className="text-sm text-gray-500">
-                                                                        {fecha}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
+                                                    {item.fechaDeEliminacion && (
+                                                        <p className="text-sm text-gray-500">
+                                                            <strong>Fecha de eliminación disposición:</strong> {item.fechaDeEliminacion}
+                                                        </p>
                                                     )}
 
-                                                    {/* Mostrar las fechas de eliminación solo si hay al menos una */}
-                                                    {item.fechasDeEliminacion && item.fechasDeEliminacion.length > 0 && (
-                                                        <div className="mt-2">
-                                                            <p className="text-sm text-gray-500">
-                                                                <strong>Fecha de eliminación:</strong>
-                                                            </p>
-                                                            <ul className="list-disc list-inside">
-                                                                {item.fechasDeEliminacion.map((fecha, index) => (
-                                                                    <li key={index} className="text-sm text-gray-500">
-                                                                        {fecha}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </li>
                                         ))}

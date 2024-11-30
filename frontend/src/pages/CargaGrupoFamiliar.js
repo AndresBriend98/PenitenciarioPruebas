@@ -5,7 +5,6 @@ import Header from '../components/Header';
 const CargaGrupoFamiliar = () => {
     const navigate = useNavigate();
     const [historial, setHistorial] = useState([]);
-    const [photo, setPhoto] = useState(null);
     const photoInputRef = useRef(null);
     const setFileInputRef = (element, index) => {
         fileInputRefs.current[index] = element;
@@ -58,9 +57,64 @@ const CargaGrupoFamiliar = () => {
     const [isEditingDomicilio, setIsEditingDomicilio] = useState(null);
     const [newDomicilio, setNewDomicilio] = useState('');
 
+
     const handleEditarDomicilio = (index) => {
         setIsEditingDomicilio(index);
         setNewDomicilio(historial[index].domicilio);
+    };
+
+    const handleGuardarCiudad = (index) => {
+        if (newCiudad.trim() === "") {
+            alert("El campo de ciudad no puede estar vacío.");
+            return;
+        }
+
+        if (newCiudad !== historial[index].ciudad) {
+            const nuevoHistorial = [...historial];
+            const editDate = new Date().toLocaleString();
+
+            nuevoHistorial[index].ciudad = newCiudad;
+            nuevoHistorial[index].ultimaModificacionCiudad = editDate;
+
+            setHistorial(nuevoHistorial);
+        }
+
+        setIsEditingCiudad(null);
+    };
+
+    const [isEditingCiudad, setIsEditingCiudad] = useState(null);
+    const [newCiudad, setNewCiudad] = useState('');
+
+    const handleEditarCiudad = (index) => {
+        setIsEditingCiudad(index);
+        setNewCiudad(historial[index].ciudad);
+    };
+
+    const handleGuardarProvincia = (index) => {
+        if (newProvincia.trim() === "") {
+            alert("El campo de provincia no puede estar vacío.");
+            return;
+        }
+
+        if (newProvincia !== historial[index].provincia) {
+            const nuevoHistorial = [...historial];
+            const editDate = new Date().toLocaleString();
+
+            nuevoHistorial[index].provincia = newProvincia;
+            nuevoHistorial[index].ultimaModificacionProvincia = editDate;
+
+            setHistorial(nuevoHistorial);
+        }
+
+        setIsEditingProvincia(null);
+    };
+
+    const [isEditingProvincia, setIsEditingProvincia] = useState(null);
+    const [newProvincia, setNewProvincia] = useState('');
+
+    const handleEditarProvincia = (index) => {
+        setIsEditingProvincia(index);
+        setNewProvincia(historial[index].provincia);
     };
 
     const handleViewPhoto = (photo) => {
@@ -142,6 +196,9 @@ const CargaGrupoFamiliar = () => {
     const [formData, setFormData] = useState({
         nombre: '',
         relacion: '',
+        nacionalidad: '',
+        provincia: '',
+        ciudad: '',
         domicilio: '',
         dni: '',
         fechaNacimiento: '',
@@ -182,6 +239,7 @@ const CargaGrupoFamiliar = () => {
         if (!formData.domicilio) newErrors.domicilio = 'Este campo es obligatorio.';
         if (!formData.dni) newErrors.dni = 'Este campo es obligatorio.';
         if (!formData.fechaNacimiento) newErrors.fechaNacimiento = 'Este campo es obligatorio.';
+        if (!formData.nacionalidad) newErrors.nacionalidad = 'Este campo es obligatorio.';
 
         setErrors(newErrors);
 
@@ -196,6 +254,9 @@ const CargaGrupoFamiliar = () => {
                     relacion: nuevaRelacion,
                     domicilio: formData.domicilio,
                     dni: formData.dni,
+                    ciudad: formData.ciudad,
+                    nacionalidad: formData.nacionalidad,
+                    provincia: formData.provincia,
                     fechaNacimiento: formData.fechaNacimiento,
                     fechaFallecimiento: formData.fechaFallecimiento || '',
                     observacion: formData.observacion || '',
@@ -211,6 +272,9 @@ const CargaGrupoFamiliar = () => {
                 relacion: '',
                 domicilio: '',
                 dni: '',
+                nacionalidad: '',
+                provincia: '',
+                ciudad: '',
                 fechaNacimiento: '',
                 fechaFallecimiento: '',
                 observacion: '',
@@ -277,6 +341,19 @@ const CargaGrupoFamiliar = () => {
                             {errors.nombre && <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>}
                         </div>
                         <div className="flex-grow">
+                            <label htmlFor="dni" className="block text-sm font-semibold mb-1">DNI/M.I</label>
+                            <input
+                                placeholder='Ingresar DNI/M.I'
+                                type="text"
+                                id="dni"
+                                value={formData.dni}
+                                onChange={(e) => handleInputChange(e, 'dni')}
+                                className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.dni ? 'border-red-500' : 'border-gray-300'}`}
+                            />
+                            {errors.dni && <p className="text-red-500 text-sm mt-1">{errors.dni}</p>}
+                        </div>
+
+                        <div className="flex-grow">
                             <label htmlFor="relacion" className="block text-sm font-semibold mb-1">Relación con el interno</label>
                             <select
                                 id="relacion"
@@ -330,19 +407,70 @@ const CargaGrupoFamiliar = () => {
                             />
                             {errors.domicilio && <p className="text-red-500 text-sm mt-1">{errors.domicilio}</p>}
                         </div>
+
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:space-x-4">
                         <div className="flex-grow">
-                            <label htmlFor="dni" className="block text-sm font-semibold mb-1">DNI/M.I</label>
+                            <label htmlFor="nacionalidad" className="block text-sm font-semibold mb-1">Nacionalidad</label>
+                            <select
+                                id="nacionalidad"
+                                value={formData.nacionalidad}
+                                onChange={(e) => handleInputChange(e, 'nacionalidad')}
+                                className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.nacionalidad ? 'border-red-500' : 'border-gray-300'}`}
+                            >
+                                <option value="" disabled>Seleccionar Nacionalidad</option>
+                                <option value="Argentino">Argentino</option>
+                                <option value="Brasileño">Brasileño</option>
+                                <option value="Chileno">Chileno</option>
+                                <option value="Colombiano">Colombiano</option>
+                                <option value="Mexicano">Mexicano</option>
+                                <option value="Peruano">Peruano</option>
+                                <option value="Venezolano">Venezolano</option>
+                                <option value="Ecuatoriano">Ecuatoriano</option>
+                                <option value="Boliviano">Boliviano</option>
+                                <option value="Paraguayo">Paraguayo</option>
+                                <option value="Uruguayo">Uruguayo</option>
+                                <option value="Hondureño">Hondureño</option>
+                                <option value="Nicaragüense">Nicaragüense</option>
+                                <option value="Guatemalteco">Guatemalteco</option>
+                                <option value="Costarricense">Costarricense</option>
+                                <option value="Salvadoreño">Salvadoreño</option>
+                                <option value="Panameño">Panameño</option>
+                                <option value="Cubano">Cubano</option>
+                                <option value="Dominicano">Dominicano</option>
+                                <option value="Puertorriqueño">Puertorriqueño</option>
+                                <option value="Beliceño">Beliceño</option>
+                                <option value="Jamaicano">Jamaicano</option>
+                            </select>
+                            {errors.nacionalidad && <p className="text-red-500 text-sm mt-1">{errors.nacionalidad}</p>}
+                        </div>
+                        <div className="flex-grow">
+                            <label htmlFor="provincia" className="block text-sm font-semibold mb-1">Provincia</label>
                             <input
-                                placeholder='Ingresar DNI/M.I'
+                                placeholder='Ingresar provincia'
                                 type="text"
-                                id="dni"
-                                value={formData.dni}
-                                onChange={(e) => handleInputChange(e, 'dni')}
-                                className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.dni ? 'border-red-500' : 'border-gray-300'}`}
+                                id="provincia"
+                                value={formData.provincia}
+                                onChange={(e) => handleInputChange(e, 'provincia')}
+                                className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.provincia ? 'border-red-500' : 'border-gray-300'}`}
                             />
-                            {errors.dni && <p className="text-red-500 text-sm mt-1">{errors.dni}</p>}
+                            {errors.provincia && <p className="text-red-500 text-sm mt-1">{errors.provincia}</p>}
+                        </div>
+                        <div className="flex-grow">
+                            <label htmlFor="ciudad" className="block text-sm font-semibold mb-1">Ciudad</label>
+                            <input
+                                placeholder='Ingresar ciudad'
+                                type="text"
+                                id="ciudad"
+                                value={formData.ciudad}
+                                onChange={(e) => handleInputChange(e, 'ciudad')}
+                                className={`w-full p-2 border border-gray-300 rounded text-sm ${errors.ciudad ? 'border-red-500' : 'border-gray-300'}`}
+                            />
+                            {errors.ciudad && <p className="text-red-500 text-sm mt-1">{errors.ciudad}</p>}
                         </div>
                     </div>
+
                     <div className="flex flex-col md:flex-row md:space-x-4">
                         <div className="flex-grow">
                             <label htmlFor="fechaNacimiento" className="block text-sm font-semibold mb-1">Fecha de nacimiento</label>
@@ -380,7 +508,7 @@ const CargaGrupoFamiliar = () => {
                     <div className="flex justify-center mt-4">
                         <button
                             onClick={handleGuardarCambios}
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                         >
                             Cargar
                         </button>
@@ -403,6 +531,7 @@ const CargaGrupoFamiliar = () => {
                                         <li key={index} className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm">
                                             <p className='text-sm max-w-full break-words'><strong>Nombre/s y Apellido/s:</strong> {item.nombre}</p>
                                             <p className='text-sm max-w-full break-words mt-2'><strong>DNI/M.I:</strong> {item.dni}</p>
+                                            <p className='text-sm max-w-full break-words mt-2'><strong>Nacionalidad: </strong> {item.nacionalidad}</p>
                                             {/* Relación */}
                                             <div className="mt-2">
 
@@ -475,6 +604,90 @@ const CargaGrupoFamiliar = () => {
                                             {historial[0].ultimaModificacionRelacion && (
                                                 <p className="text-sm text-gray-500 mt-2">
                                                     <strong>Última modificación de la relación:</strong> {historial[0].ultimaModificacionRelacion}
+                                                </p>
+                                            )}
+                                            {/* Ciudad */}
+                                            <div className="mt-2">
+                                                {isEditingCiudad === index ? (
+                                                    <>
+                                                        {/* Campo de entrada para Ciudad */}
+                                                        <input
+                                                            type="text"
+                                                            value={newCiudad}
+                                                            onChange={(e) => setNewCiudad(e.target.value)}
+                                                            className="p-1 border border-gray-300 rounded text-sm flex-1 max-w-full"
+                                                        />
+
+                                                        {/* Botón "Guardar" solo habilitado si hay un cambio y no está vacío */}
+                                                        <button
+                                                            onClick={() => handleGuardarCiudad(index)}
+                                                            disabled={newCiudad.trim() === "" || newCiudad === historial[index].ciudad}
+                                                            className={`bg-green-400 text-white p-1 rounded hover:bg-green-500 text-xs ml-2 ${newCiudad.trim() === "" || newCiudad === historial[index].ciudad ? 'bg-green-400 cursor-not-allowed opacity-50' : ''}`}
+                                                        >
+                                                            Guardar
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {/* Modo de visualización cuando no está editando */}
+                                                        <p className='text-sm max-w-full break-words'>
+                                                            <strong>Ciudad:</strong> {item.ciudad || "No asignada"}
+                                                        </p>
+                                                        <button
+                                                            onClick={() => handleEditarCiudad(index)}
+                                                            className={`p-1 rounded text-xs mt-1 ${item.ciudad ? 'bg-orange-400 hover:bg-orange-500' : 'bg-blue-400 hover:bg-blue-500'} text-white`}
+                                                        >
+                                                            {item.ciudad ? "Editar Ciudad" : "Añadir Ciudad"}
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                            {/* Mostrar la fecha de última edición siempre */}
+                                            {item.ultimaModificacionCiudad && (
+                                                <p className="text-sm text-gray-500 mt-2">
+                                                    <strong>Última modificación ciudad:</strong> {item.ultimaModificacionCiudad}
+                                                </p>
+                                            )}
+                                            {/* Provincia */}
+                                            <div className="mt-2">
+                                                {isEditingProvincia === index ? (
+                                                    <>
+                                                        {/* Campo de entrada para Provincia */}
+                                                        <input
+                                                            type="text"
+                                                            value={newProvincia}
+                                                            onChange={(e) => setNewProvincia(e.target.value)}
+                                                            className="p-1 border border-gray-300 rounded text-sm flex-1 max-w-full"
+                                                        />
+
+                                                        {/* Botón "Guardar" solo habilitado si hay un cambio y no está vacío */}
+                                                        <button
+                                                            onClick={() => handleGuardarProvincia(index)}
+                                                            disabled={newProvincia.trim() === "" || newProvincia === historial[index].provincia}
+                                                            className={`bg-green-400 text-white p-1 rounded hover:bg-green-500 text-xs ml-2 ${newProvincia.trim() === "" || newProvincia === historial[index].provincia ? 'bg-green-400 cursor-not-allowed opacity-50' : ''}`}
+                                                        >
+                                                            Guardar
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {/* Modo de visualización cuando no está editando */}
+                                                        <p className='text-sm max-w-full break-words'>
+                                                            <strong>Provincia:</strong> {item.provincia || "No asignada"}
+                                                        </p>
+                                                        <button
+                                                            onClick={() => handleEditarProvincia(index)}
+                                                            className={`p-1 rounded text-xs mt-1 ${item.provincia ? 'bg-orange-400 hover:bg-orange-500' : 'bg-blue-400 hover:bg-blue-500'} text-white`}
+                                                        >
+                                                            {item.provincia ? "Editar Provincia" : "Añadir Provincia"}
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                            {/* Mostrar la fecha de última edición siempre */}
+                                            {item.ultimaModificacionProvincia && (
+                                                <p className="text-sm text-gray-500 mt-2">
+                                                    <strong>Última modificación provincia:</strong> {item.ultimaModificacionProvincia}
                                                 </p>
                                             )}
 
@@ -626,7 +839,7 @@ const CargaGrupoFamiliar = () => {
                                                     </div>
                                                 ) : (
                                                     <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
-                                                        <span className="text-white">Sin foto</span>
+                                                        <span className="text-white">Sin Foto</span>
                                                     </div>
                                                 )}
 
@@ -634,17 +847,27 @@ const CargaGrupoFamiliar = () => {
                                                     className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500"
                                                     onClick={() => item.foto ? handleViewPhoto(item.foto) : fileInputRefs.current[index]?.click()}
                                                 >
-                                                    {item.foto ? 'Ver' : 'Subir foto'}
+                                                    {item.foto ? 'Ver Foto' : 'Subir Foto'}
                                                 </button>
 
+                                                {item.foto && (
+                                                    <button
+                                                        className="mt-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
+                                                        onClick={() => fileInputRefs.current[index]?.click()}
+                                                    >
+                                                        Editar Foto
+                                                    </button>
+                                                )}
 
                                                 <input
                                                     type="file"
-                                                    ref={(element) => setFileInputRef(element, index)} accept="image/*"
+                                                    ref={(element) => setFileInputRef(element, index)}
+                                                    accept="image/*"
                                                     onChange={() => handleUploadPhoto(index)}
                                                     className="hidden"
                                                 />
                                             </div>
+
 
                                             <div>
                                                 <p className="text-sm max-w-full break-words text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>

@@ -1,9 +1,116 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Modal from '../components/ModalChanges';
 
 const CargaJudicial = () => {
+    const [files, setFiles] = useState({});
+    const [archivosHistorial, setArchivosHistorial] = useState({});
+    const [campoEditando, setCampoEditando] = useState(null);
+    const [isCargado, setIsCargado] = useState({});
+    const [isModalArchivos, setIsModalArchivos] = useState(false);
+    const [modalCerradoSinEdicion, setModalCerradoSinEdicion] = useState(false);
+
+    const handleEditFotoClick = (id) => {
+        const victima = victimas.find((item) => item.id === id);
+
+        if (victima) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const updatedVictimas = victimas.map((item) =>
+                        item.id === id ? { ...item, foto: URL.createObjectURL(file) } : item
+                    );
+                    setVictimas(updatedVictimas); 
+                }
+            };
+
+            input.click();
+        }
+    };
+
+
+    const handleFileSelect = (e, campo) => {
+        const archivo = e.target.files[0];
+        if (archivo) {
+            setFiles((prev) => ({
+                ...prev,
+                [campo]: archivo,
+            }));
+        }
+    };
+
+    const handleCargarArchivos = () => {
+        Object.entries(files).forEach(([campo, archivo]) => {
+            if (archivo) {
+                setArchivosHistorial((prev) => ({
+                    ...prev,
+                    [campo]: [
+                        ...(prev[campo] || []),
+                        {
+                            archivoAdjunto: archivo,
+                            fechaArchivoAdjunto: new Date().toLocaleString(),
+                            fechaEdicionArchivo: '',
+                        },
+                    ],
+                }));
+
+                setIsCargado((prev) => ({
+                    ...prev,
+                    [campo]: true,
+                }));
+            }
+        });
+
+        setFiles({});
+    };
+
+    const handleEditFile = (campo) => {
+        setCampoEditando(campo);
+        setIsModalArchivos(true);
+        setModalCerradoSinEdicion(false);
+    };
+
+    const handleFileEdit = (e) => {
+        const archivo = e.target.files[0];
+        if (archivo && campoEditando) {
+            const archivoEditado = {
+                archivoAdjunto: archivo,
+                fechaArchivoAdjunto: archivosHistorial[campoEditando][0].fechaArchivoAdjunto,
+                fechaEdicionArchivo: new Date().toLocaleString(),
+            };
+
+            setArchivosHistorial((prev) => {
+                const archivos = prev[campoEditando] || [];
+                archivos[0] = archivoEditado;
+                return { ...prev, [campoEditando]: archivos };
+            });
+
+            setCampoEditando(null);
+            setModalCerradoSinEdicion(true);
+        }
+    };
+
+    const toggleModal = () => {
+        if (!modalCerradoSinEdicion) {
+            setCampoEditando(null);
+        }
+        setIsModalArchivos(!isModalArchivos);
+    };
+
+    const hayArchivosSeleccionados = Object.keys(files).length > 0;
+
+    const campoToTitle = {
+        resolucionFinal: "Resolución Final",
+        fundamentoSentencia: "Fundamento Sentencia",
+        abocamiento: "Abocamiento",
+        computo: "Cómputo",
+    };
+
     const [victimas, setVictimas] = useState([]);
     const [victima, setVictima] = useState({ nombres: '', dni: '', foto: null });
     const [fotoVictima, setFotoVictima] = useState(null);
@@ -15,8 +122,25 @@ const CargaJudicial = () => {
             [field]: value,
         }));
     };
-    
+
     const [showModalFoto, setShowModalFoto] = useState(false); const [modalPhoto, setModalPhoto] = useState('');
+    const handleFotoHistorialChange = (e, index) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const updatedVictimas = [...victimas];
+                updatedVictimas[index] = {
+                    ...updatedVictimas[index],
+                    foto: reader.result,
+                    fechaCargaFoto: new Date().toLocaleString(),
+                };
+                setVictimas(updatedVictimas);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleFotoChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -53,10 +177,6 @@ const CargaJudicial = () => {
         }
     };
 
-    const handleCloseFilesModal = () => {
-        setIsModalOpenFiles(false);
-    };
-
     const verFoto = (foto) => {
         if (foto) {
             return (
@@ -84,57 +204,6 @@ const CargaJudicial = () => {
     };
 
     const navigate = useNavigate();
-    const [isModalOpenFiles, setIsModalOpenFiles] = useState(false);
-    const [files, setFiles] = useState({
-        resolucionFinal: null,
-        fundamentoSentencia: null,
-        abocamiento: null,
-        computo: null,
-    });
-    const [fileHistorial, setFileHistorial] = useState([]);
-
-    const fileLabels = {
-        resolucionFinal: "Resolución Final",
-        fundamentoSentencia: "Fundamento de la Sentencia",
-        abocamiento: "Abocamiento",
-        computo: "Cómputo",
-    };
-
-    const handleFileEdit = (key, e) => {
-        e.preventDefault(); e.stopPropagation();
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.onchange = (e) => handleFileChange(e, key, true);
-        fileInput.click();
-    };
-
-    const handleFileChange = (e, key, isEdit = false) => {
-        const file = e.target.files[0];
-        if (file) {
-            const updatedFile = {
-                file,
-                fileName: file.name,
-                fechaCarga: isEdit ? fileHistorial.find(item => item.tipo === key)?.fechaCarga : new Date().toLocaleString(),
-                fechaEdicion: isEdit ? new Date().toLocaleString() : null,
-                tipo: key,
-            };
-            setFiles({ ...files, [key]: file });
-
-            setFileHistorial((prev) => {
-                const existingFile = prev.find(item => item.tipo === key);
-                if (existingFile) {
-                    return prev.map(item => (item.tipo === key ? { ...item, ...updatedFile } : item));
-                } else {
-                    return [...prev, updatedFile];
-                }
-            });
-        }
-    };
-
-    const handleOpenFilesModal = () => {
-        setIsModalOpenFiles(true);
-    };
-
 
     const handleInputChange = (e, field) => {
         const value = e.target.value;
@@ -157,21 +226,7 @@ const CargaJudicial = () => {
     };
 
     const [isModalOpen, setIsModalOpen] = useState('');
-    const handleFotoHistorialChange = (e, index) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const updatedVictimas = [...victimas];
-                updatedVictimas[index] = {
-                    ...updatedVictimas[index],
-                    foto: reader.result,
-                };
-                setVictimas(updatedVictimas);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+
     const [historialCambios, setHistorialCambios] = useState({});
     const [isEditable, setIsEditable] = useState(true); const [buttonText, setButtonText] = useState('Cargar'); const [isDataModified, setIsDataModified] = useState(false);
     const handleCargarActualizar = (e) => {
@@ -431,77 +486,52 @@ const CargaJudicial = () => {
                         <div className="border border-gray-300 bg-gray-50 p-2 bg-white rounded-md shadow-md flex flex-col mt-5">
                             <h2 className="text-l font-bold mb-4">Documentos Adjuntos</h2>
 
-                            <div className="flex flex-col md:flex-row md:space-x-4 items-center space-y-4 md:space-y-0">
-                                <div className="w-full">
-                                    <label className="block text-sm font-semibold mb-1">Resolución Final</label>
-                                    <input
-                                        type="file"
-                                        accept=".pdf"
-                                        onChange={(e) => handleFileChange(e, 'resolucionFinal')}
-                                        disabled={!!files.resolucionFinal}
-                                        className={`w-full p-2 border ${files.resolucionFinal ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
-                                    />
-                                </div>
+                            {/* Uso de grid para 2 columnas en pantallas grandes y 1 columna en pantallas pequeñas */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                {['resolucionFinal', 'fundamentoSentencia', 'abocamiento', 'computo'].map((campo) => (
+                                    <div key={campo} className="mb-4">
+                                        <label className="block text-sm font-semibold mb-1 capitalize">
+                                            {campoToTitle[campo]}
+                                        </label>
 
-                                <div className="w-full">
-                                    <label className="block text-sm font-semibold mb-1">Fundamento de la Sentencia</label>
-                                    <input
-                                        type="file"
-                                        accept=".pdf"
-                                        onChange={(e) => handleFileChange(e, 'fundamentoSentencia')}
-                                        disabled={!!files.fundamentoSentencia}
-                                        className={`w-full p-2 border ${files.fundamentoSentencia ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
-                                    />
-                                </div>
+                                        {/* Solo muestra el selector de archivo si no se ha cargado un archivo */}
+                                        <input
+                                            type="file"
+                                            accept=".pdf"
+                                            onChange={(e) => handleFileSelect(e, campo)}
+                                            className={`w-full p-1 border ${isCargado[campo] ? 'bg-gray-200 cursor-not-allowed' : 'border-gray-300'} rounded text-sm`}
+                                            disabled={isCargado[campo]}
+                                        />
+                                    </div>
+                                ))}
                             </div>
 
-                            <div className="flex flex-col md:flex-row md:space-x-4 items-center mt-4 space-y-4 md:space-y-0">
-                                <div className="w-full">
-                                    <label className="block text-sm font-semibold mb-1">Abocamiento</label>
-                                    <input
-                                        type="file"
-                                        accept=".pdf"
-                                        onChange={(e) => handleFileChange(e, 'abocamiento')}
-                                        disabled={!!files.abocamiento}
-                                        className={`w-full p-2 border ${files.abocamiento ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
-                                    />
+                            {/* Solo muestra el botón de cargar archivos si hay archivos seleccionados */}
+                            {hayArchivosSeleccionados && (
+                                <div className="flex justify-center mt-4">
+                                    <button
+                                        onClick={handleCargarArchivos}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-md text-xs"
+                                    >
+                                        Cargar
+                                    </button>
                                 </div>
+                            )}
 
-                                <div className="w-full">
-                                    <label className="block text-sm font-semibold mb-1">Cómputo</label>
-                                    <input
-                                        type="file"
-                                        accept=".pdf"
-                                        onChange={(e) => handleFileChange(e, 'computo')}
-                                        disabled={!!files.computo}
-                                        className={`w-full p-2 border ${files.computo ? 'bg-gray-200' : 'border-gray-300'} rounded text-sm`}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Botón para abrir el modal de archivos cargados */}
-                            <div className="flex justify-center mt-4 mb-4">
+                            <div className="flex justify-center lg:justify-end mb-4 mt-4">
                                 <button
-                                    type="button"
-                                    onClick={handleOpenFilesModal}
+                                    onClick={toggleModal}
                                     className="bg-blue-800 text-white p-2 rounded hover:bg-blue-900 text-xs"
                                 >
                                     Ver archivos cargados
                                 </button>
                             </div>
-
-
-
-                            {/* Modal para ver y editar los archivos cargados */}
-                            {isModalOpenFiles && (
+                            {isModalArchivos && (
                                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
-                                    <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-lg mx-auto">
+                                    <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-[90%] md:max-w-lg mx-auto">
                                         <button
-                                            onClick={(e) => {
-                                                e.preventDefault(); handleCloseFilesModal();
-                                            }}
+                                            onClick={toggleModal}
                                             className="absolute top-2 right-2 bg-gray-400 text-white p-2 rounded-full shadow-lg hover:bg-gray-500 focus:outline-none"
-                                            aria-label="Cerrar modal"
                                         >
                                             <svg
                                                 className="w-4 h-4"
@@ -518,52 +548,69 @@ const CargaJudicial = () => {
                                         </button>
 
                                         <h3 className="text-lg font-bold text-center">Archivos cargados</h3>
-                                        <div className="mt-4 max-h-64 md:max-h-96 overflow-y-auto">
-                                            {fileHistorial.length > 0 ? (
+
+                                        {/* Verificar si hay archivos en el historial */}
+                                        {Object.keys(archivosHistorial).length === 0 ? (
+                                            <div className="text-center text-sm text-gray-500 mt-4">
+                                                No hay documentos adjuntos cargados aún.
+                                            </div>
+                                        ) : (
+                                            <div className="mt-4 max-h-64 md:max-h-96 overflow-y-auto">
                                                 <ul className="space-y-2">
-                                                    {fileHistorial.map((item, index) => (
-                                                        <li key={index} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
-                                                            <div>
-                                                                <span className="text-sm"><strong>{fileLabels[item.tipo]}:</strong></span>
-                                                                <a
-                                                                    href={URL.createObjectURL(item.file)}
-                                                                    download={item.fileName}
-                                                                    className="ml-2 bg-blue-500 text-white p-2 rounded-full text-xs hover:bg-blue-600"
-                                                                >
-                                                                    {item.fileName}
-                                                                </a>
-                                                            </div>
-
-                                                            <div className="text-sm text-gray-500 mt-2">
-                                                                <strong className="text-xs">Fecha de Carga:</strong> {item.fechaCarga}
-                                                            </div>
-
-                                                            {item.fechaEdicion && (
-                                                                <div className="text-sm text-gray-500 mt-2">
-                                                                    <strong className="text-xs">Fecha de Edición:</strong> {item.fechaEdicion}
+                                                    {Object.entries(archivosHistorial).map(([campo, archivos]) =>
+                                                        archivos.map((item, index) => (
+                                                            <li key={`${campo}-${index}`} className="border border-gray-300 p-2 rounded bg-white shadow-sm">
+                                                                <div>
+                                                                    <span className="text-sm">
+                                                                        <strong>{campoToTitle[campo]}:</strong>
+                                                                    </span>
+                                                                    <a
+                                                                        href={URL.createObjectURL(item.archivoAdjunto)}
+                                                                        download={item.archivoAdjunto.name}
+                                                                        className="ml-2 bg-blue-500 text-white p-2 rounded-full text-xs hover:bg-blue-600"
+                                                                    >
+                                                                        {item.archivoAdjunto.name}
+                                                                    </a>
                                                                 </div>
-                                                            )}
+                                                                <div className="text-sm text-gray-500 mt-2">
+                                                                    <strong className="text-xs">Fecha de Carga:</strong> {item.fechaArchivoAdjunto}
+                                                                </div>
+                                                                {item.fechaEdicionArchivo && (
+                                                                    <div className="text-sm text-gray-500 mt-1">
+                                                                        <strong className="text-xs">Fecha de Edición:</strong> {item.fechaEdicionArchivo}
+                                                                    </div>
+                                                                )}
+                                                                <div className="mt-2 flex justify-between">
+                                                                    <button
+                                                                        onClick={() => handleEditFile(campo)}
+                                                                        className="bg-orange-500 text-white p-1 rounded text-xs ml-auto"
+                                                                    >
+                                                                        Editar
+                                                                    </button>
+                                                                </div>
 
-                                                            {/* Botón de editar archivo */}
-                                                            <div className="mt-2">
-                                                                <button
-                                                                    onClick={(e) => handleFileEdit(item.tipo, e)}
-                                                                    className="bg-orange-400 text-white p-1 rounded hover:bg-orange-500 text-xs"
-                                                                >
-                                                                    Editar Archivo
-                                                                </button>
-                                                            </div>
-                                                        </li>
-                                                    ))}
+                                                                {/* Mostrar el campo para seleccionar archivo solo si estamos editando este campo */}
+                                                                {campoEditando === campo && (
+                                                                    <div className="mt-4 text-xs">
+                                                                        <input
+                                                                            type="file"
+                                                                            accept=".pdf"
+                                                                            onChange={handleFileEdit}
+                                                                            className="w-full p-2 border rounded"
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </li>
+                                                        ))
+                                                    )}
                                                 </ul>
-                                            ) : (
-                                                <p className="text-sm text-gray-500 text-center">No hay archivos cargados aún.</p>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
                         </div>
+
                     </div>
                 </div>
 
@@ -610,7 +657,7 @@ const CargaJudicial = () => {
                                 <button
                                     type="button"
                                     onClick={handleAgregarAbogadoData}
-                                    className="bg-blue-500 text-white px-4 py-2 rounded-md text-xs"
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-md text-xs"
                                 >
                                     Cargar
                                 </button>
@@ -684,7 +731,7 @@ const CargaJudicial = () => {
                             <div className="mb-4">
                                 <label className="block text-sm font-semibold mb-1">DNI</label>
                                 <input
-                                    type="text"
+                                    type="number"
                                     placeholder="Ingrese el DNI"
                                     value={victima.dni}
                                     onChange={(e) => setVictima({ ...victima, dni: e.target.value })}
@@ -697,7 +744,7 @@ const CargaJudicial = () => {
                                 <button
                                     type="button"
                                     onClick={agregarVictima}
-                                    className="bg-blue-500 text-white px-4 py-2 rounded-md text-xs"
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-md text-xs"
                                 >
                                     Cargar
                                 </button>
@@ -719,13 +766,22 @@ const CargaJudicial = () => {
                                                             {verFoto(item.foto)}
 
                                                             {item.foto ? (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => openModal(item.foto)}
-                                                                    className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs"
-                                                                >
-                                                                    Ver Foto
-                                                                </button>
+                                                                <>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => openModal(item.foto)}
+                                                                        className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs"
+                                                                    >
+                                                                        Ver Foto
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleEditFotoClick(item.id)}
+                                                                        className="mt-2 bg-orange-400 text-white p-2 rounded-full text-xs"
+                                                                    >
+                                                                        Editar Foto
+                                                                    </button>
+                                                                </>
                                                             ) : (
                                                                 <>
                                                                     <input
@@ -753,6 +809,8 @@ const CargaJudicial = () => {
                                     )}
                                 </div>
                             </div>
+
+
                         </form>
 
                         {/* Modal para mostrar la foto */}

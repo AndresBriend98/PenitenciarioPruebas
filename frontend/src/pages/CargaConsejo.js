@@ -1,4 +1,4 @@
-import React, { useState, useRef} from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 
@@ -31,25 +31,27 @@ const CargaConsejo = () => {
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             <Header />
             <div className="bg-white p-4 rounded-md shadow-md">
-                <h1 className="text-xl font-bold mb-4">Carga Consejo (Esta en desarrollo)</h1>
+                <h1 className="text-xl font-bold mb-4">Carga Consejo</h1>
                 <div className="grid grid-cols-1 gap-4">
 
-                    <div className="bg-white p-4 rounded-md shadow-md">
-                        <div className="flex justify-center mt-2">
+                    <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
+                        <div className="flex justify-center items-center gap-4 border-dashed border-2 p-6 rounded-lg border-gray-300 bg-gray-50">
+                            <strong className='text-sm'>Subir archivos: </strong>
                             <input
                                 type="file"
+                                accept='.pdf'
                                 onChange={(e) => setArchivo(e.target.files[0])}
-                                className="p-2 rounded text-xs"
+                                className="p-2 rounded text-xs border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <button
                                 onClick={handleAgregarArchivo}
-                                className="bg-blue-500 text-white p-2 rounded ml-2 hover:bg-blue-600 text-xs"
+                                className="bg-blue-600 text-white p-2 rounded text-xs hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 Cargar
                             </button>
                         </div>
 
-                        <div className="bg-white p-4 rounded-md shadow-md mb-4 mt-5">
+                        <div className="bg-white p-4 rounded-md shadow-md border border-gray-300 mb-4 mt-5">
                             <h1 className="text-sm font-bold mt-4">Historial de Carga</h1>
                             <div className="border border-gray-300 p-2 rounded mt-2 bg-gray-50 max-h-60 overflow-y-auto">
                                 {historialArchivos.length > 0 ? (
@@ -60,7 +62,7 @@ const CargaConsejo = () => {
                                                 <p className="text-sm text-gray-500"><strong>Fecha de carga:</strong> {entrada.fecha}</p>
                                                 <button
                                                     onClick={() => handleDescargarArchivo(entrada.url, entrada.archivo)}
-                                                    className="bg-green-500 text-white p-1 rounded text-xs mt-2 hover:bg-green-600"
+                                                    className="bg-blue-400 text-white p-1 rounded text-xs mt-2 hover:bg-blue-500"
                                                 >
                                                     Descargar
                                                 </button>

@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HistorialVisitasProhibidas from '../components/HistorialVisitasProhibidas'; import HistorialVisitasSancionadas from '../components/HistorialVisitasSacionadas'; import Header from '../components/Header'; import Modal from '../components/ModalChanges';
+import HistorialVisitasProhibidas from '../components/HistorialVisitasProhibidas';
+import HistorialVisitasSancionadas from '../components/HistorialVisitasSacionadas';
+import Header from '../components/Header';
+import Modal from '../components/ModalAlerts';
 
 const CargaVisitas = () => {
     const [showModalAlert, setShowModalAlert] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const navigate = useNavigate();
+
     const handleGenerarReporte = () => {
         let visitasAImprimir = [];
-
         if (dniFiltro) {
             visitasAImprimir = historialVisitas.filter(item =>
                 item.dni.toLowerCase().includes(dniFiltro.toLowerCase())
@@ -97,35 +100,21 @@ const CargaVisitas = () => {
         ventanaImpresion.document.close();
         ventanaImpresion.print();
     };
-    const [historialVisitas, setHistorialVisitas] = useState([]); const [fileInputRefs, setFileInputRefs] = useState([]); const [selectedItemId, setSelectedItemId] = useState(null); const [comportamientoObservacion, setComportamientoObservacion] = useState({ tipo: '', texto: '', fechaCarga: '' });
+    const [historialVisitas, setHistorialVisitas] = useState([]);
+    const [fileInputRefs, setFileInputRefs] = useState([]);
+    const [selectedItemId, setSelectedItemId] = useState(null);
+    const [comportamientoObservacion, setComportamientoObservacion] = useState({ tipo: '', texto: '', fechaCarga: '' });
     const [showComportamientoObservacionModal, setShowComportamientoObservacionModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalPhoto, setModalPhoto] = useState('');
     const [historialVisitasProhibidas, setHistorialVisitasProhibidas] = useState([]);
-    const [historialVisitasSancionadas, setHistorialVisitasSancionadas] = useState([]); const photoInputRef = useRef(null);
+    const [historialVisitasSancionadas, setHistorialVisitasSancionadas] = useState([]);
+    const photoInputRef = useRef(null);
+
     const isDniAlreadyInHistory = (dni) => {
         return historialVisitasProhibidas.some(visita => visita.dni === dni);
     };
-
-    const handleInputChangeNuevaVisita = (e) => {
-        const { id, value, type, checked } = e.target;
-
-        setNuevaVisita(prevState => {
-            if (id === 'comportamiento' || id === 'observacion') {
-                return {
-                    ...prevState,
-                    [id]: type === 'checkbox' ? checked : value,
-                    [`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`]: prevState[id] !== value ? prevState[`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`] || new Date().toLocaleString() : prevState[`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`]
-                };
-            }
-            return {
-                ...prevState,
-                [id]: type === 'checkbox' ? checked : value
-            };
-        });
-    };
-
 
     const checkDniSancionadoCumplido = (dni) => {
         const visitaSancionada = historialVisitasSancionadas.find(visita => visita.dni === dni);
@@ -160,22 +149,9 @@ const CargaVisitas = () => {
         comportamiento: '',
         observacion: ''
     });
-
-    const handlePhotoChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setNuevaVisita((prev) => ({
-                    ...prev,
-                    foto: reader.result,
-                }));
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const [editIndex, setEditIndex] = useState(null); const [errors, setErrors] = useState({}); const [dniFiltro, setDniFiltro] = useState('');
+    const [editIndex, setEditIndex] = useState(null);
+    const [errors, setErrors] = useState({}); 
+    const [dniFiltro, setDniFiltro] = useState('');
 
     const handleFiltroDniChange = (e) => {
         setDniFiltro(e.target.value);
@@ -184,6 +160,7 @@ const CargaVisitas = () => {
     const historialFiltrado = historialVisitas.filter(item =>
         item.dni.toLowerCase().includes(dniFiltro.toLowerCase())
     );
+
     const validateFields = () => {
         const requiredFields = ['nombre', 'dni', 'relacion', 'tipoVisita', 'motivoVisita', 'fechaVisita', 'horaVisita'];
         const newErrors = {};
@@ -197,22 +174,6 @@ const CargaVisitas = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
-    const handleSaveComportamientoObservacion = () => {
-        const updatedHistorial = historialVisitas.map((item) =>
-            item.id === selectedItemId
-                ? {
-                    ...item,
-                    [comportamientoObservacion.tipo]: comportamientoObservacion.texto,
-                    [`fecha${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]: item[`fecha${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`] || new Date().toLocaleString(),
-                    [`fechaUltimaModificacion${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]: isEditing ? new Date().toLocaleString() : item[`fechaUltimaModificacion${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]
-                }
-                : item
-        );
-        setHistorialVisitas(updatedHistorial);
-        setShowComportamientoObservacionModal(false);
-    };
-
     const checkDniInSancionadas = (dni) => {
         const visitaSancionada = historialVisitasSancionadas.find(visita => visita.dni === dni);
 
@@ -237,7 +198,7 @@ const CargaVisitas = () => {
         }
 
         if (isDniAlreadyInHistory(nuevaVisita.dni)) {
-            setModalMessage('El DNI ingresado se encuentra en el historial de visitas prohibidas.');
+            setModalMessage('El DNI ingresado se encuentra en el historial de visitas prohibidas. No se puede realizar la carga.');
             setShowModalAlert(true);
             return;
         }
@@ -296,9 +257,23 @@ const CargaVisitas = () => {
         setErrors({});
     };
 
-    useEffect(() => {
-        setFileInputRefs(historialVisitas.map(() => React.createRef()));
-    }, [historialVisitas]);
+    const handleInputChangeNuevaVisita = (e) => {
+        const { id, value, type, checked } = e.target;
+
+        setNuevaVisita(prevState => {
+            if (id === 'comportamiento' || id === 'observacion') {
+                return {
+                    ...prevState,
+                    [id]: type === 'checkbox' ? checked : value,
+                    [`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`]: prevState[id] !== value ? prevState[`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`] || new Date().toLocaleString() : prevState[`fecha${id.charAt(0).toUpperCase() + id.slice(1)}`]
+                };
+            }
+            return {
+                ...prevState,
+                [id]: type === 'checkbox' ? checked : value
+            };
+        });
+    };
 
     const handleUploadPhoto = (index) => {
         const file = fileInputRefs[index].current.files[0];
@@ -314,6 +289,35 @@ const CargaVisitas = () => {
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setNuevaVisita((prev) => ({
+                    ...prev,
+                    foto: reader.result,
+                }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSaveComportamientoObservacion = () => {
+        const updatedHistorial = historialVisitas.map((item) =>
+            item.id === selectedItemId
+                ? {
+                    ...item,
+                    [comportamientoObservacion.tipo]: comportamientoObservacion.texto,
+                    [`fecha${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]: item[`fecha${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`] || new Date().toLocaleString(),
+                    [`fechaUltimaModificacion${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]: isEditing ? new Date().toLocaleString() : item[`fechaUltimaModificacion${comportamientoObservacion.tipo.charAt(0).toUpperCase() + comportamientoObservacion.tipo.slice(1)}`]
+                }
+                : item
+        );
+        setHistorialVisitas(updatedHistorial);
+        setShowComportamientoObservacionModal(false);
     };
 
     const handleViewPhoto = (photoUrl) => {
@@ -554,7 +558,7 @@ const CargaVisitas = () => {
                     <div className="flex justify-center mt-4">
                         <button
                             onClick={handleAddVisita}
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                         >
                             Cargar
                         </button>
@@ -628,37 +632,37 @@ const CargaVisitas = () => {
                                                                 <strong>Comportamiento:</strong> {item.comportamiento}
                                                                 {/* Mostrar la fecha de carga comportamiento */}
                                                                 {item.fechaComportamiento && (
-                                                                    <span className="text-gray-500 ml-2">
+                                                                    <div className="text-gray-500 ml-2 mt-2">
                                                                         <strong>Fecha de carga comportamiento:</strong> {item.fechaComportamiento}
-                                                                    </span>
-                                                                )}
-                                                                {/* Verificar si hay una última modificación diferente a la fecha de carga */}
-                                                                {item.fechaUltimaModificacionComportamiento && item.fechaUltimaModificacionComportamiento !== item.fechaComportamiento && (
-                                                                    <span className="text-gray-500 ml-2">
-                                                                        <strong>Última modificación comportamiento:</strong> {item.fechaUltimaModificacionComportamiento}
-                                                                    </span>
+                                                                        {/* Verificar si hay una última modificación y mostrarla al lado de la fecha de carga */}
+                                                                        {item.fechaUltimaModificacionComportamiento && item.fechaUltimaModificacionComportamiento !== item.fechaComportamiento && (
+                                                                            <span className="ml-2">
+                                                                                <strong>(Última modificación:</strong> {item.fechaUltimaModificacionComportamiento})
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
                                                                 )}
                                                             </p>
                                                         )}
 
-
                                                         {item.observacion && (
-                                                            <p className='text-sm'>
+                                                            <p className="text-sm">
                                                                 <strong>Observación:</strong> {item.observacion}
                                                                 {/* Mostrar la fecha de carga observación */}
                                                                 {item.fechaObservacion && (
-                                                                    <span className="text-gray-500 ml-2">
+                                                                    <div className="text-gray-500 ml-2 mt-2">
                                                                         <strong>Fecha de carga observación:</strong> {item.fechaObservacion}
-                                                                    </span>
-                                                                )}
-                                                                {/* Verificar si hay una última modificación diferente a la fecha de carga */}
-                                                                {item.fechaUltimaModificacionObservacion && item.fechaUltimaModificacionObservacion !== item.fechaObservacion && (
-                                                                    <span className="text-gray-500 ml-2">
-                                                                        <strong>Última modificación observación:</strong> {item.fechaUltimaModificacionObservacion}
-                                                                    </span>
+                                                                        {/* Verificar si hay una última modificación y mostrarla al lado de la fecha de carga */}
+                                                                        {item.fechaUltimaModificacionObservacion && item.fechaUltimaModificacionObservacion !== item.fechaObservacion && (
+                                                                            <span className="ml-2">
+                                                                                <strong>(Última modificación:</strong> {item.fechaUltimaModificacionObservacion})
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
                                                                 )}
                                                             </p>
                                                         )}
+
 
                                                         <p className="text-sm text-gray-500 mt-2 mb-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
 
@@ -700,12 +704,23 @@ const CargaVisitas = () => {
                                                                 <span className="text-white">Sin foto</span>
                                                             </div>
                                                         )}
+
                                                         <button
                                                             className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500"
                                                             onClick={() => item.foto ? handleViewPhoto(item.foto) : inputRef.current.click()}
                                                         >
-                                                            {item.foto ? 'Ver' : 'Subir foto'}
+                                                            {item.foto ? 'Ver Foto' : 'Subir Foto'}
                                                         </button>
+
+                                                        {item.foto && (
+                                                            <button
+                                                                className="mt-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
+                                                                onClick={() => inputRef.current.click()}
+                                                            >
+                                                                Editar Foto
+                                                            </button>
+                                                        )}
+
                                                         <input
                                                             type="file"
                                                             ref={inputRef}
@@ -714,6 +729,7 @@ const CargaVisitas = () => {
                                                             className="hidden"
                                                         />
                                                     </div>
+
                                                 </div>
                                             </li>
                                         );

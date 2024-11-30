@@ -102,7 +102,7 @@ const CargaTrabajo = () => {
         setModalEntries([]);         setInputValue('');     };
 
     return (
-        <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">\
+        <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
             <Header/>
             <div className="bg-white p-6 rounded-md shadow-md">
                 <h1 className="text-xl font-bold mb-4">Carga Trabajo</h1>
@@ -178,7 +178,7 @@ const CargaTrabajo = () => {
                         <div className="flex justify-center mt-5 mb-2">
                             <button
                                 onClick={handleAgregar}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
+                                className="bg-blue-600 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
                                 Cargar
                             </button>

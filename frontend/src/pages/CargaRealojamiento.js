@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 
 const CargaRealojamiento = () => {
-        const handleAgregarRealojamiento = () => {
+    const handleAgregarRealojamiento = () => {
         if (validateForm()) {
             const fechaCarga = new Date().toLocaleString();
 
@@ -12,7 +12,8 @@ const CargaRealojamiento = () => {
                 fechaCarga,
                 nombreActaArchivo: RealojamientoData.actaOficio ? RealojamientoData.actaOficio.name : '',
                 fechaCargaActa: RealojamientoData.actaOficio ? fechaCarga : null,
-                fechasDeCargaActa: RealojamientoData.actaOficio ? [fechaCarga] : [],             };
+                fechasDeCargaActa: RealojamientoData.actaOficio ? [fechaCarga] : [],
+            };
 
             setHistorialRealojamientos([...historialRealojamientos, RealojamientoConFecha]);
 
@@ -31,41 +32,38 @@ const CargaRealojamiento = () => {
                 actaOficio: null,
             });
 
-                        document.querySelector('input[type="file"]').value = '';
+            document.querySelector('input[type="file"]').value = '';
         }
     };
-
     const handleFileChange = (e, index) => {
         const file = e.target.files[0];
         if (file) {
             const newHistorial = [...historialRealojamientos];
 
-                        if (!newHistorial[index]) {
+            if (!newHistorial[index]) {
                 newHistorial[index] = {};
             }
 
-                        newHistorial[index].actaOficio = file;
+            newHistorial[index].fechasDeEdicionActa = [];
+            newHistorial[index].fechasDeEliminacionActa = [];
+            newHistorial[index].actaOficio = file;
             newHistorial[index].nombreActaArchivo = file.name;
+            newHistorial[index].fechaCarga = new Date().toLocaleString();
 
-                        if (!newHistorial[index].fechasDeCargaActa) {
+            if (!newHistorial[index].fechasDeCargaActa) {
                 newHistorial[index].fechasDeCargaActa = [];
             }
-            newHistorial[index].fechasDeCargaActa.push(new Date().toLocaleString()); 
-            newHistorial[index].fechaEdicionActa = null;
 
-                        setHistorialRealojamientos(newHistorial);
-            setRealojamientoData({
-                ...RealojamientoData,
-                actaOficio: file,
-            });
+            newHistorial[index].fechasDeCargaActa.push(new Date().toLocaleString());
+
+            setHistorialRealojamientos(newHistorial);
         }
     };
-
 
     const handleEditActa = (index) => {
         const input = document.createElement("input");
         input.type = "file";
-        input.accept = ".pdf,.doc,.docx";
+        input.accept = ".pdf";
 
         input.onchange = (e) => {
             const newHistorial = [...historialRealojamientos];
@@ -75,10 +73,11 @@ const CargaRealojamiento = () => {
                 newHistorial[index].actaOficio = file;
                 newHistorial[index].nombreActaArchivo = file.name;
 
-                                if (!newHistorial[index].fechasDeEdicionActa) {
+                if (!newHistorial[index].fechasDeEdicionActa) {
                     newHistorial[index].fechasDeEdicionActa = [];
                 }
-                newHistorial[index].fechasDeEdicionActa.push(new Date().toLocaleString());
+
+                newHistorial[index].fechasDeEdicionActa = [new Date().toLocaleString()];
 
                 setHistorialRealojamientos(newHistorial);
             }
@@ -90,14 +89,18 @@ const CargaRealojamiento = () => {
     const handleConfirmDeleteActa = () => {
         const newHistorial = [...historialRealojamientos];
 
-                newHistorial[actaToDelete] = {
-            ...newHistorial[actaToDelete],
-            actaOficio: null,              nombreActaArchivo: null,              fechaEliminacionActa: new Date().toLocaleString(),          };
+        if (newHistorial[actaToDelete]) {
+            newHistorial[actaToDelete] = {
+                ...newHistorial[actaToDelete],
+                actaOficio: null,
+                nombreActaArchivo: null,
+                fechasDeEliminacionActa: [new Date().toLocaleString()],
+            };
+        }
 
-                if (!newHistorial[actaToDelete].fechasDeEliminacionActa) {
-            newHistorial[actaToDelete].fechasDeEliminacionActa = [];         }
-        newHistorial[actaToDelete].fechasDeEliminacionActa.push(new Date().toLocaleString()); 
-        setHistorialRealojamientos(newHistorial);         setConfirmDeleteActaModal(false);      };
+        setHistorialRealojamientos(newHistorial);
+        setConfirmDeleteActaModal(false);
+    };
 
     const [RealojamientoData, setRealojamientoData] = useState({
         numeroActa: '',
@@ -127,26 +130,24 @@ const CargaRealojamiento = () => {
         lugarDestino: '',
         motivoRealojamiento: '',
         encargado: {
-            nombrecompleto: '',             dni: '',                    },
+            nombrecompleto: '', dni: '',
+        },
         chofer: {
             nombrecompleto: '',
             dni: '',
         },
     });
 
-    const [nombreActaArchivo, setNombreActaArchivo] = useState('');
-
-
-        const handleNuevoEncargadoChange = (e) => {
+    const handleNuevoEncargadoChange = (e) => {
         const { name, value } = e.target;
         setNuevoEncargado({ ...nuevoEncargado, [name]: value });
     };
 
-        const handleAgregarEncargado = () => {
+    const handleAgregarEncargado = () => {
         const newErrors = { ...errors };
         let isValid = true;
 
-                if (!nuevoEncargado.nombrecompleto) {
+        if (!nuevoEncargado.nombrecompleto) {
             newErrors.encargado.nombrecompleto = 'Nombre y Apellido de la custodia es requerido';
             isValid = false;
         } else {
@@ -160,21 +161,22 @@ const CargaRealojamiento = () => {
             newErrors.encargado.dni = '';
         }
 
-        setErrors(newErrors); 
+        setErrors(newErrors);
         if (isValid) {
             setRealojamientoData({
                 ...RealojamientoData,
                 encargados: [...RealojamientoData.encargados, nuevoEncargado],
             });
-            setNuevoEncargado({ nombrecompleto: '', dni: '' });         }
+            setNuevoEncargado({ nombrecompleto: '', dni: '' });
+        }
     };
 
-        const handleEliminarEncargado = (index) => {
+    const handleEliminarEncargado = (index) => {
         const nuevosEncargados = RealojamientoData.encargados.filter((_, i) => i !== index);
         setRealojamientoData({ ...RealojamientoData, encargados: nuevosEncargados });
     };
 
-        const validateForm = () => {
+    const validateForm = () => {
         let isValid = true;
         const newErrors = {
             numeroActa: '',
@@ -184,7 +186,8 @@ const CargaRealojamiento = () => {
             lugarDestino: '',
             motivoRealojamiento: '',
             encargado: {
-                nombrecompleto: '',                 dni: '',                        },
+                nombrecompleto: '', dni: '',
+            },
             chofer: {
                 nombrecompleto: '',
                 dni: '',
@@ -221,7 +224,7 @@ const CargaRealojamiento = () => {
             isValid = false;
         }
 
-                if (RealojamientoData.encargados.length === 0) {
+        if (RealojamientoData.encargados.length === 0) {
             newErrors.encargado.nombrecompleto = 'Nombre de la custodia es requerido';
             newErrors.encargado.dni = 'DNI de la custodia es requerido';
             isValid = false;
@@ -243,12 +246,14 @@ const CargaRealojamiento = () => {
 
     const navigate = useNavigate();
     const [confirmDeleteActaModal, setConfirmDeleteActaModal] = useState(false);
-    const [actaToDelete, setActaToDelete] = useState(null);  
+    const [actaToDelete, setActaToDelete] = useState(null);
     const handleOpenDeleteActaModal = (index) => {
-        setActaToDelete(index);          setConfirmDeleteActaModal(true);      };
+        setActaToDelete(index); setConfirmDeleteActaModal(true);
+    };
 
     const handleCloseDeleteActaModal = () => {
-        setConfirmDeleteActaModal(false);      };
+        setConfirmDeleteActaModal(false);
+    };
 
     const [historialRealojamientos, setHistorialRealojamientos] = useState([]);
 
@@ -270,7 +275,6 @@ const CargaRealojamiento = () => {
             },
         });
     };
-
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
@@ -383,7 +387,7 @@ const CargaRealojamiento = () => {
                             type="text"
                             id="choferNombre"
                             name="nombrecompleto"
-                            value={RealojamientoData.chofer ? RealojamientoData.chofer.nombrecompleto : ''}                             onChange={handleChoferChange}
+                            value={RealojamientoData.chofer ? RealojamientoData.chofer.nombrecompleto : ''} onChange={handleChoferChange}
                             className="w-full p-1 border border-gray-300 rounded text-sm"
                         />{errors.chofer.nombrecompleto && (
                             <p className="text-red-500 text-sm">{errors.chofer.nombrecompleto}</p>
@@ -395,7 +399,7 @@ const CargaRealojamiento = () => {
                             type="number"
                             id="choferDNI"
                             name="dni"
-                            value={RealojamientoData.chofer ? RealojamientoData.chofer.dni : ''}                             onChange={handleChoferChange}
+                            value={RealojamientoData.chofer ? RealojamientoData.chofer.dni : ''} onChange={handleChoferChange}
                             className="w-full p-1 border border-gray-300 rounded text-sm"
                         />
                         {errors.chofer.dni && (
@@ -490,7 +494,7 @@ const CargaRealojamiento = () => {
                         <input
                             type="file"
                             onChange={handleFileChange}
-                            accept=".pdf,.doc,.docx"
+                            accept=".pdf"
                             className="mt-1 mb-2 text-sm border border-gray-300 rounded p-1 w-full"
                         />
 
@@ -498,7 +502,7 @@ const CargaRealojamiento = () => {
                     <div className="flex justify-center mt-4">
                         <button
                             onClick={handleAgregarRealojamiento}
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                         >
                             Cargar
                         </button>
@@ -539,7 +543,10 @@ const CargaRealojamiento = () => {
                                         <div className="text-sm"><strong className="text-sm">Número de Acta:</strong> {Realojamiento.numeroActa}</div>
                                         <div className="text-sm"><strong className="text-sm">Fecha de Realojamiento:</strong> {Realojamiento.fechaRealojamiento}</div>
                                         <div className="text-sm"><strong className="text-sm">Horario del Realojamiento:</strong> {Realojamiento.horarioRealojamiento}</div>
-                                        {/* Mostrar acta/Oficio */}
+                                        {/* Mostrar la fecha de carga solo si existe */}
+                                        {Realojamiento.fechaCarga && (
+                                            <p className="text-sm text-gray-500 mt-2 mb-2"><strong>Fecha de carga:</strong> {Realojamiento.fechaCarga}</p>
+                                        )}
                                         {Realojamiento.actaOficio ? (
                                             <div>
                                                 <p className="text-sm mt-1"><strong>Acta/Oficio:</strong></p>
@@ -554,7 +561,7 @@ const CargaRealojamiento = () => {
                                                 {/* Botones Editar y Eliminar */}
                                                 <button
                                                     onClick={() => handleEditActa(index)}
-                                                    className="mt-2 ml-2 bg-yellow-400 text-white p-2 rounded-full text-xs hover:bg-yellow-500"
+                                                    className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
                                                 >
                                                     Editar Acta/Oficio
                                                 </button>
@@ -575,64 +582,47 @@ const CargaRealojamiento = () => {
                                                         const file = e.target.files[0];
 
                                                         if (file) {
-                                                                                                                        if (!newHistorial[index].fechasDeCargaActa) {
+                                                            if (!newHistorial[index].fechasDeCargaActa) {
                                                                 newHistorial[index].fechasDeCargaActa = [];
                                                             }
 
-                                                                                                                        newHistorial[index].fechasDeCargaActa.push(new Date().toLocaleString());
-
-                                                                                                                        newHistorial[index].actaOficio = file;
+                                                            newHistorial[index].fechasDeEdicionActa = [];
+                                                            newHistorial[index].fechasDeEliminacionActa = [];
+                                                            newHistorial[index].fechasDeCargaActa.push(new Date().toLocaleString());
+                                                            newHistorial[index].actaOficio = file;
                                                             newHistorial[index].nombreActaArchivo = file.name;
-
-                                                                                                                        newHistorial[index].fechaEdicionActa = null;
+                                                            newHistorial[index].fechaEdicionActa = null;
 
                                                             setHistorialRealojamientos(newHistorial);
                                                         }
                                                     }}
-                                                    accept=".pdf,.doc,.docx"
+                                                    accept=".pdf"
                                                     className="mt-1 mb-2 text-sm border border-gray-300 rounded p-1 w-full"
                                                 />
-
                                             </div>
                                         )}
-                                        {/* Mostrar la fecha de carga solo si existe */}
-                                        {Realojamiento.fechaCarga && (
-                                            <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {Realojamiento.fechaCarga}</p>
-                                        )}
 
-                                        {/* Mostrar fechas de carga */}
                                         {Realojamiento.fechasDeCargaActa && Realojamiento.fechasDeCargaActa.length > 0 && (
-                                            <div className="mt-2">
-                                                <p className="text-sm text-gray-500"><strong>Fechas de carga del Acta/Oficio:</strong></p>
-                                                <ul className="list-disc list-inside">
-                                                    {Realojamiento.fechasDeCargaActa.map((fecha, fechaIndex) => (
-                                                        <li key={fechaIndex} className="text-sm text-gray-500">{fecha}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
+                                            <p className="text-sm text-gray-500 mt-2">
+                                                <strong>Fecha de carga Acta/Oficio:</strong> {Realojamiento.fechasDeCargaActa[Realojamiento.fechasDeCargaActa.length - 1]}
+                                            </p>
                                         )}
 
-                                        {/* Mostrar fechas de edición */}
+                                        {/* Mostrar fechas de edición solo si existen */}
                                         {Realojamiento.fechasDeEdicionActa && Realojamiento.fechasDeEdicionActa.length > 0 && (
                                             <div className="mt-2">
-                                                <p className="text-sm text-gray-500"><strong>Fechas de edición del Acta/Oficio:</strong></p>
-                                                <ul className="list-disc list-inside">
-                                                    {Realojamiento.fechasDeEdicionActa.map((fecha, fechaIndex) => (
-                                                        <li key={fechaIndex} className="text-sm text-gray-500">{fecha}</li>
-                                                    ))}
-                                                </ul>
+                                                <p className="text-sm text-gray-500">
+                                                    <strong>Fecha de edición Acta/Oficio:</strong> {Realojamiento.fechasDeEdicionActa[Realojamiento.fechasDeEdicionActa.length - 1]}
+                                                </p>
                                             </div>
                                         )}
 
-                                        {/* Mostrar fechas de eliminación */}
+                                        {/* Mostrar fechas de eliminación solo si existen */}
                                         {Realojamiento.fechasDeEliminacionActa && Realojamiento.fechasDeEliminacionActa.length > 0 && (
                                             <div className="mt-2">
-                                                <p className="text-sm text-gray-500"><strong>Fechas de eliminación del Acta/Oficio:</strong></p>
-                                                <ul className="list-disc list-inside">
-                                                    {Realojamiento.fechasDeEliminacionActa.map((fecha, fechaIndex) => (
-                                                        <li key={fechaIndex} className="text-sm text-gray-500">{fecha}</li>
-                                                    ))}
-                                                </ul>
+                                                <p className="text-sm text-gray-500">
+                                                    <strong>Fecha de eliminación Acta/Oficio:</strong> {Realojamiento.fechasDeEliminacionActa[Realojamiento.fechasDeEliminacionActa.length - 1]}
+                                                </p>
                                             </div>
                                         )}
 

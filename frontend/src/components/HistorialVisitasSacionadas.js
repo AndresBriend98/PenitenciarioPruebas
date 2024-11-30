@@ -70,7 +70,7 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
 
     const handleAddVisita = () => {
         if (validateForm()) {
-            calcularTiempoSancionado(); 
+            calcularTiempoSancionado();
             const nueva = { ...nuevaVisitaSancionada, id: visitasSancionadas.length + 1 };
             setVisitasSancionadas(prevState => {
                 const updatedList = [...prevState, nueva];
@@ -243,7 +243,7 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
                     <div className="flex justify-center mt-4">
                         <button
                             onClick={handleAddVisita}
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                         >
                             Cargar
                         </button>
@@ -275,9 +275,6 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
                                                     <p className='text-sm'><strong>Fecha de Cumplimiento:</strong> {item.fechaCumplimiento}</p>
                                                     <p className='text-sm'><strong>Tiempo Sancionado:</strong> {diffDays} días</p>
                                                     <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.desdeHistorial ? item.fechaFoto : new Date().toLocaleString()}</p>
-                                                    {item.desdeHistorial && item.fechaFoto && (
-                                                        <p className="text-sm text-gray-500"><strong>Fecha de carga de foto:</strong> {item.fechaFoto}</p>
-                                                    )}
                                                 </div>
                                                 <div className="mt-4 md:mt-0 md:ml-4 flex flex-col items-center">
                                                     {item.foto ? (
@@ -289,12 +286,23 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
                                                             <span className="text-white">Sin foto</span>
                                                         </div>
                                                     )}
+
                                                     <button
                                                         className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500"
                                                         onClick={() => item.foto ? handleViewPhoto(item.foto) : fileInputRefs.current[index].click()}
                                                     >
                                                         {item.foto ? 'Ver foto' : 'Subir foto'}
                                                     </button>
+
+                                                    {item.foto && (
+                                                        <button
+                                                            className="mt-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
+                                                            onClick={() => fileInputRefs.current[index].click()}
+                                                        >
+                                                            Editar Foto
+                                                        </button>
+                                                    )}
+
                                                     <input
                                                         type="file"
                                                         ref={el => fileInputRefs.current[index] = el}
@@ -303,6 +311,7 @@ const HistorialVisitasSancionadas = ({ setHistorialVisitasSancionadas }) => {
                                                         className="hidden"
                                                     />
                                                 </div>
+
                                             </div>
                                         </li>
                                     );

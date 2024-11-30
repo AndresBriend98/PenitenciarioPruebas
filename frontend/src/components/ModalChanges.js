@@ -1,9 +1,33 @@
 import React from 'react';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 const Modal = ({ isOpen, onClose, historialCambios, campoMapeado }) => {
     if (!isOpen) return null;
 
     const noChanges = Object.keys(historialCambios).length === 0;
+
+    const handleDownloadZip = (imagenes) => {
+        const zip = new JSZip();
+        const promises = [];
+
+        imagenes.forEach((file, index) => {
+            const fetchPromise = fetch(file.url)
+                .then(response => response.blob())
+                .then(blob => {
+                    zip.file(file.name, blob);
+                })
+                .catch(error => console.error('Error al agregar archivo al ZIP:', error));
+
+            promises.push(fetchPromise);
+        });
+
+        Promise.all(promises).then(() => {
+            zip.generateAsync({ type: 'blob' }).then(content => {
+                saveAs(content, 'tatuajes-marcas-distintivas.zip');
+            });
+        });
+    };
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -26,15 +50,15 @@ const Modal = ({ isOpen, onClose, historialCambios, campoMapeado }) => {
 
                                 {imagenUrl && (
                                     <div className="mt-2">
-                                        <a
-                                            href={imagenUrl}
-                                            download={imagenNombre} 
+                                        <button
                                             className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                            onClick={() => handleDownloadZip(imagenUrl)}
                                         >
-                                            Descargar archivo
-                                        </a>
+                                            Descargar Archivo/s
+                                        </button>
                                     </div>
                                 )}
+
                             </div>
                         ))}
                     </div>

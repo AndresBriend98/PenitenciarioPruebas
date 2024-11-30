@@ -49,7 +49,7 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
             setErrors({});
         }
     };
-   
+
     const [showModal, setShowModal] = useState(false);
     const [modalPhoto, setModalPhoto] = useState('');
     const fileInputRef = useRef(null);
@@ -198,7 +198,7 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
                     <div className="flex justify-center mt-4">
                         <button
                             onClick={handleAddVisita}
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                         >
                             Cargar
                         </button>
@@ -222,9 +222,6 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
                                             <p className='text-sm'><strong>DNI:</strong> {item.dni}</p>
                                             <p className='text-sm'><strong>Motivo de la Prohibición:</strong> {item.motivo}</p>
                                             <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {new Date().toLocaleString()}</p>
-                                            {item.desdeHistorial && item.fechaFoto && (
-                                                <p className="text-sm text-gray-500"><strong>Fecha de carga de foto:</strong> {item.fechaFoto}</p>
-                                            )}
                                         </div>
                                         <div className="mt-4 md:mt-0 md:ml-4 flex flex-col items-center">
                                             {item.foto ? (
@@ -236,12 +233,23 @@ const HistorialVisitasProhibidas = ({ setHistorialVisitasProhibidas }) => {
                                                     <span className="text-white">Sin foto</span>
                                                 </div>
                                             )}
+
                                             <button
                                                 className="mt-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500"
                                                 onClick={() => item.foto ? handleViewPhoto(item.foto) : fileInputRefs.current[index].click()}
                                             >
                                                 {item.foto ? 'Ver foto' : 'Subir foto'}
                                             </button>
+
+                                            {item.foto && (
+                                                <button
+                                                    className="mt-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
+                                                    onClick={() => fileInputRefs.current[index].click()}
+                                                >
+                                                    Editar Foto
+                                                </button>
+                                            )}
+
                                             <input
                                                 type="file"
                                                 ref={el => fileInputRefs.current[index] = el}

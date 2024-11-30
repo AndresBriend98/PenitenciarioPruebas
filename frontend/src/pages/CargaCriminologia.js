@@ -1,4 +1,4 @@
-import React, { useState,useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 
@@ -36,10 +36,14 @@ const CargaCriminologia = () => {
         setConfirmDeleteHistorialModal(false);
         setSelectedHistorialIndex(null);
     };
+
     const handleEliminarActaArchivo = () => {
         if (selectedHistorialIndex !== null) {
             const newHistorial = [...historial];
             const newDate = new Date().toLocaleString();
+
+            newHistorial[selectedHistorialIndex].actasArchivo = null;
+            newHistorial[selectedHistorialIndex].nombreActaArchivo = '';
 
             if (!newHistorial[selectedHistorialIndex].fechasDeEliminacion) {
                 newHistorial[selectedHistorialIndex].fechasDeEliminacion = [];
@@ -47,11 +51,9 @@ const CargaCriminologia = () => {
 
             newHistorial[selectedHistorialIndex].fechasDeEliminacion.push(newDate);
 
-            newHistorial[selectedHistorialIndex].actasArchivo = null;
-            newHistorial[selectedHistorialIndex].nombreActaArchivo = '';
-
             setHistorial(newHistorial);
         }
+
         setConfirmDeleteHistorialModal(false);
         setSelectedHistorialIndex(null);
     };
@@ -110,7 +112,7 @@ const CargaCriminologia = () => {
             fechaModificacion: new Date().toLocaleString(),
         };
         setHistorialBeneficio(nuevoHistorialBeneficio);
-        setEditIndexBeneficio(null); 
+        setEditIndexBeneficio(null);
         setEditBeneficio('');
         setEditDescripcionBeneficio('');
         setEditObservacionBeneficio('');
@@ -147,7 +149,7 @@ const CargaCriminologia = () => {
             return;
         }
 
-        setHasErrorBeneficio(false); 
+        setHasErrorBeneficio(false);
 
         const nuevaEntrada = {
             beneficio: beneficio || '',
@@ -165,7 +167,7 @@ const CargaCriminologia = () => {
         setObservacionBeneficio('');
     };
 
-    const [hasErrorCriminologico, setHasErrorCriminologico] = useState(false); 
+    const [hasErrorCriminologico, setHasErrorCriminologico] = useState(false);
     const [hasErrorBeneficio, setHasErrorBeneficio] = useState(false);
     const fileInputRef = useRef(null);
     const handleCargarCriminologico = () => {
@@ -183,7 +185,7 @@ const CargaCriminologia = () => {
             observacion: observacion || '',
             actasArchivo,
             nombreActaArchivo,
-            fechaCargaActa: actasArchivo ? new Date().toLocaleString() : null,
+            fechaCarga: actasArchivo ? new Date().toLocaleString() : null,
             fechasDeCargaActa: actasArchivo ? [new Date().toLocaleString()] : [],
             fecha: new Date().toLocaleString(),
         };
@@ -195,7 +197,7 @@ const CargaCriminologia = () => {
         setObservacion('');
         setInformeCriminologicoArchivo(null);
         setNombreArchivo('');
-        fileInputRef.current.value = ''; 
+        fileInputRef.current.value = '';
     };
 
     const [beneficio, setBeneficio] = useState('');
@@ -251,7 +253,7 @@ const CargaCriminologia = () => {
                                         setArchivoRegimen(file);
                                         setNombreArchivoRegimen(file.name);
                                     }}
-                                    accept=".pdf,.doc,.docx"
+                                    accept=".pdf"
                                     className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
                                 />
 
@@ -298,7 +300,7 @@ const CargaCriminologia = () => {
                                                                         newHistorial[index].nombreArchivo = e.target.files[0].name;
                                                                         setHistorialRegimen(newHistorial);
                                                                     }}
-                                                                    accept=".pdf,.doc,.docx"
+                                                                    accept=".pdf"
                                                                     className="mt-1 mb-2 text-sm border border-gray-300 rounded p-1 w-full"
                                                                 />
                                                             </div>
@@ -362,7 +364,7 @@ const CargaCriminologia = () => {
                             </div>
 
                             <label className="block text-sm font-bold mt-2 mb-2">Subir informe</label>
-                        
+
                             <input
                                 type="file"
                                 ref={fileInputRef}
@@ -371,14 +373,14 @@ const CargaCriminologia = () => {
                                     setActasArchivo(file);
                                     setNombreActaArchivo(file.name);
                                 }}
-                                accept=".pdf,.doc,.docx"
+                                accept=".pdf"
                                 className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
                             />
 
                             <div className="flex justify-center mt-2">
                                 <button
                                     onClick={handleCargarCriminologico}
-                                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                                 >
                                     Cargar
                                 </button>
@@ -458,150 +460,111 @@ const CargaCriminologia = () => {
                                                             <p className="text-sm"><strong>Observación:</strong> {entrada.observacion}</p>
                                                         )}
 
+                                                        <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {entrada.fecha}</p>
+
                                                         {/* Acta */}
                                                         <span className="text-sm max-w-full break-words">
                                                             <strong>Informe:</strong>
                                                         </span>
-                                                        {/* Si no hay archivo cargado */}
-                                                        {!entrada.actasArchivo ? (
-                                                            <input
-                                                                type="file"
-                                                                onChange={(e) => {
-                                                                    const newHistorial = [...historial];
-                                                                    const newDate = new Date().toLocaleString(); 
 
-                                                                    newHistorial[index].actasArchivo = e.target.files[0];
+                                                        {
+                                                            entrada.actasArchivo ? (
+                                                                <>
+                                                                    <a
+                                                                        href={URL.createObjectURL(entrada.actasArchivo)}
+                                                                        download={entrada.actasArchivo.name}
+                                                                        className="mt-2 ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                                    >
+                                                                        Descargar Informe
+                                                                    </a>
 
-                                                                    if (!newHistorial[index].fechaCarga) {
-                                                                        newHistorial[index].fechaCarga = newDate;
-                                                                    }
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const input = document.createElement("input");
+                                                                            input.type = "file";
+                                                                            input.accept = ".pdf";
 
+                                                                            input.onchange = (e) => {
+                                                                                const file = e.target.files[0];
+                                                                                if (file) {
+                                                                                    const newHistorial = [...historial];
+                                                                                    const newDate = new Date().toLocaleString();
 
-                                                                    if (!newHistorial[index].fechasDeCargaActa) {
-                                                                        newHistorial[index].fechasDeCargaActa = [];
-                                                                    }
+                                                                                    if (!newHistorial[index].fechasDeEdicion) {
+                                                                                        newHistorial[index].fechasDeEdicion = [];
+                                                                                    }
 
-                                                                    newHistorial[index].fechasDeCargaActa.push(newDate);
+                                                                                    newHistorial[index].fechasDeEdicion.push(newDate);
+                                                                                    newHistorial[index].fechasDeEliminacion = [];
+                                                                                    newHistorial[index].actasArchivo = file;
 
-                                                                    setHistorial(newHistorial);
-                                                                }}
-                                                                accept=".pdf,.doc,.docx"
-                                                                className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
-                                                            />
-                                                        ) : (
-                                                            <>
-                                                                <a
-                                                                    href={URL.createObjectURL(entrada.actasArchivo)}
-                                                                    download={entrada.actasArchivo.name}
-                                                                    className="mt-2 ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
-                                                                >
-                                                                    Descargar Informe
-                                                                </a>
-
-                                                                <button
-                                                                    onClick={() => {
-                                                                        const input = document.createElement("input");
-                                                                        input.type = "file";
-                                                                        input.accept = ".pdf,.doc,.docx";
-
-                                                                        input.onchange = (e) => {
-                                                                            const file = e.target.files[0];
-                                                                            if (file) {
-                                                                                const newHistorial = [...historial];
-                                                                                const newDate = new Date().toLocaleString();
-
-                                                                                if (!newHistorial[index].fechasDeEdicion) {
-                                                                                    newHistorial[index].fechasDeEdicion = [];
+                                                                                    setHistorial(newHistorial);
                                                                                 }
+                                                                            };
 
-                                                                                newHistorial[index].fechasDeEdicion.push(newDate);
+                                                                            input.click();
+                                                                        }}
+                                                                        className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
+                                                                    >
+                                                                        Editar Informe
+                                                                    </button>
 
-                                                                                newHistorial[index].actasArchivo = file;
-                                                                                setHistorial(newHistorial);
-                                                                            }
-                                                                        };
+                                                                    {/* Botón de Eliminar */}
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setSelectedHistorialIndex(index);
+                                                                            setConfirmDeleteHistorialModal(true);
+                                                                        }}
+                                                                        className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
+                                                                    >
+                                                                        Eliminar Informe
+                                                                    </button>
+                                                                </>
+                                                            ) : (
+                                                                <input
+                                                                    type="file"
+                                                                    onChange={(e) => {
+                                                                        const newHistorial = [...historial];
+                                                                        const newDate = new Date().toLocaleString();
 
-                                                                        input.click();
+                                                                        newHistorial[index].actasArchivo = e.target.files[0];
+                                                                        newHistorial[index].fechaCarga = newDate;
+                                                                        newHistorial[index].fechasDeCargaActa = [newDate];
+                                                                        newHistorial[index].fechasDeEdicion = [];
+                                                                        newHistorial[index].fechasDeEliminacion = [];
+
+                                                                        setHistorial(newHistorial);
                                                                     }}
-                                                                    className="mt-2 ml-2 bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500"
-                                                                >
-                                                                    Editar Informe
-                                                                </button>
+                                                                    accept=".pdf"
+                                                                    className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
+                                                                />
+                                                            )
+                                                        }
 
-                                                                {/* Botón de Eliminar */}
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedHistorialIndex(index);
-                                                                        setConfirmDeleteHistorialModal(true);
-                                                                    }}
-                                                                    className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
-                                                                >
-                                                                    Eliminar Informe
-                                                                </button>
-                                                            </>
+                                                        {entrada.fechaCarga && (
+                                                            <div className="mt-2">
+                                                                <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                    <strong>Fecha de carga informe:</strong> {entrada.fechaCarga}
+                                                                </p>
+                                                            </div>
                                                         )}
 
-                                                        <div>
+                                                        {entrada.fechasDeEdicion && entrada.fechasDeEdicion.length > 0 && (
+                                                            <div className="mt-2">
+                                                                <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                    <strong>Fecha de edición informe:</strong> {entrada.fechasDeEdicion[entrada.fechasDeEdicion.length - 1]}
+                                                                </p>
+                                                            </div>
+                                                        )}
 
-                                                            {/* Mostrar la fecha de carga de acta solo si existe */}
-                                                            {entrada.fechasDeCargaActa && (
-                                                                <div className="mt-2">
-                                                                    <p className="text-sm text-gray-500 max-w-full break-words">
-                                                                        <strong>Fecha de carga informe:</strong>
-                                                                    </p>
-                                                                    <ul className="list-disc list-inside">
-                                                                        {entrada.fechasDeCargaActa.map((fecha, index) => (
-                                                                            <li
-                                                                                key={index}
-                                                                                className="text-sm text-gray-500 max-w-full break-words"
-                                                                            >
-                                                                                {fecha}
-                                                                            </li>
-                                                                        ))}
-                                                                    </ul>
-                                                                </div>
-                                                            )}
+                                                        {entrada.fechasDeEliminacion && entrada.fechasDeEliminacion.length > 0 && (
+                                                            <div className="mt-2">
+                                                                <p className="text-sm text-gray-500 max-w-full break-words">
+                                                                    <strong>Fecha de eliminación informe:</strong> {entrada.fechasDeEliminacion[entrada.fechasDeEliminacion.length - 1]}
+                                                                </p>
+                                                            </div>
+                                                        )}
 
-                                                            {/* Mostrar las fechas de edición solo si hay al menos una */}
-                                                            {entrada.fechasDeEdicion && entrada.fechasDeEdicion.length > 0 && (
-                                                                <div className="mt-2">
-                                                                    <p className="text-sm text-gray-500 max-w-full break-words">
-                                                                        <strong>Fecha de edición informe:</strong>
-                                                                    </p>
-                                                                    <ul className="list-disc list-inside">
-                                                                        {entrada.fechasDeEdicion.map((fecha, index) => (
-                                                                            <li
-                                                                                key={index}
-                                                                                className="text-sm text-gray-500 max-w-full break-words"
-                                                                            >
-                                                                                {fecha}
-                                                                            </li>
-                                                                        ))}
-                                                                    </ul>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Mostrar las fechas de eliminación solo si hay al menos una */}
-                                                            {entrada.fechasDeEliminacion &&
-                                                                entrada.fechasDeEliminacion.length > 0 && (
-                                                                    <div className="mt-2">
-                                                                        <p className="text-sm text-gray-500 max-w-full break-words">
-                                                                            <strong>Fecha de eliminación informe:</strong>
-                                                                        </p>
-                                                                        <ul className="list-disc list-inside">
-                                                                            {entrada.fechasDeEliminacion.map((fecha, index) => (
-                                                                                <li
-                                                                                    key={index}
-                                                                                    className="text-sm text-gray-500 max-w-full break-words"
-                                                                                >
-                                                                                    {fecha}
-                                                                                </li>
-                                                                            ))}
-                                                                        </ul>
-                                                                    </div>
-                                                                )}
-                                                        </div>
-                                                        <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {entrada.fecha}</p>
                                                         {entrada.fechaModificacion && (
                                                             <p className="text-sm text-gray-500"><strong>Fecha de modificación (beneficio/descripción/observación):</strong> {entrada.fechaModificacion}</p>
                                                         )}
@@ -643,6 +606,7 @@ const CargaCriminologia = () => {
                                 </div>
                             </div>
                         )}
+
                     </div>
 
 
@@ -693,7 +657,7 @@ const CargaCriminologia = () => {
                             <div className="flex justify-center mt-2">
                                 <button
                                     onClick={handleCargarBeneficio}
-                                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                                 >
                                     Cargar
                                 </button>
@@ -787,15 +751,15 @@ const CargaCriminologia = () => {
 
                     </div>
                 </div>
-            </div>
-            {/* Botón de Menú Principal */}
-            <div className="flex justify-between mt-10">
-                <button
-                    onClick={handleVolver}
-                    className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-xs"
-                >
-                    Menu Principal
-                </button>
+                {/* Botón de Menú Principal */}
+                <div className="flex justify-between mt-10">
+                    <button
+                        onClick={handleVolver}
+                        className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-xs"
+                    >
+                        Menu Principal
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -11,10 +11,80 @@ const CargaEducacion = () => {
     const [archivoSeleccionado, setArchivoSeleccionado] = useState(null);
     const [isModalOpenArchivo, setIsModalOpenArchivo] = useState(false);
     const archivoInputRef = useRef(null);
+    const [confirmDeleteHistorialModal, setConfirmDeleteHistorialModal] = useState(false);
+    const [archivoAEliminar, setArchivoAEliminar] = useState(null);
+    
+    const handleEliminarActaArchivo = () => {
+        if (archivoAEliminar !== null) {
+            const nuevoHistorial = [...historialCurso];
+            const archivoAEliminarIndex = archivoAEliminar;
+            const archivo = nuevoHistorial[archivoAEliminarIndex];
+            const fechaEliminacion = new Date().toLocaleString();
+            archivo.fechaEliminacionArchivo = fechaEliminacion;
+            archivo.archivoAdjunto = null;
+            nuevoHistorial[archivoAEliminarIndex] = archivo;
+
+            setHistorialCurso(nuevoHistorial);
+
+            handleCloseDeleteHistorialModal();
+        }
+    };
+
+    const handleArchivoAdjunto = (e, index) => {
+        const archivoSeleccionado = e.target.files[0];
+
+        if (archivoSeleccionado) {
+            const nuevoHistorial = [...historialCurso];
+            const registro = nuevoHistorial[index];
+
+            if (registro.fechaEliminacionArchivo) {
+                // Mantener la fecha de eliminación intacta
+            }
+
+            registro.archivoAdjunto = archivoSeleccionado;
+            registro.fechaArchivoAdjunto = new Date().toLocaleString();
+
+            registro.fechaEdicionArchivo = null;
+
+            setHistorialCurso(nuevoHistorial);
+        }
+    };
+
+    const handleCloseDeleteHistorialModal = () => {
+        setConfirmDeleteHistorialModal(false);
+        setArchivoAEliminar(null);
+    };
+
+    const handleOpenDeleteModal = (index) => {
+        setArchivoAEliminar(index);
+        setConfirmDeleteHistorialModal(true);
+    };
+
 
     const handleArchivoSeleccionado = (e) => {
         const archivo = e.target.files[0];
         setArchivoSeleccionado(archivo);
+    };
+
+    const handleEditarArchivo = (index) => {
+        const inputArchivo = document.createElement('input');
+        inputArchivo.type = 'file';
+        inputArchivo.accept = '.pdf';
+
+        inputArchivo.onchange = (e) => {
+            const archivoNuevo = e.target.files[0];
+
+            const nuevoHistorial = [...historialCurso];
+            nuevoHistorial[index] = {
+                ...nuevoHistorial[index],
+                archivoAdjunto: archivoNuevo,
+                fechaEdicionArchivo: new Date().toLocaleString(),
+            };
+
+            setHistorialCurso(nuevoHistorial);
+        };
+
+        inputArchivo.click();
     };
 
     const handleCargarArchivo = () => {
@@ -23,21 +93,7 @@ const CargaEducacion = () => {
                 archivoAdjunto: archivoSeleccionado,
                 fechaArchivoAdjunto: new Date().toLocaleString(),
             };
-            // Añadir el archivo al estado de archivos adjuntos
-            setArchivosAdjuntos((prevArchivos) => [...prevArchivos, nuevoArchivo]);
-
-            // Restablecer el input de archivo
-            archivoInputRef.current.value = null;
-            setArchivoSeleccionado(null);
-        }
-    };
-
-    const handleArchivoAdjunto = () => {
-        if (archivoSeleccionado) {
-            const nuevoArchivo = {
-                archivoAdjunto: archivoSeleccionado,
-                fechaArchivoAdjunto: new Date().toLocaleString(),
-            };
+  
             setArchivosAdjuntos((prevArchivos) => [...prevArchivos, nuevoArchivo]);
 
             archivoInputRef.current.value = null;
@@ -99,35 +155,6 @@ const CargaEducacion = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [motivoAnulacion, setMotivoAnulacion] = useState("");
     const [cursoAnuladoIndex, setCursoAnuladoIndex] = useState(null);
-    const handleAnularCursoConMotivo = () => {
-        if (motivoAnulacion.trim() === "" || !archivoAnulacion) {
-            alert("Debe ingresar el motivo y el archivo adjunto.");
-            return;
-        }
-
-        const nuevoHistorialAnulado = [...historialCursoAnulado];
-        const cursoAAnular = historialCurso[cursoAnuladoIndex];
-
-        nuevoHistorialAnulado.push({
-            ...cursoAAnular,
-            motivoAnulacion: motivoAnulacion,
-            fechaAnulacion: new Date().toISOString().split('T')[0],
-            archivoAnulacion: archivoAnulacion,
-            nombreArchivo: archivoAnulacion.name,
-            archivoOriginalCurso: cursoAAnular.archivoAdjunto,
-            nombreArchivoOriginalCurso: cursoAAnular.archivoAdjunto,
-        });
-
-        const nuevoHistorialCurso = historialCurso.filter((_, index) => index !== cursoAnuladoIndex);
-
-        setHistorialCurso(nuevoHistorialCurso);
-        setHistorialCursoAnulado(nuevoHistorialAnulado);
-
-        setMotivoAnulacion("");
-        setArchivoAnulacion(null);
-        setIsModalOpen(false);
-        setCursoAnuladoIndex(null);
-    };
 
     const handleSaveFechaFinPlan = (index) => {
         const updatedHistorialPlan = [...historialPlan];
@@ -234,7 +261,7 @@ const CargaEducacion = () => {
             tiempoCursando: tiempoCursandoCurso,
             fechaCarga: new Date().toLocaleString(),
             archivoAdjunto: archivo,
-            fechaArchivoAdjunto: new Date().toLocaleString(),
+            fechaArchivoAdjunto: archivo ? new Date().toLocaleString() : null,
         };
 
         setHistorialCurso([...historialCurso, nuevoRegistroCurso]);
@@ -247,11 +274,43 @@ const CargaEducacion = () => {
         archivoInputRef.current.value = "";
     };
 
+
+    const handleAnularCursoConMotivo = () => {
+        if (motivoAnulacion.trim() === "" || !archivoAnulacion) {
+            alert("Debe ingresar el motivo y el archivo adjunto.");
+            return;
+        }
+
+        const nuevoHistorialAnulado = [...historialCursoAnulado];
+        const cursoAAnular = historialCurso[cursoAnuladoIndex];
+
+        const fechaActual = new Date().toLocaleString();
+
+        nuevoHistorialAnulado.push({
+            ...cursoAAnular,
+            motivoAnulacion: motivoAnulacion,
+            fechaAnulacion: fechaActual,
+            archivoAnulacion: archivoAnulacion,
+            nombreArchivo: archivoAnulacion.name,
+            archivoOriginalCurso: cursoAAnular.archivoAdjunto,
+            nombreArchivoOriginalCurso: cursoAAnular.archivoAdjunto,
+            fechaCargaAnulacion: fechaActual,
+        });
+
+        const nuevoHistorialCurso = historialCurso.filter((_, index) => index !== cursoAnuladoIndex);
+
+        setHistorialCurso(nuevoHistorialCurso);
+        setHistorialCursoAnulado(nuevoHistorialAnulado);
+
+        setMotivoAnulacion("");
+        setArchivoAnulacion(null);
+        setIsModalOpen(false);
+        setCursoAnuladoIndex(null);
+    };
+
     const handleGenerarInforme = () => {
 
     };
-
-    const [archivoAdjunto, setArchivoAdjunto] = useState(null);
 
     const handleVolver = () => {
         navigate('/general');
@@ -324,7 +383,7 @@ const CargaEducacion = () => {
 
                     <input
                         type="file"
-                        accept=".pdf,.doc,.docx,.jpg,.png"
+                        accept=".pdf"
                         ref={archivoInputRef}
                         onChange={handleArchivoSeleccionado}
                         className={`w-full p-1 border rounded text-sm mb-2`}
@@ -440,7 +499,7 @@ const CargaEducacion = () => {
                             <div className="flex justify-center mt-4">
                                 <button
                                     onClick={handleAgregarPlan}
-                                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                                 >
                                     Cargar
                                 </button>
@@ -538,6 +597,7 @@ const CargaEducacion = () => {
                                 <label htmlFor="archivo" className="block text-sm font-semibold mb-2">Archivo adjunto</label>
                                 <input
                                     id="archivo"
+                                    accept=".pdf"
                                     type="file"
                                     ref={archivoInputRef}
                                     className="w-full p-2 border border-gray-300 rounded text-sm mb-2 mt-2"
@@ -549,7 +609,7 @@ const CargaEducacion = () => {
                             <div className="flex justify-center mt-4">
                                 <button
                                     onClick={handleAgregarCurso}
-                                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
+                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 text-xs"
                                 >
                                     Cargar
                                 </button>
@@ -617,34 +677,41 @@ const CargaEducacion = () => {
                                                 <div className="text-sm"><strong>Tiempo Cursando:</strong> {calcularTiempoCursando(registro.fechaInicio, registro.fechaFin)}</div>
                                                 <div className="text-sm text-gray-500 mt-2"><strong>Fecha de Carga:</strong> {registro.fechaCarga}</div>
 
-                                                {/* Mostrar el archivo adjunto si existe */}
                                                 {registro.archivoAdjunto ? (
-                                                    <div className="text-sm mt-2">
-                                                        <strong>Archivo adjunto:</strong>{" "}
+                                                    <div className="flex items-center mt-2">
+                                                        <strong className="text-sm mr-2">Archivo adjunto: </strong>
+
+                                                        {/* Si el archivo es un objeto File */}
                                                         {registro.archivoAdjunto instanceof File ? (
-                                                            <a
-                                                                href={URL.createObjectURL(registro.archivoAdjunto)}
-                                                                download={registro.archivoAdjunto.name}
-                                                                className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
-                                                            >
-                                                                Descargar
-                                                            </a>
+                                                            <div className="flex items-center">
+                                                                <a
+                                                                    href={URL.createObjectURL(registro.archivoAdjunto)}
+                                                                    download={registro.archivoAdjunto.name}
+                                                                    className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                                >
+                                                                    Descargar
+                                                                </a>
+
+                                                                {/* Botones Editar y Eliminar al lado del de Descargar */}
+                                                                <button
+                                                                    onClick={() => handleEditarArchivo(index)}
+                                                                    className="bg-orange-400 text-white p-2 rounded-full text-xs hover:bg-orange-500 inline-block ml-2"
+                                                                >
+                                                                    Editar
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleOpenDeleteModal(index)}
+                                                                    className="bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500 inline-block ml-2"
+                                                                >
+                                                                    Eliminar
+                                                                </button>
+                                                            </div>
                                                         ) : (
                                                             <span className="text-red-500">Error: No se puede generar enlace para el archivo adjunto.</span>
                                                         )}
-
-                                                        {/* Mostrar la fecha de carga del archivo */}
-                                                        {registro.fechaArchivoAdjunto && (
-                                                            <div className="text-xs text-gray-500 mt-1">
-                                                                <div className="text-sm text-gray-500 mt-2"><strong>Fecha de Carga del Archivo:</strong> {registro.fechaArchivoAdjunto} </div>
-                                                            </div>
-                                                        )}
                                                     </div>
-                                                ) : null}
-
-
-                                                {/* Mostrar el campo para cargar archivo solo si no existe uno */}
-                                                {!registro.archivoAdjunto && (
+                                                ) : (
+                                                    // Si el archivo fue eliminado, mostrar el campo para cargar uno nuevo
                                                     <div className="flex flex-col mt-2">
                                                         <span className="text-sm"><strong>Archivo adjunto:</strong></span>
                                                         <input
@@ -654,6 +721,32 @@ const CargaEducacion = () => {
                                                         />
                                                     </div>
                                                 )}
+
+                                                {/* Mostrar las fechas debajo de los botones */}
+                                                <div className="mt-2">
+                                                    {/* Mostrar la fecha de carga del archivo solo si el archivo ha sido cargado */}
+                                                    {registro.fechaArchivoAdjunto && (
+                                                        <div className="text-sm text-gray-500 mt-1">
+                                                            <strong>Fecha de Carga Archivo:</strong> {registro.fechaArchivoAdjunto}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Mostrar la fecha de edición, si existe */}
+                                                    {registro.fechaEdicionArchivo && (
+                                                        <div className="text-sm text-gray-500 mt-1">
+                                                            <strong>Fecha de Edición Archivo:</strong> {registro.fechaEdicionArchivo}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Mostrar la fecha de eliminación, si existe */}
+                                                    {registro.fechaEliminacionArchivo && (
+                                                        <div className="text-sm text-gray-500 mt-1">
+                                                            <strong>Fecha de Eliminación Archivo:</strong> {registro.fechaEliminacionArchivo}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+
 
                                                 <div className="flex justify-end mt-2">
                                                     <button
@@ -671,12 +764,35 @@ const CargaEducacion = () => {
                                     </ul>
                                 )}
                             </div>
-                        </div>
 
+                            {confirmDeleteHistorialModal && (
+                                <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
+                                    <div className="bg-white p-6 rounded-md shadow-lg text-center w-full max-w-md mx-4 md:mx-0 max-h-screen overflow-auto">
+                                        <h2 className="text-lg font-bold mb-4 text-red-600">Confirmar Eliminación</h2>
+                                        <p>¿Estás seguro de que deseas eliminar este archivo? Esta acción no se puede deshacer.</p>
+                                        <div className="mt-4 flex justify-center">
+                                            <button
+                                                onClick={handleEliminarActaArchivo}
+                                                className="bg-red-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-red-600"
+                                            >
+                                                Eliminar
+                                            </button>
+                                            <button
+                                                onClick={handleCloseDeleteHistorialModal}
+                                                className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+                                            >
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                        </div>
 
                         {isModalOpen && (
                             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                                <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-full md:max-w-md mx-4 md:mx-auto"> {/* Responsivo */}
+                                <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-full md:max-w-md mx-4 md:mx-auto">
                                     <h2 className="text-lg font-bold mb-4 text-center md:text-left">Ingrese el Motivo de la Anulación</h2>
 
                                     {/* Textarea para el motivo */}
@@ -692,6 +808,7 @@ const CargaEducacion = () => {
                                     <div className="text-sm mb-1"><strong>Archivo adjunto:</strong></div>
                                     <input
                                         type="file"
+                                        accept='.pdf'
                                         onChange={(e) => setArchivoAnulacion(e.target.files[0])}
                                         className="w-full p-2 border border-gray-300 rounded text-sm mb-4"
                                     />
@@ -738,21 +855,31 @@ const CargaEducacion = () => {
 
                                                     {/* Motivo y fecha de anulación */}
                                                     <p className="text-sm italic"><strong>Motivo de anulación:</strong> {registro.motivoAnulacion}</p>
-                                                    <p className="text-sm italic"><strong>Fecha de anulación:</strong> {registro.fechaAnulacion}</p>
 
-                                                    {/* Mostrar archivo adjunto de la anulación solo si existe */}
-                                                    {registro.archivoAnulacion && (
-                                                        <div className="text-sm italic mt-2">
-                                                            <strong>Archivo adjunto:</strong>{" "}
-                                                            <a
-                                                                href={URL.createObjectURL(registro.archivoAnulacion)}
-                                                                download={registro.nombreArchivo}
-                                                                className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
-                                                            >
-                                                                Descargar
-                                                            </a>
+                                                    {registro.archivoAnulacion ? (
+                                                        <div>
+                                                            <div className="text-sm italic mt-2">
+                                                                <strong>Archivo adjunto:</strong>{" "}
+                                                                <a
+                                                                    href={URL.createObjectURL(registro.archivoAnulacion)}
+                                                                    download={registro.nombreArchivo}
+                                                                    className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                                >
+                                                                    Descargar
+                                                                </a>
+                                                            </div>
+
+                                                            {/* Fechas de carga de anulación */}
+                                                            <div className="text-xs text-gray-500 mt-2">
+                                                                {registro.fechaCargaAnulacion && (
+                                                                    <p><strong>Fecha de Carga:</strong> {registro.fechaCargaAnulacion}</p>
+                                                                )}
+                                                            </div>
                                                         </div>
+                                                    ) : (
+                                                        <p className="text-sm italic text-gray-500 mt-2">Archivo adjunto: Eliminado</p>
                                                     )}
+
                                                 </div>
 
                                                 {/* Información del curso */}
@@ -766,27 +893,52 @@ const CargaEducacion = () => {
                                                 </div>
 
                                                 {/* Mostrar archivo original solo si existe */}
-                                                {registro.archivoOriginalCurso && (
-                                                    <div className="text-sm">
-                                                        <strong>Archivo adjunto:</strong>{" "}
-                                                        <a
-                                                            href={URL.createObjectURL(registro.archivoOriginalCurso)} // URL temporal para archivos locales
-                                                            download={registro.archivoOriginalCurso.name} // Nombre del archivo para la descarga
-                                                            className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
-                                                        >
-                                                            Descargar
-                                                        </a>
+                                                {registro.archivoOriginalCurso ? (
+                                                    <div>
+                                                        <div className="text-sm">
+                                                            <strong>Archivo adjunto:</strong>{" "}
+                                                            <a
+                                                                href={URL.createObjectURL(registro.archivoOriginalCurso)}
+                                                                download={registro.archivoOriginalCurso.name}
+                                                                className="bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                            >
+                                                                Descargar
+                                                            </a>
+                                                        </div>
+
+                                                        {/* Mostrar fechas de carga, edición y eliminación del archivo si existen */}
+                                                        <div className="text-sm text-gray-500 mt-2">
+                                                            <p><strong>Fecha de carga:</strong> {registro.fechaCarga}</p>
+                                                            {registro.fechaEdicionArchivo && (
+                                                                <p><strong>Fecha de edición:</strong> {registro.fechaEdicionArchivo}</p>
+                                                            )}
+                                                            {registro.fechaEliminacionArchivo && (
+                                                                <p><strong>Fecha de eliminación:</strong> {registro.fechaEliminacionArchivo}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    // Si el archivo fue eliminado, mostrar las fechas de carga, edición y eliminación
+
+                                                    <div className=" mt-2">
+                                                        <div className="text-sm mb-2"><strong>Archivo adjunto:</strong> Eliminado</div>
+                                                        <div className='text-sm text-gray-500'><strong>Fecha de carga:</strong> {registro.fechaCarga}</div>
+                                                        {registro.fechaEdicionArchivo && (
+                                                            <div className='text-sm text-gray-500'><strong>Fecha de edición:</strong> {registro.fechaEdicionArchivo}</div>
+                                                        )}
+                                                        {registro.fechaEliminacionArchivo && (
+                                                            <div className='text-sm text-gray-500'><strong>Fecha de eliminación:</strong> {registro.fechaEliminacionArchivo}</div>
+                                                        )}
                                                     </div>
                                                 )}
 
-                                                {/* Fecha de carga */}
-                                                <div><p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {registro.fechaCarga}</p></div>
                                             </li>
                                         ))}
                                     </ul>
                                 )}
                             </div>
                         </div>
+
 
 
                     </div>

@@ -18,6 +18,17 @@ const CargaAlojamientoYMovimiento = () => {
         motivoRealojamiento: ''
     });
 
+    const handleEliminarRealojamientoArchivo = () => {
+        const newRealojamientos = [...realojamientos];
+        const newDate = new Date().toLocaleString();
+
+        newRealojamientos[selectedRealojamientoIndex].actasArchivo = null;
+        newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion = [newDate];
+
+        setRealojamientos(newRealojamientos);
+        setConfirmDeleteRealojamientoModal(false);
+    };
+
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedFechaEgreso, setEditedFechaEgreso] = useState('');
 
@@ -117,24 +128,6 @@ const CargaAlojamientoYMovimiento = () => {
         actualizarAlojamientoActual(newRealojamientos[index].pabellon, newRealojamientos[index].celda);
     };
 
-    const handleEliminarRealojamientoArchivo = () => {
-        if (selectedRealojamientoIndex !== null) {
-            const newRealojamientos = [...realojamientos];
-            const newDate = new Date().toLocaleString();
-
-            if (!newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion) {
-                newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion = [];
-            }
-
-            newRealojamientos[selectedRealojamientoIndex].fechasDeEliminacion.push(newDate);
-            newRealojamientos[selectedRealojamientoIndex].actasArchivo = null;
-            setRealojamientos(newRealojamientos);
-        }
-
-        setConfirmDeleteRealojamientoModal(false);
-        setSelectedRealojamientoIndex(null);
-    };
-
     const handleVolver = () => {
         navigate('/general');
     };
@@ -219,14 +212,14 @@ const CargaAlojamientoYMovimiento = () => {
                                 setActasArchivo(file);
                                 setNombreActaArchivo(file.name);
                             }}
-                            accept=".pdf,.doc,.docx"
+                            accept=".pdf"
                             className="mt-1 mb-2 text-sm w-full border border-gray-300 rounded p-1"
                         />
 
                         <div className="flex justify-center mt-2">
                             <button
                                 onClick={handleAgregarRealojamiento}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
+                                className="bg-blue-600 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
                                 Cargar
                             </button>
@@ -279,6 +272,11 @@ const CargaAlojamientoYMovimiento = () => {
                                             </p>
                                             <p className="text-sm"><strong>Motivo del realojamiento:</strong> {item.motivoRealojamiento}</p>
 
+                                            {/* Mostrar la fecha de carga solo si existe */}
+                                            {item.fechaCarga && (
+                                                <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
+                                            )}
+
                                             <span className="text-sm"><strong>Acta:</strong></span>
 
                                             {!item.actasArchivo ? (
@@ -288,26 +286,22 @@ const CargaAlojamientoYMovimiento = () => {
                                                         const newRealojamientos = [...realojamientos];
                                                         const newDate = new Date().toLocaleString();
 
-
                                                         newRealojamientos[index].actasArchivo = e.target.files[0];
 
                                                         if (!newRealojamientos[index].fechaCarga) {
                                                             newRealojamientos[index].fechaCarga = newDate;
                                                         }
 
-                                         
-                                                        if (!newRealojamientos[index].fechasDeCargaActa) {
-                                                            newRealojamientos[index].fechasDeCargaActa = [];
-                                                        }
-
-
-                                                        newRealojamientos[index].fechasDeCargaActa.push(newDate);
+                                                        newRealojamientos[index].fechasDeEdicion = [];
+                                                        newRealojamientos[index].fechasDeEliminacion = [];
+                                                        newRealojamientos[index].fechasDeCargaActa = [newDate];
 
                                                         setRealojamientos(newRealojamientos);
                                                     }}
-                                                    accept=".pdf,.doc,.docx"
+                                                    accept=".pdf"
                                                     className="mt-1 mb-2 text-sm ml-2 w-full border border-gray-300 rounded p-1"
                                                 />
+
                                             ) : (
                                                 <>
                                                     <a
@@ -322,7 +316,7 @@ const CargaAlojamientoYMovimiento = () => {
                                                         onClick={() => {
                                                             const input = document.createElement("input");
                                                             input.type = "file";
-                                                            input.accept = ".pdf,.doc,.docx";
+                                                            input.accept = ".pdf";
 
                                                             input.onchange = (e) => {
                                                                 const file = e.target.files[0];
@@ -330,11 +324,7 @@ const CargaAlojamientoYMovimiento = () => {
                                                                     const newRealojamientos = [...realojamientos];
                                                                     const newDate = new Date().toLocaleString();
 
-                                                                    if (!newRealojamientos[index].fechasDeEdicion) {
-                                                                        newRealojamientos[index].fechasDeEdicion = [];
-                                                                    }
-
-                                                                    newRealojamientos[index].fechasDeEdicion.push(newDate);
+                                                                    newRealojamientos[index].fechasDeEdicion = [newDate]; 
 
                                                                     newRealojamientos[index].actasArchivo = file;
                                                                     setRealojamientos(newRealojamientos);
@@ -348,57 +338,41 @@ const CargaAlojamientoYMovimiento = () => {
                                                         Editar Acta
                                                     </button>
 
+
+
                                                     <button
                                                         onClick={() => {
-                                                            setSelectedRealojamientoIndex(index); 
+                                                            setSelectedRealojamientoIndex(index);
                                                             setConfirmDeleteRealojamientoModal(true);
                                                         }}
                                                         className="mt-2 ml-2 bg-red-400 text-white p-2 rounded-full text-xs hover:bg-red-500"
                                                     >
                                                         Eliminar Acta
                                                     </button>
+
                                                 </>
                                             )}
 
                                             <div>
-                                                {/* Mostrar la fecha de carga solo si existe */}
-                                                {item.fechaCarga && (
-                                                    <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
-                                                )}
 
-                                                {/* Mostrar la fecha de carga de acta solo si existe */}
-                                                {item.fechasDeCargaActa && (
+                                                {/* Mostrar solo la última fecha de carga de acta */}
+                                                {item.fechasDeCargaActa && item.fechasDeCargaActa.length > 0 && (
                                                     <div className="mt-2">
-                                                        <p className='text-sm text-gray-500'><strong>Fecha de carga de acta:</strong></p>
-                                                        <ul className="list-disc list-inside">
-                                                            {item.fechasDeCargaActa.map((fecha, index) => (
-                                                                <li key={index} className="text-sm text-gray-500">{fecha}</li>
-                                                            ))}
-                                                        </ul>
+                                                        <p className="text-sm text-gray-500"><strong>Fecha de carga acta:</strong> {item.fechasDeCargaActa[0]}</p>
                                                     </div>
                                                 )}
 
                                                 {/* Mostrar las fechas de edición solo si hay al menos una */}
                                                 {item.fechasDeEdicion && item.fechasDeEdicion.length > 0 && (
                                                     <div className="mt-2">
-                                                        <p className='text-sm text-gray-500'><strong>Fecha de edición:</strong></p>
-                                                        <ul className="list-disc list-inside">
-                                                            {item.fechasDeEdicion.map((fecha, index) => (
-                                                                <li key={index} className="text-sm text-gray-500">{fecha}</li>
-                                                            ))}
-                                                        </ul>
+                                                        <p className="text-sm text-gray-500"><strong>Fecha de edición acta:</strong> {item.fechasDeEdicion[0]}</p>
                                                     </div>
                                                 )}
 
                                                 {/* Mostrar las fechas de eliminación solo si hay al menos una */}
                                                 {item.fechasDeEliminacion && item.fechasDeEliminacion.length > 0 && (
                                                     <div className="mt-2">
-                                                        <p className='text-sm text-gray-500'><strong>Fecha de eliminación:</strong></p>
-                                                        <ul className="list-disc list-inside">
-                                                            {item.fechasDeEliminacion.map((fecha, index) => (
-                                                                <li key={index} className="text-sm text-gray-500">{fecha}</li>
-                                                            ))}
-                                                        </ul>
+                                                        <p className="text-sm text-gray-500"><strong>Fecha de eliminación acta:</strong> {item.fechasDeEliminacion[0]}</p>
                                                     </div>
                                                 )}
                                             </div>

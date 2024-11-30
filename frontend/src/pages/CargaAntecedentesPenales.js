@@ -53,7 +53,7 @@ const CargaAntecendentesPenales = () => {
                         <div className="flex justify-center mt-2">
                             <button
                                 onClick={handleAgregarAntecedente}
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-xs"
+                                className="bg-blue-600 text-white p-2 rounded hover:bg-blue-600 text-xs"
                             >
                                 Cargar
                             </button>
