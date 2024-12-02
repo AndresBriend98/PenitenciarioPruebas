@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Modal from '../components/ModalChanges';
 
-
 const FichaIngreso = () => {
     const navigate = useNavigate();
     const [historialCambios, setHistorialCambios] = useState({});
@@ -19,39 +18,44 @@ const FichaIngreso = () => {
         }
     };
 
+    const disabledStyle = {
+        backgroundColor: '#f0f0f0', borderColor: '#d1d5db', color: '#6b7280', cursor: 'not-allowed',
+    };
+    const [tipoInterno, setTipoInterno] = useState('');
+
     const calcularCondenaRestante = (fechaCumpleCondena) => {
         const fechaActual = new Date();
         const fechaFinalCondena = new Date(fechaCumpleCondena);
-    
+
         if (isNaN(fechaFinalCondena.getTime()) || isNaN(fechaActual.getTime())) {
             return 'No se puede calcular';
         }
-    
+
         const diferenciaTiempo = fechaFinalCondena - fechaActual;
-    
+
         if (diferenciaTiempo <= 0) return 'La condena ha finalizado';
-    
+
         const añosRestantes = Math.floor(diferenciaTiempo / (1000 * 60 * 60 * 24 * 365));
         const mesesRestantes = Math.floor((diferenciaTiempo % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
         const díasRestantes = Math.floor((diferenciaTiempo % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
-    
+
         return `${añosRestantes} años, ${mesesRestantes} meses y ${díasRestantes} días`;
     };
-    
+
     const [datosInterno, setDatosInterno] = useState({
-        name: 'Maximiliano Ezequiel Dominguez',
+        firstName: 'Maximiliano Ezequiel',
+        lastName: 'Dominguez',
         alias: 'JL',
         unit: 'Unidad Penitenciaria 9',
         fileNumber: '3576',
         typedoc: 'Cédula Ejemplar B',
         dni: '23123564',
         crime: 'Robo',
-        typeofintern: 'Condenado',
         entryDate: '2026-06-01',
         sentenceEndDate: '2034-08-16',
         remainingSentence: '',
         numprontuario: '48765',
-        reingresante: false,
+        reingresante: 0,
         processed: true,
         placeOfEvent: 'Calle Falsa 123, Ciudad',
         detentionDate: '2024-08-15',
@@ -66,7 +70,6 @@ const FichaIngreso = () => {
         observation: '',
         firma: null,
         huellaDactilar: null,
-        oficioEgreso: null,
         caratulaCausa: null,
     });
 
@@ -110,58 +113,15 @@ const FichaIngreso = () => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     };
-
-    const handleInputChange = (e, field) => {
-        const value = field === 'reingresante' ? e.target.checked : e.target.value;
-        const currentDate = new Date().toLocaleString();
-
-        if (field === 'sentenceEndDate') {
-            const nuevaCondenaRestante = calcularCondenaRestante(value);
-
-            if (value !== initialDatosInterno[field] || nuevaCondenaRestante !== initialDatosInterno.remainingSentence) {
-                setIsDataModified(true);
-
-                setHistorialCambios((prev) => ({
-                    ...prev,
-                    [field]: {
-                        ...prev[field],
-                        fechaCarga: prev[field]?.fechaCarga || currentDate,
-                        ultimaModificacion: currentDate,
-                    }
-                }));
-            }
-
-            setDatosInterno((prev) => ({
-                ...prev,
-                [field]: value,
-                remainingSentence: nuevaCondenaRestante,
-            }));
-        } else {
-            if (value !== initialDatosInterno[field]) {
-                setIsDataModified(true);
-
-                setHistorialCambios((prev) => ({
-                    ...prev,
-                    [field]: {
-                        ...prev[field],
-                        fechaCarga: prev[field]?.fechaCarga || currentDate,
-                        ultimaModificacion: currentDate,
-                    }
-                }));
-            } else if (value === initialDatosInterno[field]) {
-                setIsDataModified(false);
-            }
-            setDatosInterno((prev) => ({
-                ...prev,
-                [field]: value
-            }));
-        }
-    };
+    const [initialTipoInterno, setInitialTipoInterno] = useState('');
 
     const campoMapeadoDatosInterno = {
-        name: 'Nombre',
+        firstName: 'Maximiliano Ezequiel',
+        lastName: 'Dominguez',
         alias: 'Alias',
         unit: 'Unidad',
+        cantidadReingresos: 'Cantidad de Reingresos',
+        tipoInterno: 'Tipo Interno',
         fileNumber: 'Número de expediente',
         typedoc: 'Tipo de documento',
         dni: 'DNI',
@@ -186,12 +146,12 @@ const FichaIngreso = () => {
         observation: 'Observación',
         firma: 'Firma',
         huellaDactilar: 'Huella dactilar',
-        oficioEgreso: 'Oficio de egreso',
         caratulaCausa: 'Carátula de la causa',
     };
 
     const [initialDatosInterno, setInitialDatosInterno] = useState({
-        name: '',
+        firstName: 'Maximiliano Ezequiel',
+        lastName: 'Dominguez',
         alias: '',
         unit: '',
         fileNumber: '',
@@ -217,7 +177,6 @@ const FichaIngreso = () => {
         observation: '',
         firma: null,
         huellaDactilar: null,
-        oficioEgreso: null,
         caratulaCausa: null,
         detentionDate: '',
         sentenceEndDate: '',
@@ -227,17 +186,15 @@ const FichaIngreso = () => {
         assistedDate: '',
         reportDate: '',
     });
-
-    const [isEditable, setIsEditable] = useState(false);
-    const [buttonText, setButtonText] = useState('Actualizar');
-    const [isDataModified, setIsDataModified] = useState(false);
-
     const handleCargarActualizar = () => {
         const currentDate = new Date().toLocaleString();
 
         if (buttonText === 'Actualizar') {
             setIsEditable(true);
             setButtonText('Guardar Cambios');
+
+            setInitialTipoInterno(tipoInterno);
+            setInitialDatosInterno(datosInterno);
             setIsDataModified(false);
         } else if (buttonText === 'Guardar Cambios') {
             const allFieldsEmpty = Object.values(datosInterno).every(value =>
@@ -249,22 +206,129 @@ const FichaIngreso = () => {
                 return;
             }
 
-            const hasChanges = Object.keys(datosInterno).some(key =>
-                datosInterno[key] !== initialDatosInterno[key] &&
-                (datosInterno[key] !== '' || datosInterno[key] !== null)
-            );
+            const hasChanges = Object.keys(datosInterno).some(key => {
+                return datosInterno[key] !== initialDatosInterno[key];
+            }) || tipoInterno !== initialTipoInterno;
 
             if (!hasChanges) {
                 alert("No hay cambios significativos para guardar.");
                 return;
             }
 
+            setInitialDatosInterno(datosInterno);
+            setInitialTipoInterno(tipoInterno);
+
+            // Guardamos los datos
             console.log('Datos guardados');
-            setInitialDatosInterno(datosInterno); setIsEditable(false);
+            setIsEditable(false);
             setButtonText('Actualizar');
             setIsDataModified(false);
         }
     };
+
+    const handleInputChange = (e, field) => {
+        let value = e.target.type === 'checkbox'
+            ? e.target.checked
+            : e.target.value;
+
+        const currentDate = new Date().toLocaleString();
+
+        if (field === 'cantidadReingresos') {
+            value = Math.max(0, Math.min(100, parseInt(value) || 0));
+        }
+
+        if (field === 'reingresante') {
+            setDatosInterno((prev) => ({
+                ...prev,
+                reingresante: value,
+                cantidadReingresos: value ? 1 : '',
+            }));
+
+            setHistorialCambios((prev) => ({
+                ...prev,
+                reingresante: value
+                    ? {
+                        ...prev.reingresante,
+                        fechaCarga: prev.reingresante?.fechaCarga || currentDate,
+                        ultimaModificacion: currentDate,
+                    }
+                    : {
+                        ...prev.reingresante,
+                        ultimaModificacion: currentDate,
+                        eliminado: true,
+                    },
+                cantidadReingresos: value
+                    ? {
+                        ...prev.cantidadReingresos,
+                        fechaCarga: prev.cantidadReingresos?.fechaCarga || currentDate,
+                        ultimaModificacion: currentDate,
+                    }
+                    : {
+                        ...prev.cantidadReingresos,
+                        ultimaModificacion: currentDate,
+                        eliminado: true,
+                    },
+            }));
+
+            setIsDataModified(true);
+            return;
+        }
+
+        setDatosInterno((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+
+        if (value !== initialDatosInterno[field] && value !== datosInterno[field]) {
+            setHistorialCambios((prev) => ({
+                ...prev,
+                [field]: {
+                    ...prev[field],
+                    fechaCarga: prev[field]?.fechaCarga || currentDate,
+                    ultimaModificacion: currentDate,
+                },
+            }));
+            setIsDataModified(true);
+        } else {
+            const currentHistory = { ...historialCambios };
+            if (currentHistory[field]) {
+                delete currentHistory[field];
+            }
+            setHistorialCambios(currentHistory);
+            setIsDataModified(false);
+        }
+    };
+
+
+    const handleTipoInternoChange = (e) => {
+        const value = e.target.value;
+
+        if (value !== initialTipoInterno) {
+            setIsDataModified(true);
+        } else {
+            setIsDataModified(false);
+        }
+
+        setTipoInterno(value);
+
+        const currentDate = new Date().toLocaleString();
+        if (value !== initialTipoInterno) {
+            setHistorialCambios((prev) => ({
+                ...prev,
+                tipoInterno: {
+                    ...prev.tipoInterno,
+                    fechaCarga: prev.tipoInterno?.fechaCarga || currentDate,
+                    ultimaModificacion: currentDate,
+                },
+            }));
+        }
+    };
+
+
+    const [isEditable, setIsEditable] = useState(false);
+    const [buttonText, setButtonText] = useState('Actualizar');
+    const [isDataModified, setIsDataModified] = useState(false);
+
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-4 flex flex-col">
@@ -286,13 +350,31 @@ const FichaIngreso = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div>
+                            <label className="block text-sm font-semibold mb-2">Tipo de Interno</label>
+                            <select
+                                className="w-full p-1 border border-gray-300 rounded text-sm"
+                                value={tipoInterno}
+                                onChange={handleTipoInternoChange}
+                                disabled={!isEditable}
+                            >
+                                <option value="" disabled>Seleccionar tipo de interno</option>
+                                <option value="condenado">Condenado</option>
+                                <option value="procesado">Procesado</option>
+                            </select>
+                        </div>
+
+                        <div className="mb-4">
                             <label className="block text-sm font-semibold mb-2">Cantidad de Reingresos</label>
                             <input
                                 type="number"
                                 placeholder="Introduce la cantidad de reingresos"
                                 className="w-full p-1 border border-gray-300 rounded text-sm"
-                                value={datosInterno.reingresante ? '1' : '0'} disabled={!datosInterno.reingresante || !isEditable} />
+                                value={datosInterno.cantidadReingresos || ''}
+                                onChange={(e) => handleInputChange(e, 'cantidadReingresos')}
+                                disabled={!datosInterno.reingresante || !isEditable}
+                            />
                         </div>
+
                         <div>
                             <label className="block text-sm font-semibold mb-2">Lugar del hecho</label>
                             <input
@@ -301,17 +383,22 @@ const FichaIngreso = () => {
                                 className="w-full p-1 border border-gray-300 rounded text-sm"
                                 value={datosInterno.placeOfEvent}
                                 onChange={(e) => handleInputChange(e, 'placeOfEvent')}
-                                disabled={!isEditable} />
+                                disabled={!isEditable}
+                            />
                         </div>
+
                         <div>
                             <label className="block text-sm font-semibold mb-2">Fecha de Detención</label>
                             <input
                                 type="date"
+                                style={(tipoInterno === 'procesado' || tipoInterno === '') ? disabledStyle : {}}
                                 className="w-full p-1 border border-gray-300 rounded text-sm"
                                 value={datosInterno.detentionDate}
                                 onChange={(e) => handleInputChange(e, 'detentionDate')}
-                                disabled={!isEditable} />
+                                disabled={tipoInterno === 'procesado' || tipoInterno === '' || !isEditable}
+                            />
                         </div>
+
                         <div>
                             <label className="block text-sm font-semibold mb-2">Fecha de Ingreso</label>
                             <input
@@ -329,8 +416,11 @@ const FichaIngreso = () => {
                                 className="w-full p-1 border border-gray-300 rounded text-sm"
                                 value={datosInterno.sentence}
                                 onChange={(e) => handleInputChange(e, 'sentence')}
-                                disabled={!isEditable} />
+                                style={(tipoInterno === 'procesado' || tipoInterno === '') ? disabledStyle : {}}
+                                disabled={tipoInterno === 'procesado' || tipoInterno === '' || !isEditable}
+                            />
                         </div>
+
                         <div>
                             <label className="block text-sm font-semibold mb-2">Fecha Cumple Condena</label>
                             <input
@@ -338,18 +428,25 @@ const FichaIngreso = () => {
                                 className="w-full p-1 border border-gray-300 rounded text-sm text-red-700"
                                 value={datosInterno.sentenceEndDate}
                                 onChange={(e) => handleInputChange(e, 'sentenceEndDate')}
-                                disabled={!isEditable} />
+                                style={(tipoInterno === 'procesado' || tipoInterno === '') ? disabledStyle : {}}
+                                disabled={tipoInterno === 'procesado' || tipoInterno === '' || !isEditable}
+                            />
                         </div>
+
                         <div>
                             <label className="block text-sm font-semibold mb-2">Condena Restante</label>
                             <input
                                 type="text"
-                                value={datosInterno.remainingSentence}
-                                onChange={(e) => handleInputChange(e, 'remainingSentence')}
-                                disabled={true} // Campo no editable
-                                className="w-full p-1 border border-gray-300 rounded text-sm text-red-700"
+                                value={tipoInterno === 'procesado' || tipoInterno === '' ? 'No disponible' : datosInterno.remainingSentence}
+                                disabled={tipoInterno === 'procesado' || tipoInterno === ''}
+                                style={(tipoInterno === 'procesado' || tipoInterno === '') ? disabledStyle : {}}
+                                className={`w-full p-1 border border-gray-300 rounded text-sm 
+                                ${tipoInterno === 'procesado' || tipoInterno === '' ? 'bg-gray-200 text-gray-500' : 'text-red-700'}`}
                             />
                         </div>
+
+
+
                         <div>
                             <label className="block text-sm font-semibold mb-2">Fecha Conmutación de Pena</label>
                             <input
@@ -357,7 +454,9 @@ const FichaIngreso = () => {
                                 className="w-full p-1 border border-gray-300 rounded text-sm"
                                 value={datosInterno.commutationDate}
                                 onChange={(e) => handleInputChange(e, 'commutationDate')}
-                                disabled={!isEditable} />
+                                style={(tipoInterno === 'procesado' || tipoInterno === '') ? disabledStyle : {}}
+                                disabled={tipoInterno === 'procesado' || tipoInterno === '' || !isEditable}
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-semibold mb-2">Fecha Beneficio Transitorio</label>
@@ -375,8 +474,11 @@ const FichaIngreso = () => {
                                 className="w-full p-1 border border-gray-300 rounded text-sm"
                                 value={datosInterno.conditionalLibertyDate}
                                 onChange={(e) => handleInputChange(e, 'conditionalLibertyDate')}
-                                disabled={!isEditable} />
+                                style={(tipoInterno === 'procesado' || tipoInterno === '') ? disabledStyle : {}}
+                                disabled={tipoInterno === 'procesado' || tipoInterno === '' || !isEditable}
+                            />
                         </div>
+
                         <div>
                             <label className="block text-sm font-semibold mb-2">Fecha Asistida</label>
                             <input
@@ -384,8 +486,11 @@ const FichaIngreso = () => {
                                 className="w-full p-1 border border-gray-300 rounded text-sm"
                                 value={datosInterno.assistedDate}
                                 onChange={(e) => handleInputChange(e, 'assistedDate')}
-                                disabled={!isEditable} />
+                                style={(tipoInterno === 'procesado' || tipoInterno === '') ? disabledStyle : {}}
+                                disabled={tipoInterno === 'procesado' || tipoInterno === '' || !isEditable}
+                            />
                         </div>
+
                         <div>
                             <label className="block text-sm font-semibold mb-2">Fecha Informe</label>
                             <input
@@ -403,11 +508,12 @@ const FichaIngreso = () => {
                                 rows="2"
                                 value={datosInterno.observation}
                                 onChange={(e) => handleInputChange(e, 'observation')}
-                                disabled={!isEditable}                             ></textarea>
+                                disabled={!isEditable}
+                            ></textarea>
                         </div>
                     </div>
-                    <div className="flex items-center mt-4 space-x-4">
-                        <div className="flex-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                        <div>
                             <label className="block text-sm font-semibold mb-2">Foto de Firma</label>
                             <div className="border border-gray-300 p-2 rounded-md bg-gray-50 mt-1">
                                 {isEditable ? (
@@ -435,7 +541,7 @@ const FichaIngreso = () => {
                             </div>
                         </div>
 
-                        <div className="flex-1">
+                        <div>
                             <label className="block text-sm font-semibold mb-2">Foto de Huella Dactilar</label>
                             <div className="border border-gray-300 p-2 rounded-md bg-gray-50 mt-1">
                                 {isEditable ? (
@@ -463,45 +569,13 @@ const FichaIngreso = () => {
                             </div>
                         </div>
 
-                    </div>
-
-                    <div className="flex items-center mt-4 space-x-4">
-                        <div className="flex-1">
-                            <label className="block text-sm font-semibold mb-2">Oficio de Egreso</label>
-                            <div className="border border-gray-300 p-2 rounded-md bg-gray-50 mt-1">
-                                {isEditable ? (
-                                    <input
-                                        type="file"
-                                        accept='.pdf'
-                                        className="w-full text-sm text-gray-500"
-                                        onChange={(e) => handleFileUpload(e, 'oficioEgreso')}
-                                    />
-                                ) : (
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-gray-500 text-sm">
-                                            {datosInterno.oficioEgreso ? datosInterno.oficioEgreso.name : 'Ningún archivo cargado'}
-                                        </p>
-                                        {datosInterno.oficioEgreso && (
-                                            <button
-                                                className="ml-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition"
-                                                onClick={() => handleDownload(datosInterno.oficioEgreso)}
-                                            >
-                                                <i className="fas fa-download"></i>
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-
-                        <div className="flex-1">
+                        <div>
                             <label className="block text-sm font-semibold mb-2">Carátula de la Causa</label>
                             <div className="border border-gray-300 p-2 rounded-md bg-gray-50 mt-1">
                                 {isEditable ? (
                                     <input
                                         type="file"
-                                        accept='.pdf'
+                                        accept=".pdf"
                                         className="w-full text-sm text-gray-500"
                                         onChange={(e) => handleFileUpload(e, 'caratulaCausa')}
                                     />
@@ -523,6 +597,7 @@ const FichaIngreso = () => {
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 <div className="flex justify-between mt-10">
@@ -555,7 +630,6 @@ const FichaIngreso = () => {
                         historialCambios={historialCambios}
                         campoMapeado={campoMapeadoDatosInterno}
                     />
-
                 </div>
             </div>
 

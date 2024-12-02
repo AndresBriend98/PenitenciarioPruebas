@@ -10,6 +10,33 @@ const CargaJudicial = () => {
     const [isCargado, setIsCargado] = useState({});
     const [isModalArchivos, setIsModalArchivos] = useState(false);
     const [modalCerradoSinEdicion, setModalCerradoSinEdicion] = useState(false);
+    const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
+    const [selectedAbogadoIndex, setSelectedAbogadoIndex] = useState(null);
+
+    const handleOpenDeleteModal = (index) => {
+        setSelectedAbogadoIndex(index);
+        setConfirmDeleteModal(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setSelectedAbogadoIndex(null);
+        setConfirmDeleteModal(false);
+    };
+
+    const handleConfirmDeleteAbogado = () => {
+        if (selectedAbogadoIndex !== null) {
+            setAbogados((prevState) =>
+                prevState
+                    .map((abogado, i) =>
+                        i === selectedAbogadoIndex
+                            ? { ...abogado, eliminado: true }
+                            : abogado
+                    )
+                    .sort((a, b) => (a.eliminado ? 1 : -1))
+            );
+        }
+        handleCloseDeleteModal();
+    };
 
     const handleEditFotoClick = (id) => {
         const victima = victimas.find((item) => item.id === id);
@@ -25,14 +52,13 @@ const CargaJudicial = () => {
                     const updatedVictimas = victimas.map((item) =>
                         item.id === id ? { ...item, foto: URL.createObjectURL(file) } : item
                     );
-                    setVictimas(updatedVictimas); 
+                    setVictimas(updatedVictimas);
                 }
             };
 
             input.click();
         }
     };
-
 
     const handleFileSelect = (e, campo) => {
         const archivo = e.target.files[0];
@@ -101,8 +127,6 @@ const CargaJudicial = () => {
         }
         setIsModalArchivos(!isModalArchivos);
     };
-
-    const hayArchivosSeleccionados = Object.keys(files).length > 0;
 
     const campoToTitle = {
         resolucionFinal: "Resolución Final",
@@ -317,10 +341,14 @@ const CargaJudicial = () => {
         }
 
         const fechaCarga = new Date().toLocaleString();
-        setAbogados([...abogados, { ...abogado, fechaCarga }]);
+        setAbogados((prevState) => [
+            { ...abogado, fechaCarga },
+            ...prevState,
+        ]);
         setAbogado({ nombreApellido: '', matricula: '', poderes: '' });
         setAbogadoErrors({ nombreApellido: false, matricula: false, poderes: false });
     };
+
 
     const [abogado, setAbogado] = useState({
         nombreApellido: '',
@@ -486,7 +514,6 @@ const CargaJudicial = () => {
                         <div className="border border-gray-300 bg-gray-50 p-2 bg-white rounded-md shadow-md flex flex-col mt-5">
                             <h2 className="text-l font-bold mb-4">Documentos Adjuntos</h2>
 
-                            {/* Uso de grid para 2 columnas en pantallas grandes y 1 columna en pantallas pequeñas */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 {['resolucionFinal', 'fundamentoSentencia', 'abocamiento', 'computo'].map((campo) => (
                                     <div key={campo} className="mb-4">
@@ -494,29 +521,39 @@ const CargaJudicial = () => {
                                             {campoToTitle[campo]}
                                         </label>
 
-                                        {/* Solo muestra el selector de archivo si no se ha cargado un archivo */}
-                                        <input
-                                            type="file"
-                                            accept=".pdf"
-                                            onChange={(e) => handleFileSelect(e, campo)}
-                                            className={`w-full p-1 border ${isCargado[campo] ? 'bg-gray-200 cursor-not-allowed' : 'border-gray-300'} rounded text-sm`}
-                                            disabled={isCargado[campo]}
-                                        />
+                                        <div className="border border-gray-300 p-2 rounded-md bg-gray-50 mt-1">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-gray-500 text-sm">
+                                                    {isCargado[campo] && files[campo]
+                                                        ? files[campo].name
+                                                        : isCargado[campo] && archivosHistorial[campo]?.length > 0
+                                                            ? archivosHistorial[campo][0].archivoAdjunto.name
+                                                            : ''}
+                                                </p>
+
+                                                {!isCargado[campo] && (
+                                                    <input
+                                                        type="file"
+                                                        accept=".pdf"
+                                                        onChange={(e) => handleFileSelect(e, campo)}
+                                                        className="w-full p-1 border border-gray-300 rounded text-sm"
+                                                    />
+                                                )}
+
+                                                {files[campo] && !isCargado[campo] && (
+                                                    <button
+                                                        onClick={() => handleCargarArchivos(campo)}
+                                                        className="ml-2 p-1 text-xs bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
+                                                        title="Cargar archivo"
+                                                    >
+                                                        Cargar
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
-
-                            {/* Solo muestra el botón de cargar archivos si hay archivos seleccionados */}
-                            {hayArchivosSeleccionados && (
-                                <div className="flex justify-center mt-4">
-                                    <button
-                                        onClick={handleCargarArchivos}
-                                        className="bg-blue-600 text-white px-4 py-2 rounded-md text-xs"
-                                    >
-                                        Cargar
-                                    </button>
-                                </div>
-                            )}
 
                             <div className="flex justify-center lg:justify-end mb-4 mt-4">
                                 <button
@@ -546,7 +583,6 @@ const CargaJudicial = () => {
                                                 <path d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
-
                                         <h3 className="text-lg font-bold text-center">Archivos cargados</h3>
 
                                         {/* Verificar si hay archivos en el historial */}
@@ -589,7 +625,6 @@ const CargaJudicial = () => {
                                                                     </button>
                                                                 </div>
 
-                                                                {/* Mostrar el campo para seleccionar archivo solo si estamos editando este campo */}
                                                                 {campoEditando === campo && (
                                                                     <div className="mt-4 text-xs">
                                                                         <input
@@ -610,6 +645,7 @@ const CargaJudicial = () => {
                                 </div>
                             )}
                         </div>
+
 
                     </div>
                 </div>
@@ -662,18 +698,38 @@ const CargaJudicial = () => {
                                     Cargar
                                 </button>
                             </div>
-                            <div className='bg-white p-4 rounded-md shadow-md border border-gray-300'>
+                            <div className="bg-white p-4 rounded-md shadow-md border border-gray-300">
                                 <h3 className="text-sm font-bold">Historial de Abogados</h3>
                                 <div className="mt-3 border border-gray-300 rounded bg-gray-50 p-2 max-h-40 overflow-y-auto">
                                     {abogados.length > 0 ? (
                                         <ul className="mt-2">
                                             {abogados.map((item, index) => (
-                                                <li key={index} className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm">
-                                                    <p className='text-sm'><strong>Nombre y Apellido:</strong> {item.nombreApellido}</p>
-                                                    <p className='text-sm'><strong>Matrícula:</strong> {item.matricula}</p>
-                                                    <p className='text-sm'><strong>Poderes:</strong> {item.poderes}</p>
-                                                    <div>
+                                                <li
+                                                    key={index}
+                                                    className="px-4 py-2 border border-gray-300 text-left mb-2 rounded bg-white shadow-sm flex flex-col sm:flex-row sm:justify-between items-start sm:items-center"
+                                                >
+                                                    <div className="mb-2 sm:mb-0">
+                                                        <p className="text-sm"><strong>Nombre y Apellido:</strong> {item.nombreApellido}</p>
+                                                        <p className="text-sm"><strong>Matrícula:</strong> {item.matricula}</p>
+                                                        <p className="text-sm"><strong>Poderes:</strong> {item.poderes}</p>
                                                         <p className="text-sm text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
+                                                    </div>
+
+                                                    <div className="w-full sm:w-auto text-right sm:text-left">
+                                                        {item.eliminado && (
+                                                            <p className="text-red-500 font-bold mt-2 sm:mt-0 italic text-sm">Abogado Eliminado</p>
+                                                        )}
+
+
+                                                        {!item.eliminado && (
+                                                            <button
+                                                                type="button"
+                                                                className="mt-2 bg-red-400 text-white px-4 py-1 rounded-md text-xs hover:bg-red-500"
+                                                                onClick={() => handleOpenDeleteModal(index)}
+                                                            >
+                                                                Eliminar
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </li>
                                             ))}
@@ -684,7 +740,37 @@ const CargaJudicial = () => {
                                         </p>
                                     )}
                                 </div>
+
+                                {/* Modal de confirmación de eliminación */}
+                                {confirmDeleteModal && (
+                                    <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
+                                        <div className="bg-white p-6 rounded-md shadow-lg text-center w-full max-w-md mx-4 md:mx-0 max-h-screen overflow-auto">
+                                            <h2 className="text-lg font-bold mb-4 text-red-600">Confirmar Eliminación</h2>
+                                            <p>¿Estás seguro de que deseas eliminar este abogado? Esta acción no se puede deshacer.</p>
+                                            <div className="mt-4 flex justify-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleConfirmDeleteAbogado}
+                                                    className="bg-red-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-red-600"
+                                                >
+                                                    Eliminar
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCloseDeleteModal}
+                                                    className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+                                                >
+                                                    Cancelar
+                                                </button>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+
+
                         </form>
                     </div>
 
@@ -817,14 +903,12 @@ const CargaJudicial = () => {
                         {showModalFoto && (
                             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                                 <div className="bg-white p-4 rounded-md shadow-lg relative max-w-full w-full sm:max-w-lg sm:w-auto">
-                                    {/* Botón para cerrar el modal */}
                                     <button
                                         onClick={handleCloseModal}
                                         className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                                     >
                                         ×
                                     </button>
-                                    {/* Imagen dentro del modal, que será responsive */}
                                     <img
                                         src={modalPhoto}
                                         alt="Modal Foto"

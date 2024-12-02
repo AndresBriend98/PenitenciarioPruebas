@@ -34,33 +34,35 @@ const Modal = ({ isOpen, onClose, historialCambios, campoMapeado }) => {
             <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2 max-w-3xl">
                 <h2 className="text-lg font-bold mb-2">Historial de Cambios</h2>
 
-                {noChanges ? (
+                {Object.keys(historialCambios).filter(key => historialCambios[key] && !historialCambios[key].eliminado).length === 0 ? (
+
                     <p className="text-center text-sm text-gray-500 mt-4">No hay cambios registrados aún.</p>
                 ) : (
                     <div className="overflow-y-auto max-h-[400px] md:max-h-[500px] lg:max-h-[600px] border border-gray-300 p-2 rounded mt-2 bg-gray-50">
-                        {Object.entries(historialCambios).map(([field, { fechaCarga, ultimaModificacion, imagenUrl, imagenNombre }]) => (
-                            <div key={field} className="mb-4 p-4 border-b border-gray-200 rounded-md">
-                                <h3 className="block text-sm font-bold mb-1">{campoMapeado[field] || field}</h3>
-                                <p className="text-sm text-gray-500 mt-2">
-                                    <strong>Fecha de carga:</strong> {fechaCarga ? fechaCarga : 'No disponible'}
-                                </p>
-                                <p className="text-sm text-gray-500 mt-2">
-                                    <strong>Última modificación:</strong> {ultimaModificacion ? ultimaModificacion : 'No disponible'}
-                                </p>
+                        {Object.entries(historialCambios)
+                            .filter(([_, value]) => value && !value.eliminado)
+                            .map(([field, { fechaCarga, ultimaModificacion, imagenUrl }]) => (
+                                <div key={field} className="mb-4 p-4 border-b border-gray-200 rounded-md">
+                                    <h3 className="block text-sm font-bold mb-1">{campoMapeado[field] || field}</h3>
+                                    <p className="text-sm text-gray-500 mt-2">
+                                        <strong>Fecha de carga:</strong> {fechaCarga || 'No disponible'}
+                                    </p>
+                                    <p className="text-sm text-gray-500 mt-2">
+                                        <strong>Última modificación:</strong> {ultimaModificacion || 'No disponible'}
+                                    </p>
 
-                                {imagenUrl && (
-                                    <div className="mt-2">
-                                        <button
-                                            className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
-                                            onClick={() => handleDownloadZip(imagenUrl)}
-                                        >
-                                            Descargar Archivo/s
-                                        </button>
-                                    </div>
-                                )}
-
-                            </div>
-                        ))}
+                                    {imagenUrl && (
+                                        <div className="mt-2">
+                                            <button
+                                                className="ml-2 bg-blue-400 text-white p-2 rounded-full text-xs hover:bg-blue-500 inline-block"
+                                                onClick={() => handleDownloadZip(imagenUrl)}
+                                            >
+                                                Descargar Archivo/s
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
                     </div>
                 )}
 

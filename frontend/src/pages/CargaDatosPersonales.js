@@ -315,14 +315,13 @@ const CargaDatosPersonales = () => {
                         <label className="block text-sm font-semibold mb-1">Teléfono</label>
                         <input
                             placeholder="Ingrese su teléfono"
-                            type="text"
+                            type="number"
                             value={datosPersonales.telefono}
                             onChange={(e) => handleInputChange(e, 'telefono')}
                             disabled={!isEditable}
                             className="w-full p-1 border border-gray-300 rounded text-sm"
                         />
                     </div>
-
 
                     {/* Religion */}
                     <div>

@@ -2,21 +2,43 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
+    const [touchStartX, setTouchStartX] = useState(0);
+    const [scrollOffset, setScrollOffset] = useState(0);
+    
+    const handleTouchStart = (e) => {
+        setTouchStartX(e.touches[0].clientX);  // Guarda la posición inicial del toque
+        setScrollOffset(scrollContainerRef.current.scrollLeft);  // Guarda la posición actual del carrousel
+    };
+    
+    const handleTouchMove = (e) => {
+        const touchMoveX = e.touches[0].clientX;  // Obtiene la posición actual del toque
+        const distanceMoved = touchStartX - touchMoveX;  // Calcula la distancia desplazada
+    
+        if (scrollContainerRef.current) {
+            // Desplaza el contenedor proporcionalmente al movimiento del dedo
+            scrollContainerRef.current.scrollLeft = scrollOffset + distanceMoved;
+        }
+    };
+    
+    const handleTouchEnd = () => {
+        // Opcional: Puedes agregar lógica aquí para hacer algo cuando el dedo se suelta
+    };
+    
+
     const navigate = useNavigate();
     const location = useLocation();
     const scrollContainerRef = useRef(null);
     const photoInputRef = useRef(null);
 
-    // Estado para los valores originales
     const [originalFields, setOriginalFields] = useState({
-        name: 'Maximiliano Ezequiel Dominguez',
+        firstName: 'Maximiliano Ezequiel',
+        lastName: 'Dominguez',
         alias: 'JL',
         unit: 'Unidad Penitenciaria 9',
         fileNumber: '3576',
         typedoc: 'Cédula Ejemplar B',
         dni: '23123564',
         crime: 'Robo',
-        typeofintern: 'Condenado',
         entryDate: '10/06/2024',
         sentenceEndDate: '10/06/2030',
         remainingSentence: '3 años 2 meses 5 días',
@@ -26,33 +48,109 @@ const Header = () => {
         egresoDate: '2024-09-09',
         numOficioEgreso: '12345',
         photoUrl: null,
+        motivoEgreso: 'traslado',
+        oficioEgreso: null,
+        oficioEgresoFechaCarga: null,
+        oficioEgresoFechaEdicion: null,
     });
 
-    const [editableFields, setEditableFields] = useState({ ...originalFields });
-    const [isEditing, setIsEditing] = useState(false);
-    const [hasChanges, setHasChanges] = useState(false);
+    const handleFileChange = (e) => {
+        const { name, files } = e.target;
+
+        if (name === 'oficioEgreso') {
+            if (files.length > 0) {
+                setEditableFields((prevFields) => ({
+                    ...prevFields,
+                    [name]: files[0],
+                }));
+                setIsFileChanged(true);
+            } else {
+                setEditableFields((prevFields) => ({
+                    ...prevFields,
+                    [name]: null,
+                }));
+                setIsFileChanged(false);
+            }
+        }
+    };
+
+    const handleSave = () => {
+        const hasChanges = Object.keys(editableFields).some(
+            (key) => editableFields[key] !== originalFields[key]
+        );
+
+        if (hasChanges) {
+            const currentDateTime = new Date().toLocaleString();
+
+            if (editableFields.oficioEgreso !== originalFields.oficioEgreso) {
+                setOriginalFields((prevFields) => ({
+                    ...editableFields,
+                    oficioEgresoFechaCarga: prevFields.oficioEgresoFechaCarga || currentDateTime,
+                    oficioEgresoFechaEdicion: isFileChanged ? currentDateTime : prevFields.oficioEgresoFechaEdicion,
+                }));
+            } else {
+                setOriginalFields((prevFields) => ({
+                    ...editableFields,
+                }));
+            }
+
+            setHasChanges(false);
+        }
+
+        setIsEditing(false);
+        setIsFileChanged(false);
+    };
+
 
 
     const handleCancelEdit = () => {
         setEditableFields({ ...originalFields });
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+
         setIsEditing(false);
+        setIsFileChanged(false);
     };
-    
+
+    const [editableFields, setEditableFields] = useState({ ...originalFields });
+    const [fileDates, setFileDates] = useState({
+        carga: null,
+        ultimaModificacion: null,
+    });
+    const [isFileChanged, setIsFileChanged] = useState(false);
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false);
+
+    const fileInputRef = useRef(null);
     const handleEditToggle = () => {
-        if (isEditing && hasChanges) {
+        if (isEditing && hasChanges || isFileChanged) {
             setOriginalFields({ ...editableFields });
+            setFileDates({ ...fileDates });
         }
         setIsEditing(!isEditing);
     };
-    
+
+    const handleDownload = (file) => {
+        const fileUrl = URL.createObjectURL(file);
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = file.name;
+        link.click();
+        URL.revokeObjectURL(fileUrl);
+    };
+
     useEffect(() => {
-        if (editableFields) {
-            const hasDifferences = JSON.stringify(originalFields) !== JSON.stringify(editableFields);
-            setHasChanges(hasDifferences);
-        }
+        const hasDifferences = Object.keys(editableFields).some((key) => {
+            return editableFields[key] !== originalFields[key];
+        });
+
+        setHasChanges(hasDifferences);
     }, [editableFields, originalFields]);
 
-    // Manejador para los cambios en los campos de texto
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setEditableFields((prevFields) => ({
@@ -61,7 +159,14 @@ const Header = () => {
         }));
     };
 
-    // Manejador para los cambios en la imagen
+    const handleCheckboxChange = (e) => {
+        const { name, checked } = e.target;
+        setEditableFields((prevFields) => ({
+            ...prevFields,
+            [name]: checked,
+        }));
+    };
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -74,14 +179,6 @@ const Header = () => {
             };
             reader.readAsDataURL(file);
         }
-    };
-
-    const handleCheckboxChange = (e) => {
-        const { name, checked } = e.target;
-        setEditableFields((prevFields) => ({
-            ...prevFields,
-            [name]: checked,
-        }));
     };
 
     const areas = [
@@ -247,8 +344,8 @@ const Header = () => {
                 {/* Contenedor principal para asegurar alineación */}
                 <div className="flex flex-col md:flex-row items-center md:items-start w-full">
                     {/* Foto */}
-                    <div className="relative flex-shrink-0 flex flex-col items-center mb-4 md:mr-4 text-center md:text-left w-full md:w-auto">
-                        <div className="w-32 h-32 md:w-48 md:h-48 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
+                    <div className="relative flex-shrink-0 flex flex-col items-center mb-4 text-center md:text-left w-full md:w-auto">
+                        <div className="w-32 h-32 md:w-56 md:h-56 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
                             {editableFields.photoUrl ? (
                                 <img
                                     src={editableFields.photoUrl}
@@ -278,38 +375,67 @@ const Header = () => {
                                 />
                             </>
                         )}
+                        {/* Otros checkboxes */}
+                        <div className="flex flex-row space-x-2 mt-5">
+                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
+                                <input
+                                    type="checkbox"
+                                    id="leyBlumberg"
+                                    name="leyBlumberg"
+                                    checked={editableFields.leyBlumberg}
+                                    onChange={handleCheckboxChange}
+                                    className="mr-2"
+                                    disabled={!isEditing}
+                                />
+                                <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
+                            </div>
+                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
+                                <input
+                                    type="checkbox"
+                                    id="leyMicaela"
+                                    name="leyMicaela"
+                                    checked={editableFields.leyMicaela}
+                                    onChange={handleCheckboxChange}
+                                    className="mr-2"
+                                    disabled={!isEditing}
+                                />
+                                <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Datos del usuario */}
-                    <div className="space-y-2 md:space-y-3 flex-grow w-full md:w-auto">
-                        <h2 className="text-lg font-bold text-center md:text-left">
+                    <div className="space-y-6 md:space-y-7 flex-grow w-full md:w-auto">
+                        <h2 className="text-lg font-bold text-center md:text-center">
                             {isEditing ? (
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={editableFields.name}
-                                    onChange={handleInputChange}
-                                    className="border border-gray-300 p-1 rounded text-sm w-full"
-                                />
+                                <>
+                                    <label htmlFor="firstName" className="text-sm font-bold text-black-600">Nombre/s:</label>
+                                    <input
+                                        type="text"
+                                        name="firstName"
+                                        id="firstName"
+                                        value={editableFields.firstName}
+                                        onChange={handleInputChange}
+                                        className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
+                                    />
+                                    <div className="mt-4">
+                                        <label htmlFor="lastName" className="text-sm font-bold text-black-600 mt-2">Apellido/s:</label>
+                                        <input
+                                            type="text"
+                                            name="lastName"
+                                            id="lastName"
+                                            value={editableFields.lastName}
+                                            onChange={handleInputChange}
+                                            className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
+                                        />
+                                    </div>
+                                </>
                             ) : (
-                                editableFields.name
+                                `${editableFields.firstName} ${editableFields.lastName}`
                             )}
                         </h2>
-                        <p className="text-sm">
-                            <strong>Tipo de interno:</strong>{' '}
-                            {isEditing ? (
-                                <input
-                                    type="text"
-                                    name="typeofintern"
-                                    value={editableFields.typeofintern}
-                                    onChange={handleInputChange}
-                                    className="border border-gray-300 p-1 rounded text-sm w-full"
-                                />
-                            ) : (
-                                editableFields.typeofintern
-                            )}
-                        </p>
-                        <p className="text-sm">
+                        <p className="text-sm text-center">
                             <strong>Alias:</strong>{' '}
                             {isEditing ? (
                                 <input
@@ -317,13 +443,13 @@ const Header = () => {
                                     name="alias"
                                     value={editableFields.alias}
                                     onChange={handleInputChange}
-                                    className="border border-gray-300 p-1 rounded text-sm w-full"
+                                    className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
                                 />
                             ) : (
                                 editableFields.alias
                             )}
                         </p>
-                        <p className="text-sm">
+                        <p className="text-sm text-center">
                             <strong>Unidad:</strong>{' '}
                             {isEditing ? (
                                 <input
@@ -331,13 +457,13 @@ const Header = () => {
                                     name="unit"
                                     value={editableFields.unit}
                                     onChange={handleInputChange}
-                                    className="border border-gray-300 p-1 rounded text-sm w-full"
+                                    className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
                                 />
                             ) : (
                                 editableFields.unit
                             )}
                         </p>
-                        <p className="text-sm">
+                        <p className="text-sm text-center">
                             <strong>Legajo:</strong>{' '}
                             {isEditing ? (
                                 <input
@@ -345,13 +471,13 @@ const Header = () => {
                                     name="fileNumber"
                                     value={editableFields.fileNumber}
                                     onChange={handleInputChange}
-                                    className="border border-gray-300 p-1 rounded text-sm w-full"
+                                    className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
                                 />
                             ) : (
                                 editableFields.fileNumber
                             )}
                         </p>
-                        <p className="text-sm">
+                        <p className="text-sm text-center">
                             <strong>Tipo de documento:</strong>{' '}
                             {isEditing ? (
                                 <input
@@ -359,13 +485,13 @@ const Header = () => {
                                     name="typedoc"
                                     value={editableFields.typedoc}
                                     onChange={handleInputChange}
-                                    className="border border-gray-300 p-1 rounded text-sm w-full"
+                                    className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
                                 />
                             ) : (
                                 editableFields.typedoc
                             )}
                         </p>
-                        <p className="text-sm">
+                        <p className="text-sm text-center">
                             <strong>DNI:</strong>{' '}
                             {isEditing ? (
                                 <input
@@ -373,13 +499,13 @@ const Header = () => {
                                     name="dni"
                                     value={editableFields.dni}
                                     onChange={handleInputChange}
-                                    className="border border-gray-300 p-1 rounded text-sm w-full"
+                                    className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
                                 />
                             ) : (
                                 editableFields.dni
                             )}
                         </p>
-                        <p className="text-sm">
+                        <p className="text-sm text-center">
                             <strong>Delito:</strong>{' '}
                             {isEditing ? (
                                 <input
@@ -387,13 +513,14 @@ const Header = () => {
                                     name="crime"
                                     value={editableFields.crime}
                                     onChange={handleInputChange}
-                                    className="border border-gray-300 p-1 rounded text-sm w-full"
+                                    className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
                                 />
                             ) : (
                                 editableFields.crime
                             )}
                         </p>
                     </div>
+
                     {/* Checkboxes alineados a la derecha en pantallas grandes y a la izquierda en pantallas pequeñas */}
                     <div className="flex flex-col space-y-4 md:space-y-2 md:ml-auto w-full md:w-auto">
                         {/* Egreso checkbox y campos */}
@@ -430,53 +557,99 @@ const Header = () => {
                                         name="numOficioEgreso"
                                         value={editableFields.numOficioEgreso}
                                         onChange={handleInputChange}
-                                        className="w-full p-1 border border-gray-300 rounded text-sm"
+                                        className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
                                         disabled={!isEditing}
                                     />
+
+                                    {/* Motivo de Egreso */}
+                                    <label htmlFor="motivoEgreso" className="block text-sm font-semibold mb-1">Motivo de Egreso</label>
+                                    <select
+                                        id="motivoEgreso"
+                                        name="motivoEgreso"
+                                        value={editableFields.motivoEgreso}
+                                        onChange={handleInputChange}
+                                        className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
+                                        disabled={!isEditing}
+                                    >
+                                        <option value="" disabled>Seleccionar motivo de egreso</option>
+                                        <option value="traslado">Traslado</option>
+                                        <option value="libertad condicional">Libertad Condicional</option>
+                                        <option value="libertad asistida">Libertad Asistida</option>
+                                        <option value="fallecimiento">Fallecimiento</option>
+                                    </select>
+
+                                    <label htmlFor="oficioEgreso" className="block text-sm font-semibold mb-1">Oficio de Egreso</label>
+                                    <div className="border border-gray-300 p-2 rounded-md bg-gray-50 mt-1">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-gray-500 text-sm">
+                                                {editableFields.oficioEgreso
+                                                    ? editableFields.oficioEgreso.name
+                                                    : originalFields.oficioEgreso
+                                                        ? originalFields.oficioEgreso.name
+                                                        : 'Ningún archivo cargado'}
+                                            </p>
+
+                                            {isEditing ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => fileInputRef.current.click()}
+                                                        className="ml-2 p-1 text-xs bg-green-500 text-white rounded-full hover:bg-green-600 transition"
+                                                        title="Seleccionar archivo"
+                                                    >
+                                                        <i className="fas fa-upload"></i>
+                                                    </button>
+                                                    <input
+                                                        type="file"
+                                                        id="oficioEgreso"
+                                                        name="oficioEgreso"
+                                                        accept=".pdf"
+                                                        onChange={handleFileChange}
+                                                        ref={fileInputRef}
+                                                        className="hidden"
+                                                    />
+                                                </>
+                                            ) : (
+                                                originalFields.oficioEgreso && (
+                                                    <button
+                                                        className="ml-2 p-1 text-xs bg-red-600 text-white rounded-full hover:bg-red-700 transition"
+                                                        onClick={() => handleDownload(originalFields.oficioEgreso)}
+                                                        title="Descargar archivo"
+                                                    >
+                                                        <i className="fas fa-download"></i>
+                                                    </button>
+                                                )
+                                            )}
+                                        </div>
+
+                                        {/* Mostrar fechas */}
+                                        {originalFields.oficioEgresoFechaCarga && (
+                                            <p className="text-xs text-gray-500 mt-2">
+                                                <strong>Fecha carga archivo:</strong> {originalFields.oficioEgresoFechaCarga}
+                                            </p>
+                                        )}
+                                        {originalFields.oficioEgresoFechaEdicion && (
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                <strong>Última edición archivo:</strong> {originalFields.oficioEgresoFechaEdicion}
+                                            </p>
+                                        )}
+                                    </div>
+
+
 
                                 </div>
                             )}
                         </div>
 
-                        {/* Otros checkboxes */}
-                        <div className="flex flex-col space-y-2">
-                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                                <input
-                                    type="checkbox"
-                                    id="leyBlumberg"
-                                    name="leyBlumberg"
-                                    checked={editableFields.leyBlumberg}
-                                    onChange={handleCheckboxChange}
-                                    className="mr-2"
-                                    disabled={!isEditing}
-                                />
-                                <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
-                            </div>
-                            <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
-                                <input
-                                    type="checkbox"
-                                    id="leyMicaela"
-                                    name="leyMicaela"
-                                    checked={editableFields.leyMicaela}
-                                    onChange={handleCheckboxChange}
-                                    className="mr-2"
-                                    disabled={!isEditing}
-                                />
-                                <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
-                            </div>
-                        </div>
-                        {/* Botón de edición en la esquina inferior derecha */}
                         <div className="mt-auto self-end">
                             {isEditing ? (
                                 <>
                                     <button
-                                        onClick={handleEditToggle}
+                                        onClick={handleSave}
                                         className={`text-xs px-2 py-1 rounded-md shadow-md mr-2
-                                        ${hasChanges ?
-                                                'bg-green-400 text-white hover:bg-green-500 cursor-pointer' :
-                                                'bg-green-300 text-white cursor-not-allowed'}`}
-                                        disabled={!hasChanges} // Deshabilitado si no hay cambios
-                                        title={!hasChanges ? "No hay cambios para guardar" : "Guardar cambios"}
+                        ${(hasChanges || isFileChanged) ? 'bg-green-400 text-white hover:bg-green-500 cursor-pointer' : 'bg-green-300 text-white cursor-not-allowed'}`}
+                                        disabled={!hasChanges && !isFileChanged}
+                                        title={!hasChanges && !isFileChanged ? "No hay cambios para guardar" : "Guardar cambios"}
                                     >
                                         Guardar
                                     </button>
@@ -517,6 +690,9 @@ const Header = () => {
                 <div
                     ref={scrollContainerRef}
                     className="flex items-center overflow-hidden whitespace-nowrap px-4 mx-4"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd} 
                 >
                     {areas.map((area) => (
                         <button
