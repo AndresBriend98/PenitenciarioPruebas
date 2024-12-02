@@ -261,7 +261,33 @@ const Header = () => {
 
     const handleAreaChange = (area) => {
         setSelectedArea(area);
-
+    
+        // Obtener el contenedor y el botón correspondiente al área seleccionada
+        const container = scrollContainerRef.current;
+        const selectedButton = container.querySelector(`[data-area="${area}"]`);
+    
+        // Verificar si el área ya está visible
+        if (selectedButton) {
+            const containerRect = container.getBoundingClientRect();
+            const buttonRect = selectedButton.getBoundingClientRect();
+    
+            // Si el botón ya está completamente visible, no hacer scroll
+            if (
+                buttonRect.left >= containerRect.left &&
+                buttonRect.right <= containerRect.right
+            ) {
+                // El área ya está visible, no hacemos nada
+                return;
+            }
+            
+            // Si no está visible, desplazamos suavemente
+            container.scrollTo({
+                left: selectedButton.offsetLeft - (container.offsetWidth / 2) + (selectedButton.offsetWidth / 2),
+                behavior: 'smooth',
+            });
+        }
+    
+        // Navegar a la ruta correspondiente
         switch (area) {
             case 'Salud':
                 navigate('/cargasalud');
@@ -322,6 +348,7 @@ const Header = () => {
                 break;
         }
     };
+    
 
     useEffect(() => {
         if (scrollContainerRef.current) {
