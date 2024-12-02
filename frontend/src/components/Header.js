@@ -6,24 +6,18 @@ const Header = () => {
     const [scrollOffset, setScrollOffset] = useState(0);
     
     const handleTouchStart = (e) => {
-        setTouchStartX(e.touches[0].clientX);  // Guarda la posición inicial del toque
-        setScrollOffset(scrollContainerRef.current.scrollLeft);  // Guarda la posición actual del carrousel
+        setTouchStartX(e.touches[0].clientX);
+        setScrollOffset(scrollContainerRef.current.scrollLeft);
     };
     
     const handleTouchMove = (e) => {
-        const touchMoveX = e.touches[0].clientX;  // Obtiene la posición actual del toque
-        const distanceMoved = touchStartX - touchMoveX;  // Calcula la distancia desplazada
+        const touchMoveX = e.touches[0].clientX;
+        const distanceMoved = touchStartX - touchMoveX;
     
         if (scrollContainerRef.current) {
-            // Desplaza el contenedor proporcionalmente al movimiento del dedo
             scrollContainerRef.current.scrollLeft = scrollOffset + distanceMoved;
         }
     };
-    
-    const handleTouchEnd = () => {
-        // Opcional: Puedes agregar lógica aquí para hacer algo cuando el dedo se suelta
-    };
-    
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -262,25 +256,19 @@ const Header = () => {
     const handleAreaChange = (area) => {
         setSelectedArea(area);
     
-        // Obtener el contenedor y el botón correspondiente al área seleccionada
         const container = scrollContainerRef.current;
         const selectedButton = container.querySelector(`[data-area="${area}"]`);
     
-        // Verificar si el área ya está visible
         if (selectedButton) {
             const containerRect = container.getBoundingClientRect();
             const buttonRect = selectedButton.getBoundingClientRect();
     
-            // Si el botón ya está completamente visible, no hacer scroll
             if (
                 buttonRect.left >= containerRect.left &&
                 buttonRect.right <= containerRect.right
             ) {
-                // El área ya está visible, no hacemos nada
                 return;
             }
-            
-            // Si no está visible, desplazamos suavemente
             container.scrollTo({
                 left: selectedButton.offsetLeft - (container.offsetWidth / 2) + (selectedButton.offsetWidth / 2),
                 behavior: 'smooth',
