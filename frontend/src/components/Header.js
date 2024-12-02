@@ -707,7 +707,6 @@ const Header = () => {
                     className="flex items-center overflow-hidden whitespace-nowrap px-4 mx-4"
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd} 
                 >
                     {areas.map((area) => (
                         <button
