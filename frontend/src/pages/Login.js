@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logoPenitenciaria from '../assets/images/logoPenitenciaria.png';
+import { jwtDecode } from "jwt-decode"; // Importamos jwt-decode
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -14,37 +15,55 @@ const Login = () => {
     event.preventDefault();
     setShowLoadingModal(true);
 
-        setTimeout(async () => {
-      console.log('Usuario:', username, 'Contraseña:', password);
-      
-            const userType = await fakeAuth(username, password);
+    try {
+      const response = await fetch(`http://179.0.180.134:10000/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre_usuario: username,
+          contra: password,
+        }),
+      });
 
-      if (userType) {
-        navigate(userType);       } else {
-        setShowErrorModal(true);       }
+      if (!response.ok) {
+        throw new Error("Credenciales incorrectas");
+      }
 
-      setShowLoadingModal(false);     }, 1000);
+      const token = await response.text();  // Obtener el token desde la respuesta
+      console.log("Token recibido:", token);
+
+      const decoded = jwtDecode(token);  // Decodificar el JWT
+      console.log("Datos decodificados del token:", decoded);
+
+      localStorage.setItem('token', token);
+
+      const { id_tipo_usuario } = decoded;
+
+      const userRoutes = {
+        1: "/superadministrador",
+        2: "/administrador",
+        3: "/tecnica",
+        4: "/jefatura",
+        5: "/judicial",
+        6: "/general",
+      };
+
+      if (userRoutes[id_tipo_usuario]) {
+        navigate(userRoutes[id_tipo_usuario]);
+      } else {
+        setShowErrorModal(true);
+      }
+
+    } catch (error) {
+      console.error("Error en el proceso de inicio de sesión:", error);
+      setShowErrorModal(true);
+    } finally {
+      setShowLoadingModal(false);
+    }
   };
 
-    const fakeAuth = async (username, password) => {
-        const userRoles = {
-      'admin': '/administrador',
-      'jefe': '/jefatura',
-      'general': '/general',
-      'judicial': '/judicial',
-      'tecnica': '/tecnica',
-      'superadmin': '/superadministrador',
-    };
-
-            return new Promise((resolve) => {
-      setTimeout(() => {
-                if (username in userRoles && password === username) {
-          resolve(userRoles[username]);
-        } else {
-          resolve(null);         }
-      }, 500);
-    });
-  };
 
   return (
     <div className="bg-general bg-cover bg-center relative flex items-center justify-center min-h-screen">
@@ -56,28 +75,28 @@ const Login = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label htmlFor="username" className="block text-gray-700 text-sm">Usuario:</label>
-            <input 
-              type="text" 
-              id="username" 
-              value={username} 
-              onChange={(e) => setUsername(e.target.value)} 
-              required 
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
               className="mt-1 block w-full border border-gray-300 p-1.5 text-sm rounded-md"
             />
           </div>
           <div className="mb-3">
             <label htmlFor="password" className="block text-gray-700 text-sm">Contraseña:</label>
-            <input 
-              type="password" 
-              id="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               className="mt-1 block w-full border border-gray-300 p-1.5 text-sm rounded-md"
             />
           </div>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 text-sm"
           >
             Ingresar
@@ -103,8 +122,8 @@ const Login = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-4 rounded-lg shadow-lg text-center">
             <h3 className="text-lg font-semibold text-red-600">Usuario o contraseña incorrectos</h3>
-            <button 
-              onClick={() => setShowErrorModal(false)} 
+            <button
+              onClick={() => setShowErrorModal(false)}
               className="mt-4 bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
             >
               Cerrar

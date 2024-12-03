@@ -16,7 +16,6 @@ const AdministrarUsuarios = () => {
     const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
     const [data, setData] = useState([]);
 
-
     const areas = ["Salud", "Trabajo", "Judicial", "Social", "Criminología", "Psicología"];
 
     const handleConfirmDelete = () => {
@@ -167,7 +166,6 @@ const AdministrarUsuarios = () => {
         setTimeout(() => setShowSuccessModal(false), 3000);
     };
 
-
     useEffect(() => {
         const isValidPassword = selectedUser?.password && selectedUser.password.length >= 8 && selectedUser.password.length <= 20;
         const hasChanges = Object.keys(selectedUser || {}).some(key => selectedUser[key] !== initialUser[key]);
@@ -213,7 +211,6 @@ const AdministrarUsuarios = () => {
     };
 
     const [showPassword, setShowPassword] = useState(false);
-
 
     return (
         <div className="bg-general bg-cover bg-center min-h-screen flex flex-col p-4">

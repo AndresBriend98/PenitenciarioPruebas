@@ -1,42 +1,90 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 import logoPenitenciaria from '../assets/images/logoPenitenciaria.png';
 
 const InicioAreaJudicial = () => {
   const navigate = useNavigate();
 
-  const [searchDNI, setSearchDNI] = useState('');    const [searchLegajo, setSearchLegajo] = useState('');    const [data, setData] = useState([]);  
-  const user = {
-    name: 'Tomás Torres',
-    area: 'Judicial',
-    unit: '4'
+  const [searchDNI, setSearchDNI] = useState('');
+  const [searchLegajo, setSearchLegajo] = useState('');
+  const [data, setData] = useState([]);
+  const [user, setUser] = useState({
+    name: '',
+    area: '',
+    unit: '',
+  });
+
+  const departmentNames = {
+    1: "Dep. Super Administrativo",
+    2: "Dep. Administrativo",
+    3: "Dep. Revision (Tecnica)",
+    4: "Dep. Jefatura",
+    5: "Dep. Judicial",
+    6: "Dep. Social",
+    7: "Dep. Salida",
+    8: "Dep. Sanidad",
+    9: "Dep. Educación",
+    10: "Dep. Criminologico",
+    11: "Dep. Psicológico",
+    12: "Dep. Trabajo",
+    13: "Dep. Consejo",
   };
-    useEffect(() => {
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      // Decodificar el token localmente
+      const decoded = jwtDecode(token);
+
+      // Mapeamos el ID del departamento al nombre correspondiente
+      const departmentName = departmentNames[decoded.id_departamento] || "Departamento desconocido";
+
+      // Actualizamos el estado con el nombre del departamento y otros datos
+      setUser({
+        name: decoded.nombre_usuario,
+        area: departmentName,  // Aquí usamos el nombre en lugar del ID
+        unit: decoded.id_unidad,
+      });
+    } else {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  // Generamos los datos de prueba para la tabla
+  useEffect(() => {
     const generatedData = Array(15).fill(null).map((_, index) => ({
       name: 'Juan Carlos López',
       crime: 'Robo',
       sentenceDate: '25/06/2025',
       court: 'T.O.P.LIBRES',
       sentence: '25/06/2025',
-      fileNumber: Math.floor(1000 + Math.random() * 9000),       transferDate: '25/06/2025',
+      fileNumber: Math.floor(1000 + Math.random() * 9000),
+      transferDate: '25/06/2025',
       assistanceDate: '25/06/2025',
       admissionDate: '25/06/2025',
       internalType: Math.random() > 0.5 ? 'Condenado' : 'Procesado',
-      dni: Math.floor(10000000 + Math.random() * 90000000)     }));
-    setData(generatedData);   }, []);
+      dni: Math.floor(10000000 + Math.random() * 90000000),
+    }));
+    setData(generatedData);
+  }, []);
 
   const filteredData = data.filter((item) => {
-        const isValidLegajo = item.internalType === 'Condenado'
+    const isValidLegajo = item.internalType === 'Condenado'
       ? (item.fileNumber && item.fileNumber.toString().startsWith(searchLegajo))
-      : false;  
+      : false;
+
     const matchesDNI = searchDNI === '' || (item.dni && item.dni.toString().startsWith(searchDNI));
     const matchesLegajo = searchLegajo === '' || isValidLegajo;
 
-        return matchesDNI && matchesLegajo;
+    return matchesDNI && matchesLegajo;
   });
 
   const handleLogout = () => {
-        navigate('/login');
+    localStorage.removeItem('token');
+    navigate('/login');
   };
 
   const handleAddInterno = () => {
@@ -109,7 +157,7 @@ const InicioAreaJudicial = () => {
                   <tr key={index} className="hover:bg-gray-100">
                     <td className="p-2 border text-xs">{index + 1}</td>
                     <td className="p-2 border text-xs">{item.name}</td>
-                    <td className="p-2 border text-xs">{item.dni}</td> {/* Mostrar DNI */}
+                    <td className="p-2 border text-xs">{item.dni}</td>
                     <td className="p-2 border text-xs">{item.crime}</td>
                     <td className="p-2 border text-xs">{item.internalType}</td>
                     <td className="p-2 border text-xs">{item.court}</td>
@@ -135,7 +183,6 @@ const InicioAreaJudicial = () => {
                   </tr>
                 ))}
               </tbody>
-
             </table>
           </div>
         </div>

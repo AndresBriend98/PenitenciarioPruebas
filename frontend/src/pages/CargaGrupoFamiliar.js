@@ -6,6 +6,7 @@ const CargaGrupoFamiliar = () => {
     const navigate = useNavigate();
     const [historial, setHistorial] = useState([]);
     const photoInputRef = useRef(null);
+
     const setFileInputRef = (element, index) => {
         fileInputRefs.current[index] = element;
     };
@@ -34,7 +35,6 @@ const CargaGrupoFamiliar = () => {
         setOtraRelacion("");
     };
 
-
     const handleGuardarDomicilio = (index) => {
         if (newDomicilio.trim() === "") {
             alert("El campo de domicilio no puede estar vacío.");
@@ -56,7 +56,6 @@ const CargaGrupoFamiliar = () => {
 
     const [isEditingDomicilio, setIsEditingDomicilio] = useState(null);
     const [newDomicilio, setNewDomicilio] = useState('');
-
 
     const handleEditarDomicilio = (index) => {
         setIsEditingDomicilio(index);
@@ -191,7 +190,6 @@ const CargaGrupoFamiliar = () => {
             console.error("No se ha seleccionado ningún archivo.");
         }
     };
-
 
     const [formData, setFormData] = useState({
         nombre: '',
@@ -344,7 +342,7 @@ const CargaGrupoFamiliar = () => {
                             <label htmlFor="dni" className="block text-sm font-semibold mb-1">DNI/M.I</label>
                             <input
                                 placeholder='Ingresar DNI/M.I'
-                                type="text"
+                                type="number"
                                 id="dni"
                                 value={formData.dni}
                                 onChange={(e) => handleInputChange(e, 'dni')}
@@ -735,7 +733,15 @@ const CargaGrupoFamiliar = () => {
                                                 </p>
                                             )}
 
-                                            <p className='text-sm max-w-full break-words mt-2'><strong>Fecha de nacimiento:</strong> {item.fechaNacimiento}</p>
+                                            <p className='text-sm max-w-full break-words mt-2'>
+                                                <strong>Fecha de nacimiento: </strong>
+                                                {new Date(item.fechaNacimiento).toLocaleDateString('es-ES', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                })}
+                                            </p>
+
 
                                             <div className="mt-2">
                                                 {isEditingObservacion === index ? (
@@ -744,11 +750,14 @@ const CargaGrupoFamiliar = () => {
                                                         <textarea
                                                             value={newObservacion}
                                                             onChange={(e) => {
-                                                                setNewObservacion(e.target.value); setIsObservacionModified(e.target.value !== historial[index].observacion);
+                                                                setNewObservacion(e.target.value);
+                                                                setIsObservacionModified(e.target.value !== historial[index].observacion);
                                                             }}
-                                                            className="p-1 border border-gray-300 rounded text-sm ml-2 flex-1 max-w-full"
-                                                            rows="2"
+                                                            className="p-2 border border-gray-300 rounded text-sm ml-2 w-full resize-both max-w-full min-h-[100px]"
+                                                            rows="4"
+                                                            style={{ resize: 'both' }}
                                                         />
+
 
                                                         <button
                                                             onClick={() => handleGuardarObservacion(index)}
@@ -796,9 +805,16 @@ const CargaGrupoFamiliar = () => {
                                                 </p>
                                             )}
 
-
                                             {item.fechaFallecimiento ? (
-                                                <p className='text-sm mt-2'><strong>Fecha de fallecimiento:</strong> {item.fechaFallecimiento}</p>
+                                                <p className='text-sm mt-2'>
+                                                    <strong>Fecha de fallecimiento: </strong>
+                                                    {item.fechaFallecimiento ? new Date(item.fechaFallecimiento).toLocaleDateString('es-ES', {
+                                                        day: '2-digit',
+                                                        month: '2-digit',
+                                                        year: 'numeric',
+                                                    }) : 'No disponible'}
+                                                </p>
+
                                             ) : (
                                                 <div className="flex items-center mt-2">
                                                     {isEditingFallecimiento === index ? (
@@ -867,12 +883,9 @@ const CargaGrupoFamiliar = () => {
                                                     className="hidden"
                                                 />
                                             </div>
-
-
                                             <div>
                                                 <p className="text-sm max-w-full break-words text-gray-500 mt-2"><strong>Fecha de carga:</strong> {item.fechaCarga}</p>
                                             </div>
-
                                         </li>
                                     );
                                 })}

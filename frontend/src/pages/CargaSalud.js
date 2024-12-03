@@ -61,7 +61,6 @@ const CargaSalud = () => {
         setConfirmDeleteHistorialModal(true);
     };
 
-
     const [confirmDeleteHistorialModal, setConfirmDeleteHistorialModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [sectionToDelete, setSectionToDelete] = useState('');
@@ -84,13 +83,6 @@ const CargaSalud = () => {
         setUpdatedSectionData(section, newData);
     };
 
-    const handleDeleteFile = (index, section) => {
-        const newData = getUpdatedSectionData(section);
-        newData[index].file = null;
-        newData[index].fileName = '';
-        newData[index].fechaEliminacion = new Date().toLocaleString();
-        setUpdatedSectionData(section, newData);
-    };
     const getUpdatedSectionData = (section) => {
         switch (section) {
             case "tratamientos":

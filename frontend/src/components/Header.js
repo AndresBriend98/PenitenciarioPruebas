@@ -2,31 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
-    const [touchStartX, setTouchStartX] = useState(0);
-    const [scrollOffset, setScrollOffset] = useState(0);
-    
-    const handleTouchStart = (e) => {
-        setTouchStartX(e.touches[0].clientX);
-        setScrollOffset(scrollContainerRef.current.scrollLeft);
-    };
-    
-    const handleTouchMove = (e) => {
-        const touchMoveX = e.touches[0].clientX;
-        const distanceMoved = touchStartX - touchMoveX;
-    
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollLeft = scrollOffset + distanceMoved;
-        }
-    };
-
     const navigate = useNavigate();
     const location = useLocation();
     const scrollContainerRef = useRef(null);
     const photoInputRef = useRef(null);
 
     const [originalFields, setOriginalFields] = useState({
-        firstName: 'Maximiliano Ezequiel',
-        lastName: 'Dominguez',
+        nombre_apellido: 'Maximiliano Ezequiel',
         alias: 'JL',
         unit: 'Unidad Penitenciaria 9',
         fileNumber: '3576',
@@ -37,11 +19,11 @@ const Header = () => {
         sentenceEndDate: '10/06/2030',
         remainingSentence: '3 años 2 meses 5 días',
         egreso: true,
-        leyBlumberg: false,
-        leyMicaela: false,
+        ley_blumberg : false,
+        ley_micaela: false,
         egresoDate: '2024-09-09',
         numOficioEgreso: '12345',
-        photoUrl: null,
+        archivo_foto: null,
         motivoEgreso: 'traslado',
         oficioEgreso: null,
         oficioEgresoFechaCarga: null,
@@ -168,7 +150,7 @@ const Header = () => {
             reader.onloadend = () => {
                 setEditableFields((prevFields) => ({
                     ...prevFields,
-                    photoUrl: reader.result,
+                    archivo_foto: reader.result,
                 }));
             };
             reader.readAsDataURL(file);
@@ -255,27 +237,7 @@ const Header = () => {
 
     const handleAreaChange = (area) => {
         setSelectedArea(area);
-    
-        const container = scrollContainerRef.current;
-        const selectedButton = container.querySelector(`[data-area="${area}"]`);
-    
-        if (selectedButton) {
-            const containerRect = container.getBoundingClientRect();
-            const buttonRect = selectedButton.getBoundingClientRect();
-    
-            if (
-                buttonRect.left >= containerRect.left &&
-                buttonRect.right <= containerRect.right
-            ) {
-                return;
-            }
-            container.scrollTo({
-                left: selectedButton.offsetLeft - (container.offsetWidth / 2) + (selectedButton.offsetWidth / 2),
-                behavior: 'smooth',
-            });
-        }
-    
-        // Navegar a la ruta correspondiente
+
         switch (area) {
             case 'Salud':
                 navigate('/cargasalud');
@@ -336,7 +298,6 @@ const Header = () => {
                 break;
         }
     };
-    
 
     useEffect(() => {
         if (scrollContainerRef.current) {
@@ -361,9 +322,9 @@ const Header = () => {
                     {/* Foto */}
                     <div className="relative flex-shrink-0 flex flex-col items-center mb-4 text-center md:text-left w-full md:w-auto">
                         <div className="w-32 h-32 md:w-56 md:h-56 bg-gray-500 rounded-full flex justify-center items-center overflow-hidden">
-                            {editableFields.photoUrl ? (
+                            {editableFields.archivo_foto ? (
                                 <img
-                                    src={editableFields.photoUrl}
+                                    src={editableFields.archivo_foto}
                                     alt="Foto de usuario"
                                     className="w-full h-full object-cover"
                                 />
@@ -395,26 +356,26 @@ const Header = () => {
                             <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
                                 <input
                                     type="checkbox"
-                                    id="leyBlumberg"
-                                    name="leyBlumberg"
-                                    checked={editableFields.leyBlumberg}
+                                    id="ley_blumberg "
+                                    name="ley_blumberg "
+                                    checked={editableFields.ley_blumberg }
                                     onChange={handleCheckboxChange}
                                     className="mr-2"
                                     disabled={!isEditing}
                                 />
-                                <label htmlFor="leyBlumberg" className="text-sm">Ley Blumberg</label>
+                                <label htmlFor="ley_blumberg " className="text-sm">Ley Blumberg</label>
                             </div>
                             <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center shadow-sm">
                                 <input
                                     type="checkbox"
-                                    id="leyMicaela"
-                                    name="leyMicaela"
-                                    checked={editableFields.leyMicaela}
+                                    id="ley_micaela"
+                                    name="ley_micaela"
+                                    checked={editableFields.ley_micaela}
                                     onChange={handleCheckboxChange}
                                     className="mr-2"
                                     disabled={!isEditing}
                                 />
-                                <label htmlFor="leyMicaela" className="text-sm">Ley Micaela</label>
+                                <label htmlFor="ley_micaela" className="text-sm">Ley Micaela</label>
                             </div>
                         </div>
 
@@ -425,29 +386,19 @@ const Header = () => {
                         <h2 className="text-lg font-bold text-center md:text-center">
                             {isEditing ? (
                                 <>
-                                    <label htmlFor="firstName" className="text-sm font-bold text-black-600">Nombre/s:</label>
+                                    {/* Campo para el primer nombre con el label "Nombre/s" */}
+                                    <label htmlFor="nombre_apellido" className="text-sm font-bold text-black-600">Nombre/s y Apellido/s:</label>
                                     <input
                                         type="text"
-                                        name="firstName"
-                                        id="firstName"
-                                        value={editableFields.firstName}
+                                        name="nombre_apellido"
+                                        id="nombre_apellido"
+                                        value={editableFields.nombre_apellido}
                                         onChange={handleInputChange}
                                         className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
                                     />
-                                    <div className="mt-4">
-                                        <label htmlFor="lastName" className="text-sm font-bold text-black-600 mt-2">Apellido/s:</label>
-                                        <input
-                                            type="text"
-                                            name="lastName"
-                                            id="lastName"
-                                            value={editableFields.lastName}
-                                            onChange={handleInputChange}
-                                            className="border border-gray-300 p-1 rounded text-sm w-full md:w-3/4 lg:w-1/2"
-                                        />
-                                    </div>
                                 </>
                             ) : (
-                                `${editableFields.firstName} ${editableFields.lastName}`
+                                `${editableFields.nombre_apellido}`
                             )}
                         </h2>
                         <p className="text-sm text-center">
@@ -604,6 +555,7 @@ const Header = () => {
                                                         : 'Ningún archivo cargado'}
                                             </p>
 
+                                            {/* Botones */}
                                             {isEditing ? (
                                                 <>
                                                     <button
@@ -705,8 +657,6 @@ const Header = () => {
                 <div
                     ref={scrollContainerRef}
                     className="flex items-center overflow-hidden whitespace-nowrap px-4 mx-4"
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
                 >
                     {areas.map((area) => (
                         <button

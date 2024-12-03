@@ -5,16 +5,20 @@ const CargaNuevoInterno = () => {
     const navigate = useNavigate();
 
     const [user, setUser] = useState({
-        firstName: '',
-        lastName: '',
+        nombre_apellido: '',
         alias: '',
-        typedoc: '',
-        fileNumber: '',
+        tipo_documento: '',
+        legajo: '',
         dni: '',
-        crime: '',
-        entryDate: '10/06/2024',
-        sentenceEndDate: '10/06/2030',
-        remainingSentence: '3 años 2 meses 5 días',
+        fecha_ingreso: '',
+        ley_micaela: '',
+        ley_blumberg: '',
+        egreso: false,
+        fecha_egreso: '',
+        numero_oficio_egreso: '',
+        id_motivo_egreso: '',
+        archivo_oficio_egreso: null,
+        archivo_foto: null,
     });
 
     const [fotosInterno, setFotosInterno] = useState([]);
@@ -68,8 +72,6 @@ const CargaNuevoInterno = () => {
         });
     };
 
-    const buttonText = fotosInterno.length > 0 || otrasFotosInterno.length > 0 ? 'Ver fotos del interno a cargar' : '+ Otras Fotos del Interno';
-
     const handleCloseModal = () => {
         setShowModal(false);
     };
@@ -87,23 +89,23 @@ const CargaNuevoInterno = () => {
     };
 
     const [egreso, setEgreso] = useState(false);
-    const [motivoEgreso, setMotivoEgreso] = useState('');
-    const [egresoDate, setEgresoDate] = useState('');
-    const [numOficioEgreso, setNumOficioEgreso] = useState('');
-    const [leyMicaela, setLeyMicaela] = useState(false);
-    const [leyBlumberg, setLeyBlumberg] = useState(false);
+    const [id_motivo_egreso, setId_motivo_egreso] = useState('');
+    const [fecha_egreso, setFecha_egreso] = useState('');
+    const [numero_oficio_egreso, setNumero_oficio_egreso] = useState('');
+    const [ley_micaela, setLey_micaela] = useState(false);
+    const [ley_blumberg, setLey_blumberg] = useState(false);
     const [reingresante, setReingresante] = useState(false);
     const [image, setImage] = useState(null);
     const [firma, setFirma] = useState(null);
     const [huella, setHuella] = useState(null);
     const [oficioEgreso, setOficioEgreso] = useState(null);
     const [caratulaCausa, setCaratulaCausa] = useState(null);
-    const oficioEgresoInputRef = useRef(null);
+    const archivo_oficio_egreso = useRef(null);
     const caratulaCausaInputRef = useRef(null);
     const [tipoInterno, setTipoInterno] = useState('');
     const [delito, setDelito] = useState('');
 
-    const fileInputRef = useRef(null);
+    const archivo_foto = useRef(null);
     const firmaInputRef = useRef(null);
     const huellaInputRef = useRef(null);
     const adjuntoInputRef = useRef(null);
@@ -149,9 +151,9 @@ const CargaNuevoInterno = () => {
         setEgreso(!egreso);
 
         if (!egreso) {
-            setMotivoEgreso('');
-            setEgresoDate('');
-            setNumOficioEgreso('');
+            setId_motivo_egreso('');
+            setFecha_egreso('');
+            setNumero_oficio_egreso('');
         }
     };
 
@@ -181,14 +183,6 @@ const CargaNuevoInterno = () => {
         navigate('/judicial');
     };
 
-    const handleAgregarNuevoInterno = () => {
-        setShowModal(true);
-        setTimeout(() => {
-            setShowModal(false);
-            navigate('/judicial');
-        }, 3000);
-    };
-
     return (
         <div className="bg-general bg-cover bg-center min-h-screen p-6 flex flex-col">
             {/* Información del usuario, foto y checkboxes */}
@@ -205,13 +199,13 @@ const CargaNuevoInterno = () => {
                         </div>
                         <button
                             className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center absolute -right-2 top-2 md:-right-4 md:top-4 cursor-pointer hover:bg-blue-600"
-                            onClick={() => fileInputRef.current.click()}
+                            onClick={() => archivo_foto.current.click()}
                         >
                             +
                         </button>
                         <input
                             type="file"
-                            ref={fileInputRef}
+                            ref={archivo_foto}
                             accept="image/*"
                             onChange={handleImageChange}
                             className="hidden"
@@ -284,16 +278,9 @@ const CargaNuevoInterno = () => {
                     <div className="flex-grow ml-0 md:ml-6 grid grid-cols-1 md:grid-cols-1 gap-4 w-full">
                         <input
                             type="text"
-                            placeholder="Nombre/s"
-                            value={user.firstName}
-                            onChange={(e) => setUser({ ...user, firstName: e.target.value })}
-                            className="w-full p-2 border border-gray-300 rounded text-sm"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Apellido/s"
-                            value={user.lastName}
-                            onChange={(e) => setUser({ ...user, lastName: e.target.value })}
+                            placeholder="Nombre/s y Apellido/s"
+                            value={user.nombre_apellido}
+                            onChange={(e) => setUser({ ...user, nombre_apellido: e.target.value })}
                             className="w-full p-2 border border-gray-300 rounded text-sm"
                         />
                         <input
@@ -306,15 +293,15 @@ const CargaNuevoInterno = () => {
                         <input
                             type="text"
                             placeholder="Tipo de documento"
-                            value={user.typedoc}
-                            onChange={(e) => setUser({ ...user, typedoc: e.target.value })}
+                            value={user.tipo_documento}
+                            onChange={(e) => setUser({ ...user, tipo_documento: e.target.value })}
                             className="w-full p-2 border border-gray-300 rounded text-sm"
                         />
                         <input
                             type="text"
                             placeholder="Legajo"
-                            value={user.fileNumber}
-                            onChange={(e) => setUser({ ...user, fileNumber: e.target.value })}
+                            value={user.legajo}
+                            onChange={(e) => setUser({ ...user, legajo: e.target.value })}
                             className="w-full p-2 border border-gray-300 rounded text-sm"
                         />
                         <input
@@ -342,45 +329,45 @@ const CargaNuevoInterno = () => {
                         </div>
                         {egreso && (
                             <div className="w-full">
-                                <label htmlFor="egresoDate" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
+                                <label htmlFor="fecha_egreso" className="block text-sm font-semibold mb-1">Fecha de Egreso</label>
                                 <input
                                     type="date"
-                                    id="egresoDate"
-                                    value={egresoDate}
-                                    onChange={(e) => setEgresoDate(e.target.value)}
+                                    id="fecha_egreso"
+                                    value={fecha_egreso}
+                                    onChange={(e) => setFecha_egreso(e.target.value)}
                                     className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
                                 />
 
-                                <label htmlFor="numOficioEgreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
+                                <label htmlFor="numero_oficio_egreso" className="block text-sm font-semibold mb-1">Num. Oficio Egreso</label>
                                 <input
                                     type="text"
-                                    id="numOficioEgreso"
-                                    value={numOficioEgreso}
-                                    onChange={(e) => setNumOficioEgreso(e.target.value)}
+                                    id="numero_oficio_egreso"
+                                    value={numero_oficio_egreso}
+                                    onChange={(e) => setNumero_oficio_egreso(e.target.value)}
                                     placeholder="Ingrese N. Oficio Egreso"
                                     className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
                                 />
 
-                                <label htmlFor="motivoEgreso" className="block text-sm font-semibold mb-1">Motivo de Egreso</label>
+                                <label htmlFor="id_motivo_egreso" className="block text-sm font-semibold mb-1">Motivo de Egreso</label>
                                 <select
-                                    id="motivoEgreso"
-                                    value={motivoEgreso}
-                                    onChange={(e) => setMotivoEgreso(e.target.value)}
+                                    id="id_motivo_egreso"
+                                    value={id_motivo_egreso}
+                                    onChange={(e) => setId_motivo_egreso(e.target.value)}
                                     className="w-full p-1 border border-gray-300 rounded text-sm mb-2"
                                 >
                                     <option value="" disabled>Seleccionar motivo de egreso</option>
-                                    <option value="traslado">Traslado</option>
-                                    <option value="libertad condicional">Libertad Condicional</option>
-                                    <option value="libertad asistida">Libertad Asistida</option>
-                                    <option value="fallecimiento">Fallecimiento</option>
+                                    <option value="1">Traslado</option>
+                                    <option value="2">Libertad Condicional</option>
+                                    <option value="3">Libertad Asistida</option>
+                                    <option value="4">Fallecimiento</option>
                                 </select>
 
                                 <div className="flex-1 mt-3">
-                                    <label htmlFor="motivoEgreso" className="block text-sm font-semibold mb-1">Oficio de Egreso</label>
+                                    <label htmlFor="archivo_oficio_egreso" className="block text-sm font-semibold mb-1">Oficio de Egreso</label>
                                     <input
                                         type="file"
-                                        ref={oficioEgresoInputRef}
-                                        accept=".pdf,.doc,.docx"
+                                        ref={archivo_oficio_egreso}
+                                        accept=".pdf"
                                         onChange={handleOficioEgresoChange}
                                         className="block w-full p-1 border border-gray-300 rounded text-sm"
                                     />
@@ -393,22 +380,22 @@ const CargaNuevoInterno = () => {
                     <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center text-sm shadow-sm">
                         <input
                             type="checkbox"
-                            id="leyBlumberg"
-                            checked={leyBlumberg}
-                            onChange={() => setLeyBlumberg(!leyBlumberg)}
+                            id="ley_blumberg"
+                            checked={ley_blumberg}
+                            onChange={() => setLey_blumberg(!ley_blumberg)}
                             className="mr-2"
                         />
-                        <label htmlFor="leyBlumberg">Ley Blumberg</label>
+                        <label htmlFor="ley_blumberg">Ley Blumberg</label>
                     </div>
                     <div className="p-2 border-2 border-gray-300 bg-white rounded-md flex items-center text-sm shadow-sm">
                         <input
                             type="checkbox"
-                            id="leyMicaela"
-                            checked={leyMicaela}
-                            onChange={() => setLeyMicaela(!leyMicaela)}
+                            id="ley_micaela"
+                            checked={ley_micaela}
+                            onChange={() => setLey_micaela(!ley_micaela)}
                             className="mr-2"
                         />
-                        <label htmlFor="leyMicaela">Ley Micaela</label>
+                        <label htmlFor="ley_micaela">Ley Micaela</label>
                     </div>
                 </div>
             </div>

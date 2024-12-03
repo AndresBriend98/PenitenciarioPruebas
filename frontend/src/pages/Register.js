@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import logoPenitenciaria from '../assets/images/logoPenitenciaria.png';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
     const [name, setName] = useState('');
@@ -17,41 +18,89 @@ const Register = () => {
 
     const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-
-        if (dni.length !== 8) {
-            alert('El DNI debe tener exactamente 8 caracteres.');
-            return;
+    
+        // Mapeo de id_departamento a id_tipo_usuario
+        const departmentToUserType = {
+            1: 5,  // Dep. Super Administrativo -> id_tipo_usuario 5
+            2: 5,  // Dep. Administrativo -> id_tipo_usuario 5
+            3: 5,  // Dep. Revision (Tecnica) -> id_tipo_usuario 5
+            4: 5,  // Dep. Jefatura -> id_tipo_usuario 5
+            5: 5,  // Dep. Judicial -> id_tipo_usuario 5
+            6: 5,  // Dep. Social -> id_tipo_usuario 5
+            7: 5,  // Dep. Salida -> id_tipo_usuario 5
+            8: 5,  // Dep. Sanidad -> id_tipo_usuario 5
+            9: 5,  // Dep. Educación -> id_tipo_usuario 5
+            10: 5, // Dep. Criminologico -> id_tipo_usuario 5
+            11: 5, // Dep. Psicológico -> id_tipo_usuario 5
+            12: 5, // Dep. Trabajo -> id_tipo_usuario 5
+            13: 5  // Dep. Consejo -> id_tipo_usuario 5
+        };
+    
+        // Asignamos el id_tipo_usuario según el id_departamento seleccionado
+        const tipoUsuario = departmentToUserType[parseInt(area)] || 5;  // Default to 5 if not found
+    
+        const requestBody = {
+            nombre_usuario: username,
+            contra: password,
+            id_unidad: parseInt(unit) || 0,
+            dni: dni,
+            nombre_apellido: name,
+            is_registered: false,
+            id_departamento: parseInt(area) || 0,
+            id_tipo_usuario: tipoUsuario
+        };
+    
+        console.log("Datos a enviar al backend:", requestBody);
+    
+        try {
+            const response = await fetch("http://179.0.180.134:10000/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(requestBody),
+            });
+    
+            // Verificar si la respuesta es exitosa
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Error del servidor:", errorText);
+                throw new Error("Error al registrar el usuario. Respuesta del servidor: " + errorText);
+            }
+    
+            // Obtener la respuesta del servidor
+            const data = await response.json();
+    
+            console.log("Respuesta del servidor:", data);
+    
+            // Si el registro es exitoso, cambiamos el estado de is_registered a true
+            const updatedRequestBody = {
+                ...requestBody,
+                is_registered: true
+            };
+    
+            console.log("Datos después de la actualización (is_registered a true):", updatedRequestBody);
+    
+            // Mostrar el modal de éxito
+            setShowSuccessModal(true);
+    
+            // Redirigir a la página de login después de 2 segundos
+            setTimeout(() => {
+                navigate("/login"); // Redirige a /login
+            }, 2000); // Espera 2 segundos antes de redirigir
+    
+        } catch (error) {
+            console.error("Error en el proceso de registro:", error);
+            alert("Error al registrar el usuario. Detalles: " + error.message);
         }
-
-        if (password !== confirmPassword) {
-            alert('No coinciden las contraseñas');
-            return;
-        }
-
-
-        if (password.length < 8) {
-            alert('La contraseña debe tener al menos 8 caracteres.');
-            return;
-        }
-
-        if (username.length < 8 || username.length > 20) {
-            alert('El nombre de usuario debe tener entre 8 y 20 caracteres.');
-            return;
-        }
-
-        setShowSuccessModal(true);
-
-        setTimeout(() => {
-            setShowSuccessModal(false);
-            navigate('/login');
-        }, 2500);
     };
-
+    
+    
     const handleDniChange = (e) => {
         const value = e.target.value;
-        if (/^[0-9]{0,8}$/.test(value)) { 
+        if (/^[0-9]{0,8}$/.test(value)) {
             setDni(value);
         }
     };
@@ -117,16 +166,18 @@ const Register = () => {
                             <select
                                 id="unit"
                                 value={unit}
-                                onChange={(e) => setUnit(e.target.value)}
+                                onChange={(e) => setUnit(e.target.value)}  // No cambian aquí, pero al enviar los datos se hace la conversión
                                 required
                                 className="mt-1 block w-full border border-gray-300 p-1.5 text-sm rounded-md"
                             >
-                                <option value="">Seleccione su unidad</option>
-                                {Array.from({ length: 12 }, (_, i) => (
-                                    <option key={i} value={`Unit ${i + 1}`}>Unidad {i + 1}</option>
+                                <option value="" disabled>Seleccione su unidad</option>
+                                {Array.from({ length: 11 }, (_, i) => (
+                                    <option key={i} value={i + 1}>Unidad {i + 1}</option>
                                 ))}
                             </select>
                         </div>
+
+
                         <div className="mb-3">
                             <label htmlFor="area" className="block text-gray-700 text-sm">Área:</label>
                             <select
@@ -136,15 +187,23 @@ const Register = () => {
                                 required
                                 className="mt-1 block w-full border border-gray-300 p-1.5 text-sm rounded-md"
                             >
-                                <option value="">Seleccione su área</option>
-                                <option value="Health">Salud</option>
-                                <option value="Work">Trabajo</option>
-                                <option value="Judicial">Judicial</option>
-                                <option value="Social">Social</option>
-                                <option value="Criminology">Criminología</option>
-                                <option value="Psychology">Psicología</option>
+                                <option value="" disabled>Seleccione su área</option>
+                                <option value="1">Dep. Super Administrativo</option>
+                                <option value="2">Dep. Administrativo</option>
+                                <option value="3">Dep. Revision (Tecnica)</option>
+                                <option value="4">Dep. Jefatura</option>
+                                <option value="5">Dep. Judicial</option>
+                                <option value="6">Dep. Social</option>
+                                <option value="7">Dep. Salida</option>
+                                <option value="8">Dep. Sanidad</option>
+                                <option value="9">Dep. Educación</option>
+                                <option value="10">Dep. Criminologico</option>
+                                <option value="11">Dep. Psicológico</option>
+                                <option value="12">Dep. Trabajo</option>
+                                <option value="13">Dep. Consejo</option>
                             </select>
                         </div>
+
                         <div className="mb-3">
                             <label htmlFor="username" className="block text-gray-700 text-sm">Usuario:</label>
                             <input
@@ -197,7 +256,8 @@ const Register = () => {
                                 </button>
                             </div>
                         </div>
-
+                    </form>
+                    <form onSubmit={handleSubmit}>
                         <button
                             type="submit"
                             className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 text-sm"
